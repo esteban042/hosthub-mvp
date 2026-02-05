@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "jsx": "react",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist/client",
+    "rootDir": ".",
+    "moduleResolution": "bundler",
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": [
+    "index.tsx",
+    "App.tsx",
+    "components/**/*.tsx",
+    "pages/**/*.tsx",
+    "types.ts",
+    "mockData.ts",
+    "services/**/*.ts"
+  ],
+  "exclude": [
+    "server.ts",
+    "node_modules",
+    "dist"
+  ]
+}

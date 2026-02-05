@@ -43,6 +43,7 @@ export const CORE_ICONS = {
   Dollar: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
   Mail: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
   Phone: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>,
+  Edit: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
 };
 
 export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {
@@ -127,9 +128,9 @@ export const HeroCalendar: React.FC<{
   return (
     <div className={`p-6 bg-stone-950 border border-stone-800 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 ${apartment ? 'w-full' : 'w-[320px]'}`}>
       <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" strokeWidth={3}/></svg></button>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" strokeWidth={3}/></svg></button>
         <span className="text-white font-serif font-bold text-sm">{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth={3}/></svg></button>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth={3}/></svg></button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-[9px] font-black text-stone-600 text-center mb-2 uppercase tracking-widest">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d}>{d}</div>)}
@@ -182,7 +183,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
   return (
     <div className="min-h-screen">
-      <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient overflow-hidden">
+      <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient">
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to Wanderlust</p>
           <h1 className="text-6xl md:text-9xl font-serif font-bold text-white leading-tight tracking-tight">
@@ -194,9 +195,8 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
           </p>
 
           <div className="mt-16 w-full max-w-5xl mx-auto">
-             <div className="bg-stone-900/60 backdrop-blur-2xl border border-stone-800 rounded-[2.5rem] p-3 flex flex-col md:flex-row items-center gap-1 shadow-2xl relative">
+             <div className="bg-stone-900/60 backdrop-blur-2xl border border-stone-800 rounded-[2.5rem] p-3 flex flex-col md:flex-row items-center gap-1 shadow-2xl relative z-[60]">
                 
-                {/* Dates Selector */}
                 <div 
                   onClick={() => { setIsDatesOpen(!isDatesOpen); setIsGuestsOpen(false); }}
                   className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full border-b md:border-b-0 md:border-r border-stone-800/50 group"
@@ -224,7 +224,6 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                   </div>
                 )}
 
-                {/* Guests Selector */}
                 <div 
                   onClick={() => { setIsGuestsOpen(!isGuestsOpen); setIsDatesOpen(false); }}
                   className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full"
@@ -281,7 +280,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 
                 <div className="absolute bottom-4 left-4 bg-stone-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-lg">
                   <span className="text-white font-black text-xl">${apt.pricePerNight}</span>
-                  <span className="text-[10px] font-bold text-stone-400 ml-1 uppercase">/ nt</span>
+                  <span className="text-[10px] font-bold text-stone-400 ml-1 uppercase">/ night</span>
                 </div>
               </div>
 
@@ -293,19 +292,18 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                   <span>{apt.city}</span>
                 </div>
 
-                {/* Icons in gray, numbers not bold */}
                 <div className="flex items-center space-x-10">
-                   <div className="flex items-center space-x-3 text-lg text-stone-400">
-                      <div className="text-stone-500">{CORE_ICONS.Bed("w-6 h-6")}</div>
-                      <span className="text-stone-300 font-medium">{apt.bedrooms}</span>
+                   <div className="flex items-center space-x-2">
+                     <div className="text-stone-500">{CORE_ICONS.Bed("w-4 h-4")}</div>
+                     <span className="text-stone-400 font-medium text-sm">{apt.bedrooms}</span>
                    </div>
-                   <div className="flex items-center space-x-3 text-lg text-stone-400">
-                      <div className="text-stone-500">{CORE_ICONS.Bath("w-6 h-6")}</div>
-                      <span className="text-stone-300 font-medium">{apt.bathrooms}</span>
+                   <div className="flex items-center space-x-2">
+                     <div className="text-stone-500">{CORE_ICONS.Bath("w-4 h-4")}</div>
+                     <span className="text-stone-400 font-medium text-sm">{apt.bathrooms}</span>
                    </div>
-                   <div className="flex items-center space-x-3 text-lg text-stone-400">
-                      <div className="text-stone-500">{CORE_ICONS.Guests("w-6 h-6")}</div>
-                      <span className="text-stone-300 font-medium">{apt.capacity}</span>
+                   <div className="flex items-center space-x-2">
+                     <div className="text-stone-500">{CORE_ICONS.Guests("w-4 h-4")}</div>
+                     <span className="text-stone-400 font-medium text-sm">{apt.capacity}</span>
                    </div>
                 </div>
               </div>

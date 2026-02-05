@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, UserRole, SubscriptionType, BookingStatus } from '../types';
+import { CORE_ICONS } from './GuestLandingPage'; // Import CORE_ICONS
 
 interface AdminDashboardProps {
   hosts: Host[];
@@ -9,10 +10,12 @@ interface AdminDashboardProps {
 }
 
 const THEME_GRAY = 'hsl(30 5% 55%)';
+const LABEL_COLOR = 'rgb(168, 162, 158)';
 
 const SUBSCRIPTION_PRICES = {
-  [SubscriptionType.STANDARD]: 49,
-  [SubscriptionType.PREMIUM]: 149
+  [SubscriptionType.BASIC]: 20,
+  [SubscriptionType.PRO]: 50,
+  [SubscriptionType.ENTERPRISE]: 100
 };
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -21,30 +24,36 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   bookings,
   onUpdateHosts
 }) => {
-  const [showAddHost, setShowAddHost] = useState(false);
-  const [newHost, setNewHost] = useState({ 
-    name: '', 
-    slug: '', 
-    bio: '', 
-    subscriptionType: SubscriptionType.STANDARD,
-    commissionRate: 3
-  });
+  const [showHostModal, setShowHostModal] = useState(false);
+  const [editingHost, setEditingHost] = useState<Partial<Host> | null>(null);
 
   const stats = useMemo(() => {
+    const currentYear = new Date().getFullYear();
+
     const subRev = hosts.reduce((acc, h) => acc + SUBSCRIPTION_PRICES[h.subscriptionType], 0);
     
-    const commissionRev = hosts.reduce((acc, h) => {
+    const totalCommissionAllHosts = hosts.reduce((acc, h) => {
       const hostApts = apartments.filter(a => a.hostId === h.id).map(a => a.id);
-      const hostConfirmedBookings = bookings.filter(b => hostApts.includes(b.apartmentId) && b.status === BookingStatus.CONFIRMED);
+      const hostConfirmedBookings = bookings.filter(b => 
+        hostApts.includes(b.apartmentId) && 
+        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) &&
+        new Date(b.startDate).getFullYear() === currentYear
+      );
       const hostVolume = hostConfirmedBookings.reduce((sum, b) => sum + b.totalPrice, 0);
       return acc + (hostVolume * (h.commissionRate / 100));
     }, 0);
 
+    const totalBookingsAllHostsThisYear = bookings.filter(b => 
+        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) &&
+        new Date(b.startDate).getFullYear() === currentYear
+    ).length;
+
     return {
       monthlySubscription: subRev,
-      totalCommission: commissionRev,
+      totalCommission: totalCommissionAllHosts,
       activeHosts: hosts.length,
-      totalAssets: apartments.length
+      totalAssets: apartments.length,
+      totalBookingsThisYear: totalBookingsAllHostsThisYear // New stat
     };
   }, [hosts, apartments, bookings]);
 
@@ -52,21 +61,38 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     onUpdateHosts(hosts.map(h => h.id === hostId ? { ...h, ...updates } : h));
   };
 
-  const handleAddHost = (e: React.FormEvent) => {
+  const handleSaveHost = (e: React.FormEvent) => {
     e.preventDefault();
-    const host: Host = {
-      id: `host-${Math.random().toString(36).substr(2, 9)}`,
-      slug: newHost.slug.toLowerCase().replace(/\s+/g, '-'),
-      name: newHost.name,
-      bio: newHost.bio,
-      avatar: `https://picsum.photos/seed/${newHost.slug}/200/200`,
-      subscriptionType: newHost.subscriptionType,
-      commissionRate: newHost.commissionRate
-    };
-    onUpdateHosts([...hosts, host]);
-    setShowAddHost(false);
-    setNewHost({ name: '', slug: '', bio: '', subscriptionType: SubscriptionType.STANDARD, commissionRate: 3 });
+    if (!editingHost) return;
+
+    if (editingHost.id) {
+      // Update existing
+      onUpdateHosts(hosts.map(h => h.id === editingHost.id ? { ...h, ...editingHost } as Host : h));
+    } else {
+      // Create new
+      const host: Host = {
+        id: `host-${Math.random().toString(36).substr(2, 9)}`,
+        slug: editingHost.slug?.toLowerCase().replace(/\s+/g, '-') || 'new-host',
+        name: editingHost.name || 'New Elite Host',
+        bio: editingHost.bio || '',
+        avatar: editingHost.avatar || `https://picsum.photos/seed/${editingHost.slug || 'host'}/200/200`,
+        subscriptionType: editingHost.subscriptionType || SubscriptionType.BASIC,
+        commissionRate: editingHost.commissionRate || 3,
+        contactEmail: editingHost.contactEmail || '',
+        physicalAddress: editingHost.physicalAddress || '',
+        country: editingHost.country || 'USA',
+        phoneNumber: editingHost.phoneNumber || '',
+        notes: editingHost.notes || '',
+        airbnbCalendarLink: editingHost.airbnbCalendarLink || ''
+      };
+      onUpdateHosts([...hosts, host]);
+    }
+    
+    setShowHostModal(false);
+    setEditingHost(null);
   };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-1000 font-dm">
@@ -76,7 +102,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <h1 className="text-4xl md:text-5xl font-serif font-semibold text-white">Global administration</h1>
         </div>
         <button 
-          onClick={() => setShowAddHost(true)}
+          onClick={() => { setEditingHost({}); setShowHostModal(true); }}
           className="bg-stone-100 hover:bg-white text-stone-950 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-xl shadow-stone-500/10 active:scale-95 flex items-center space-x-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -96,7 +122,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Total commissions</p>
           <h4 className="text-3xl font-bold text-coral-500">${stats.totalCommission.toLocaleString()}</h4>
           <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
-            <span>Aggregated 3-5% cut</span>
+            <span>Aggregated 3-6% cut</span>
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
@@ -107,10 +133,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
-          <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Enterprise hosts</p>
-          <h4 className="text-3xl font-bold text-white">{stats.activeHosts}</h4>
+          <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Total Bookings ({currentYear})</p>
+          <h4 className="text-3xl font-bold text-white">{stats.totalBookingsThisYear}</h4>
           <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
-            <span>Multi-tenant accounts</span>
+            <span>Across all active hosts</span>
           </div>
         </div>
       </div>
@@ -121,19 +147,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <table className="w-full text-left">
             <thead>
               <tr className="bg-stone-900/60 border-b border-stone-800 text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em]">
-                <th className="px-8 py-6">Host identity</th>
-                <th className="px-8 py-6">Status / tier</th>
-                <th className="px-8 py-6">Performance</th>
-                <th className="px-8 py-6">Commission</th>
+                <th className="px-8 py-6">Host</th> {/* Renamed from Host identity */}
+                {/* Removed Status / tier column */}
+                {/* Removed Performance column */}
+                <th className="px-8 py-6">Bookings ({currentYear})</th> {/* Existing column */}
+                <th className="px-8 py-6">Commission ({currentYear})</th> {/* Existing column */}
                 <th className="px-8 py-6 text-right">Settings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-800/40">
               {hosts.map(h => {
                 const hostApts = apartments.filter(a => a.hostId === h.id).map(a => a.id);
-                const hostBookings = bookings.filter(b => hostApts.includes(b.apartmentId) && b.status === BookingStatus.CONFIRMED);
-                const volume = hostBookings.reduce((sum, b) => sum + b.totalPrice, 0);
-                const commission = volume * (h.commissionRate / 100);
+                const hostBookings = bookings.filter(b => hostApts.includes(b.apartmentId) && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID));
+                
+                // Calculations for current year
+                const hostBookingsThisYear = hostBookings.filter(b => new Date(b.startDate).getFullYear() === currentYear);
+                const volumeThisYear = hostBookingsThisYear.reduce((sum, b) => sum + b.totalPrice, 0);
+                const commissionThisYear = volumeThisYear * (h.commissionRate / 100);
 
                 return (
                   <tr key={h.id} className="hover:bg-stone-800/20 transition-colors group">
@@ -146,41 +176,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6">
-                      <select 
-                        value={h.subscriptionType} 
-                        onChange={(e) => handleUpdateHostProperty(h.id, { subscriptionType: e.target.value as SubscriptionType })}
-                        className={`bg-stone-950 border border-stone-800 rounded-lg px-3 py-1.5 text-[9px] font-bold uppercase tracking-widest outline-none cursor-pointer transition-colors ${h.subscriptionType === SubscriptionType.PREMIUM ? 'text-coral-500 border-coral-500/30' : 'text-stone-400'}`}
-                      >
-                        <option value={SubscriptionType.STANDARD}>Standard tier</option>
-                        <option value={SubscriptionType.PREMIUM}>Premium tier</option>
-                      </select>
+                    {/* Removed td for Status / tier */}
+                    {/* Removed td for Performance */}
+                    <td className="px-8 py-6"> {/* Bookings (this year) */}
+                        <p className="text-white font-bold text-sm">{hostBookingsThisYear.length}</p>
+                        <p className="text-[9px] font-bold text-stone-600">bookings</p>
                     </td>
-                    <td className="px-8 py-6">
-                      <div className="space-y-1">
-                        <p className="text-white font-bold text-sm">${volume.toLocaleString()}</p>
-                        <p className="text-[9px] font-bold text-stone-600 uppercase tracking-widest">{hostBookings.length} Bookings</p>
-                      </div>
-                    </td>
-                    <td className="px-8 py-6">
-                      <div className="flex items-center space-x-3">
-                        <div className="space-y-1">
-                          <p className="text-coral-500 font-bold text-sm">${commission.toLocaleString()}</p>
-                          <select 
-                            value={h.commissionRate}
-                            onChange={(e) => handleUpdateHostProperty(h.id, { commissionRate: parseInt(e.target.value) })}
-                            className="bg-transparent text-[9px] font-bold text-stone-600 uppercase tracking-widest outline-none cursor-pointer hover:text-stone-400"
-                          >
-                            <option value={3}>3% rate</option>
-                            <option value={4}>4% rate</option>
-                            <option value={5}>5% rate</option>
-                          </select>
-                        </div>
-                      </div>
+                    <td className="px-8 py-6"> {/* Commission (this year) */}
+                        <p className="text-white font-bold text-sm">${commissionThisYear.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                        <p className="text-[9px] font-bold text-stone-600">commission</p>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button className="text-stone-500 hover:text-white transition-colors">
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      <button onClick={() => { setEditingHost(h); setShowHostModal(true); }} className="p-2 rounded-lg text-stone-600 hover:text-white transition-colors">
+                        {CORE_ICONS.Edit("w-5 h-5")}
                       </button>
                     </td>
                   </tr>
@@ -188,13 +196,104 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               })}
             </tbody>
           </table>
-          {hosts.length === 0 && (
-            <div className="py-24 text-center">
-              <p className="text-stone-500 font-serif text-xl">No hosts registered on the platform.</p>
-            </div>
-          )}
         </div>
       </div>
+
+      {showHostModal && editingHost && (
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
+           <div className="bg-[#1c1a19] border border-stone-800/60 w-full max-w-4xl rounded-3xl p-8 md:p-12 shadow-2xl space-y-10 my-12 relative">
+              <button onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="absolute top-8 right-8 text-stone-600 hover:text-white transition-colors"><svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" /></svg></button>
+              <h3 className="text-3xl font-serif font-bold text-white leading-none">{editingHost.id ? 'Edit Host Profile' : 'Onboard New Elite Host'}</h3>
+
+              <form onSubmit={handleSaveHost} className="space-y-8">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Basic Info */}
+                    <div className="space-y-6">
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Host Name</label>
+                          <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Host Slug (Subdomain)</label>
+                          <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Avatar URL</label>
+                          <input type="text" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                       </div>
+                       <div>
+                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Bio</label>
+                          <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[120px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+                       </div>
+                    </div>
+                    
+                    {/* Contact & Configuration */}
+                    <div className="space-y-6">
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Contact Email</label>
+                            <input type="email" value={editingHost.contactEmail || ''} onChange={e => setEditingHost({...editingHost, contactEmail: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Physical Address</label>
+                            <input type="text" value={editingHost.physicalAddress || ''} onChange={e => setEditingHost({...editingHost, physicalAddress: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                           <div>
+                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Country</label>
+                               <select value={editingHost.country || 'USA'} onChange={e => setEditingHost({...editingHost, country: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                                  <option value="USA">USA</option>
+                                  <option value="Switzerland">Switzerland</option>
+                                  <option value="Japan">Japan</option>
+                                  <option value="Italy">Italy</option>
+                                  <option value="France">France</option>
+                                  <option value="Germany">Germany</option>
+                                  <option value="UK">UK</option>
+                               </select>
+                           </div>
+                           <div>
+                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Phone Number</label>
+                               <input type="text" value={editingHost.phoneNumber || ''} onChange={e => setEditingHost({...editingHost, phoneNumber: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                           </div>
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Notes / Internal Memo</label>
+                            <textarea value={editingHost.notes || ''} onChange={e => setEditingHost({...editingHost, notes: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Airbnb Calendar Link (iCal)</label>
+                            <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                           <div>
+                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Commission Rate (%)</label>
+                               <select required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                                  <option value={3}>3%</option>
+                                  <option value={4}>4%</option>
+                                  <option value={5}>5%</option>
+                                  <option value={6}>6%</option>
+                               </select>
+                           </div>
+                           <div>
+                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Subscription Tier</label>
+                               <select required value={editingHost.subscriptionType || SubscriptionType.BASIC} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                                  <option value={SubscriptionType.BASIC}>Basic (${SUBSCRIPTION_PRICES[SubscriptionType.BASIC]}/mo)</option>
+                                  <option value={SubscriptionType.PRO}>Pro (${SUBSCRIPTION_PRICES[SubscriptionType.PRO]}/mo)</option>
+                                  <option value={SubscriptionType.ENTERPRISE}>Enterprise (${SUBSCRIPTION_PRICES[SubscriptionType.ENTERPRISE]}/mo)</option>
+                               </select>
+                           </div>
+                        </div>
+                    </div>
+                 </div>
+                 
+                 <div className="flex space-x-4 pt-6 border-t border-stone-800/60">
+                    <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800/60 text-[10px] uppercase tracking-widest hover:text-white transition-colors" style={{ color: LABEL_COLOR }}>Discard</button>
+                    <button type="submit" className="flex-1 bg-coral-500 text-white font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest shadow-2xl shadow-coral-500/30 active:scale-95">Save Host</button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

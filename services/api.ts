@@ -1,110 +1,94 @@
-
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types';
-import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData';
 
-const STORAGE_KEY_HOSTS = 'hosthub_hosts_v2';
-const STORAGE_KEY_BOOKINGS = 'hosthub_bookings_v2';
-const STORAGE_KEY_APARTMENTS = 'hosthub_apartments_v2';
-const STORAGE_KEY_BLOCKED = 'hosthub_blocked_v2';
-
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-const getStored = <T>(key: string, fallback: T): T => {
-  const stored = localStorage.getItem(key);
-  try {
-    return stored ? JSON.parse(stored) : fallback;
-  } catch (e) {
-    return fallback;
-  }
-};
-
-// Persistent singletons
-let sessionHosts: Host[] = getStored(STORAGE_KEY_HOSTS, [...MOCK_HOSTS]);
-let sessionApartments: Apartment[] = getStored(STORAGE_KEY_APARTMENTS, [...MOCK_APARTMENTS]);
-let sessionBookings: Booking[] = getStored(STORAGE_KEY_BOOKINGS, [...MOCK_BOOKINGS]);
-let sessionBlockedDates: BlockedDate[] = getStored(STORAGE_KEY_BLOCKED, []);
-
-const commitToDisk = () => {
-  localStorage.setItem(STORAGE_KEY_HOSTS, JSON.stringify(sessionHosts));
-  localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(sessionBookings));
-  localStorage.setItem(STORAGE_KEY_APARTMENTS, JSON.stringify(sessionApartments));
-  localStorage.setItem(STORAGE_KEY_BLOCKED, JSON.stringify(sessionBlockedDates));
-  console.log("HostHub DB Sync: Successfully committed to localStorage");
-};
+// THIS MUST BE UPDATED AFTER DEPLOYMENT TO YOUR RENDER BACKEND SERVICE URL
+const API_BASE_URL = 'http://localhost:3001/api/v1'; 
 
 export const hostHubApi = {
   async getLandingData(slug?: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
-    await delay(150);
-    
-    const host = sessionHosts.find(h => h.slug === slug) || 
-                 sessionHosts.find(h => h.slug === window.location.hostname.split('.')[0]) || 
-                 sessionHosts[0];
-    
-    if (!host) throw new Error("Critical: No hosts available in database.");
-
-    const apartments = sessionApartments.filter(a => a.hostId === host.id);
-    const apartmentIds = apartments.map(a => a.id);
-    const bookings = sessionBookings.filter(b => apartmentIds.includes(b.apartmentId));
-    const blockedDates = sessionBlockedDates.filter(d => apartmentIds.includes(d.apartmentId) || d.apartmentId === 'all');
-    
-    return {
-      host,
-      apartments,
-      bookings,
-      blockedDates
-    };
+    const response = await fetch(`${API_BASE_URL}/landing?slug=${slug || ''}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
   },
 
   async getAllHosts(): Promise<Host[]> {
-    return [...sessionHosts];
+    const response = await fetch(`${API_BASE_URL}/hosts`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
   },
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
-    await delay(300);
-    const newBooking = {
-      ...data,
-      id: data.id || `book-local-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      status: data.status || BookingStatus.REQUESTED,
-      isDepositPaid: data.isDepositPaid ?? false
-    } as Booking;
-    
-    sessionBookings.push(newBooking);
-    commitToDisk();
+    const response = await fetch(`${API_BASE_URL}/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+    }
+    const newBooking = await response.json();
     return newBooking;
   },
 
   async updateHosts(updatedList: Host[]): Promise<Host[]> {
-    if (!updatedList || updatedList.length === 0) return sessionHosts;
-    sessionHosts = updatedList;
-    commitToDisk();
-    return sessionHosts;
+    const response = await fetch(`${API_BASE_URL}/hosts`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedList),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+    }
+    const updatedHosts = await response.json();
+    return updatedHosts;
   },
 
   async updateApartments(updatedList: Apartment[]): Promise<Apartment[]> {
-    if (!updatedList || updatedList.length === 0) return sessionApartments;
-    const updatedIds = updatedList.map(u => u.id);
-    sessionApartments = [
-      ...sessionApartments.filter(sa => !updatedIds.includes(sa.id)),
-      ...updatedList
-    ];
-    commitToDisk();
-    return sessionApartments;
+    const response = await fetch(`${API_BASE_URL}/apartments`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedList),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+    }
+    const updatedApartments = await response.json();
+    return updatedApartments;
   },
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
-    if (!updatedList || updatedList.length === 0) return sessionBookings;
-    const updatedIds = updatedList.map(u => u.id);
-    sessionBookings = [
-      ...sessionBookings.filter(sb => !updatedIds.includes(sb.id)),
-      ...updatedList
-    ];
-    commitToDisk();
-    return sessionBookings;
+    const response = await fetch(`${API_BASE_URL}/bookings`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedList),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+    }
+    const updatedBookings = await response.json();
+    return updatedBookings;
   },
 
   async updateBlockedDates(updatedList: BlockedDate[]): Promise<BlockedDate[]> {
-    sessionBlockedDates = updatedList;
-    commitToDisk();
-    return sessionBlockedDates;
+    const response = await fetch(`${API_BASE_URL}/blocked-dates`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedList),
+    });
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error}`);
+    }
+    const updatedBlockedDates = await response.json();
+    return updatedBlockedDates;
   }
 };

@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
 import { hostHubApi } from './services/api';
-// Changed to named import because GuestLandingPage.tsx exports multiple constants and its component as named exports
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
+
+const ADMIN_EMAIL = 'admin@hosthub.com';
+const ADMIN_PWD = 'admin123';
+const DEFAULT_HOST_PWD = 'password123';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -42,17 +45,28 @@ const App: React.FC = () => {
     fetchData();
   }, []);
 
-  const handleGoogleLogin = () => {
-    if (!currentHost) return;
-    const mockUser: User = {
-      id: 'user-123',
-      name: currentHost.name,
-      email: `${currentHost.slug}@boutique.host`,
-      role: UserRole.HOST,
-      avatar: currentHost.avatar
-    };
-    setUser(mockUser);
-    setCurrentRole(UserRole.HOST);
+  const handleAuth = (email: string, pass: string) => {
+    // 1. Check Admin
+    if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
+      const adminUser: User = { id: 'admin-1', email, name: 'Platform Admin', role: UserRole.ADMIN, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=200&h=200' };
+      setUser(adminUser);
+      setCurrentRole(UserRole.ADMIN);
+      return;
+    }
+
+    // 2. Check Hosts
+    const matchingHost = hosts.find(h => email === `${h.slug}@host.com`);
+    if (matchingHost && pass === DEFAULT_HOST_PWD) {
+      const hostUser: User = { id: matchingHost.id, email, name: matchingHost.name, role: UserRole.HOST, avatar: matchingHost.avatar };
+      setUser(hostUser);
+      setCurrentHost(matchingHost);
+      setCurrentRole(UserRole.HOST);
+      // Re-fetch data for this specific host context
+      fetchData(matchingHost.slug);
+      return;
+    }
+
+    alert('Invalid credentials. Check the documentation for test accounts.');
   };
 
   const handleLogout = () => {
@@ -91,6 +105,13 @@ const App: React.FC = () => {
     await hostHubApi.updateHosts(updatedHosts);
     const allHosts = await hostHubApi.getAllHosts();
     setHosts(allHosts);
+    
+    // If we're an admin, we stay in admin role. 
+    // If we were a host and our own info changed, we might need to update currentHost.
+    if (user && user.role === UserRole.HOST) {
+      const self = allHosts.find(h => h.id === user.id);
+      if (self) setCurrentHost(self);
+    }
   };
 
   const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
@@ -103,7 +124,7 @@ const App: React.FC = () => {
     return (
       <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4">
         <div className="w-12 h-12 border-4 border-amber-700/10 border-t-amber-700 rounded-full animate-spin"></div>
-        <p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Re-establishing Database Connection...</p>
+        <p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Boutique Cluster...</p>
       </div>
     );
   }
@@ -133,7 +154,7 @@ const App: React.FC = () => {
       );
     }
 
-    if (!user) return <LoginPage onLogin={handleGoogleLogin} />;
+    if (!user) return <LoginPage onLogin={handleAuth} />;
 
     switch (currentRole) {
       case UserRole.ADMIN:

@@ -1,4 +1,3 @@
-
 import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType } from './types';
 
 export const MOCK_HOSTS: Host[] = [
@@ -8,8 +7,14 @@ export const MOCK_HOSTS: Host[] = [
     name: 'Sarah Miller',
     bio: 'Avid mountain explorer and curator of cozy high-altitude retreats with a focus on local timber and hand-woven textiles.',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=200&h=200',
-    subscriptionType: SubscriptionType.PREMIUM,
-    commissionRate: 5
+    subscriptionType: SubscriptionType.PRO,
+    commissionRate: 4,
+    contactEmail: 'sarah.miller@alpine.com',
+    physicalAddress: 'Via Cantonale 10, 3818 Grindelwald',
+    country: 'Switzerland',
+    phoneNumber: '+41 79 123 45 67',
+    notes: 'Premium host with strong performance in winter bookings.',
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/12345.ics?s=5a0d31b0e3e26f5d6f7b11d3' // Dummy link
   },
   {
     id: 'host-2',
@@ -17,8 +22,14 @@ export const MOCK_HOSTS: Host[] = [
     name: 'James Chen',
     bio: 'Architect focusing on minimalist urban living. Creating sanctuaries of silence and light in the heart of bustling cities.',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=200&h=200',
-    subscriptionType: SubscriptionType.STANDARD,
-    commissionRate: 3
+    subscriptionType: SubscriptionType.BASIC,
+    commissionRate: 3,
+    contactEmail: 'james.chen@urban.com',
+    physicalAddress: 'Shibuya 1-1, Tokyo',
+    country: 'Japan',
+    phoneNumber: '+81 90 9876 5432',
+    notes: 'Focus on high-tech amenities and modern design. Exploring expansion to Osaka.',
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/67890.ics?s=c8f2a1e7d9b4c0a5f1e6b3a2' // Dummy link
   },
   {
     id: 'host-3',
@@ -26,8 +37,29 @@ export const MOCK_HOSTS: Host[] = [
     name: 'Elena Rossi',
     bio: 'Third-generation villa manager dedicated to preserving the rustic elegance of the Italian countryside.',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200',
-    subscriptionType: SubscriptionType.STANDARD,
-    commissionRate: 4
+    subscriptionType: SubscriptionType.ENTERPRISE,
+    commissionRate: 5,
+    contactEmail: 'elena.rossi@tuscan.it',
+    physicalAddress: 'Via Chianti 50, 53100 Siena',
+    country: 'Italy',
+    phoneNumber: '+39 333 1122334',
+    notes: 'Manages several high-end villas. Looking to add more properties in Umbria next year.',
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/11223.ics?s=a9b8c7d6e5f4a3b2c1d0e9f8' // Dummy link
+  },
+  {
+    id: 'host-4',
+    slug: 'coastal-escapes',
+    name: 'Maya Singh',
+    bio: 'Passionate about beachfront properties and sustainable tourism.',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&q=80',
+    subscriptionType: SubscriptionType.PRO,
+    commissionRate: 4,
+    contactEmail: 'maya.singh@coastal.com',
+    physicalAddress: '123 Ocean Drive, Miami',
+    country: 'USA',
+    phoneNumber: '+1 305 555 1234',
+    notes: 'Specializes in luxury beach houses. Considers offering additional services like private chef.',
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/44556.ics?s=f0e1d2c3b4a5f6e7d8c9b0a1' // Dummy link
   }
 ];
 
@@ -93,16 +125,32 @@ export const MOCK_APARTMENTS: Apartment[] = [
     isActive: true,
     amenities: ['Kitchen', 'Free Parking', 'Fireplace', 'Washer', 'Air Conditioning'],
     photos: ['https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=800&h=600']
+  },
+  {
+    id: 'apt-5',
+    hostId: 'host-4',
+    title: 'Seaside Villa Azure',
+    description: 'Modern villa with breathtaking sea views and direct beach access. Perfect for a luxurious coastal retreat.',
+    city: 'Miami',
+    capacity: 8,
+    bedrooms: 4,
+    bathrooms: 4,
+    pricePerNight: 600,
+    isActive: true,
+    amenities: ['Wifi', 'Pool', 'Beach Access', 'Outdoor Shower', 'BBQ Grill', 'Kitchen', 'Air Conditioning'],
+    photos: ['https://images.unsplash.com/photo-1600596542815-ffad4d6cdb19?auto=format&fit=crop&q=80&w=800&h=600']
   }
 ];
+
+const currentYear = new Date().getFullYear();
 
 export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-1',
     apartmentId: 'apt-1',
     guestEmail: 'traveler@boutique.com',
-    startDate: '2025-06-10',
-    endDate: '2025-06-15',
+    startDate: `${currentYear}-06-10`,
+    endDate: `${currentYear}-06-15`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 1250,
     isDepositPaid: true
@@ -111,8 +159,8 @@ export const MOCK_BOOKINGS: Booking[] = [
     id: 'book-2',
     apartmentId: 'apt-3',
     guestEmail: 'city.mapper@design.jp',
-    startDate: '2025-07-01',
-    endDate: '2025-07-05',
+    startDate: `${currentYear}-07-01`,
+    endDate: `${currentYear}-07-05`,
     status: BookingStatus.REQUESTED,
     totalPrice: 840,
     isDepositPaid: false
@@ -121,10 +169,40 @@ export const MOCK_BOOKINGS: Booking[] = [
     id: 'book-3',
     apartmentId: 'apt-4',
     guestEmail: 'family.rossi@italy.it',
-    startDate: '2025-08-12',
-    endDate: '2025-08-19',
+    startDate: `${currentYear}-08-12`,
+    endDate: `${currentYear}-08-19`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 3150,
+    isDepositPaid: true
+  },
+  {
+    id: 'book-4',
+    apartmentId: 'apt-1',
+    guestEmail: 'alpine.lover@example.com',
+    startDate: `${currentYear}-01-10`,
+    endDate: `${currentYear}-01-12`,
+    status: BookingStatus.PAID,
+    totalPrice: 500, // 2 nights * 250
+    isDepositPaid: true
+  },
+  {
+    id: 'book-5',
+    apartmentId: 'apt-5',
+    guestEmail: 'beach.goer@example.com',
+    startDate: `${currentYear}-09-01`,
+    endDate: `${currentYear}-09-07`,
+    status: BookingStatus.CONFIRMED,
+    totalPrice: 3600, // 6 nights * 600
+    isDepositPaid: true
+  },
+  {
+    id: 'book-6', // Past booking, should not count for current year stats
+    apartmentId: 'apt-1',
+    guestEmail: 'old.traveler@example.com',
+    startDate: `${currentYear - 1}-10-01`,
+    endDate: `${currentYear - 1}-10-05`,
+    status: BookingStatus.CONFIRMED,
+    totalPrice: 1000,
     isDepositPaid: true
   }
 ];

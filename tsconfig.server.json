@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "CommonJS",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "moduleResolution": "node"
+  },
+  "include": [
+    "server.ts",
+    "types.ts",
+    "services/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "index.tsx",
+    "App.tsx",
+    "components/**/*.tsx",
+    "pages/**/*.tsx",
+    "mockData.ts"
+  ]
+}

@@ -1,4 +1,3 @@
-
 export enum BookingStatus {
   REQUESTED = 'requested',
   CONFIRMED = 'confirmed',
@@ -14,8 +13,9 @@ export enum UserRole {
 }
 
 export enum SubscriptionType {
-  STANDARD = 'standard',
-  PREMIUM = 'premium'
+  BASIC = 'basic',
+  PRO = 'pro',
+  ENTERPRISE = 'enterprise'
 }
 
 export interface User {
@@ -33,7 +33,13 @@ export interface Host {
   bio: string;
   avatar: string;
   subscriptionType: SubscriptionType;
-  commissionRate: number; // 3, 4, or 5
+  commissionRate: number; // 3, 4, 5, or 6
+  contactEmail?: string;
+  physicalAddress?: string;
+  country?: string;
+  phoneNumber?: string;
+  notes?: string; // For internal memos or additional info
+  airbnbCalendarLink?: string; // New: iCal link for external calendar sync
 }
 
 export interface PriceRule {
@@ -72,14 +78,6 @@ export interface Booking {
   status: BookingStatus;
   totalPrice: number;
   isDepositPaid: boolean; 
-}
-
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  role: UserRole;
-  avatar?: string;
 }
 
 export interface BlockedDate {
