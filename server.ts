@@ -7,8 +7,10 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3001;
-
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 // Database Configuration
 // Note: In IONOS, ensure DATABASE_URL includes the ?sslmode=require if necessary
 const pool = new Pool({
