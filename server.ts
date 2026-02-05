@@ -41,7 +41,7 @@ function camelToSnake(obj: any): any {
   if (Array.isArray(obj)) {
     return obj.map(v => camelToSnake(v));
   } else if (obj !== null && typeof obj === 'object') {
-    return Object.keys(obj).reduce((acc, key) => {
+    return Object.keys(obj).reduce<Record<string, any>>((acc, key) => {
       const snakeKey = key.replace(/([A-Z])/g, "_$1").toLowerCase();
       acc[snakeKey] = camelToSnake(obj[key]);
       return acc;
@@ -402,7 +402,8 @@ app.put('/api/v1/bookings', async (req, res) => {
 
 // Manage Bookings status update (original route, now using snakeToCamel for response)
 app.patch('/api/v1/bookings/:id/status', async (req, res) => {
-  const { id } = req.params;
+  const params = req.params as Record<string, string>;
+const id = params[paramName];
   const { status } = req.body;
   try {
     const result = await pool.query('UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *', [status, id]);
