@@ -1,0 +1,76 @@
+
+<!DOCTYPE html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wanderlust | Luxury Boutique Stays</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              stone: {
+                950: 'hsl(0, 0%, 10%)',
+              },
+              coral: {
+                500: '#e97c62',
+                600: '#d86a51',
+              }
+            },
+            fontFamily: {
+              serif: ['Playfair Display', 'serif'],
+              sans: ['Plus Jakarta Sans', 'sans-serif'],
+              dm: ['DM Sans', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400..900&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap');
+      
+      body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: hsl(0, 0%, 10%);
+        margin: 0;
+        color: #e7e5e4;
+      }
+      .font-serif { font-family: 'Playfair Display', serif; }
+      .font-dm { font-family: 'DM Sans', sans-serif; }
+      
+      /* Global No Italics */
+      * { font-style: normal !important; }
+
+      ::-webkit-scrollbar { width: 6px; }
+      ::-webkit-scrollbar-track { background: hsl(0, 0%, 10%); }
+      ::-webkit-scrollbar-thumb { background: #292524; border-radius: 10px; }
+      
+      .hero-gradient {
+        background: linear-gradient(to bottom, rgba(26, 26, 26, 0.4), rgba(26, 26, 26, 0.9)), url('https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000');
+        background-size: cover;
+        background-position: center;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
+    "dotenv": "https://esm.sh/dotenv@^17.2.3",
+    "pg": "https://esm.sh/pg@^8.18.0",
+    "cors": "https://esm.sh/cors@^2.8.6",
+    "express": "https://esm.sh/express@^5.2.1"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-stone-950 text-stone-200 antialiased">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
