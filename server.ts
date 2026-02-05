@@ -402,8 +402,8 @@ app.put('/api/v1/bookings', async (req, res) => {
 
 // Manage Bookings status update (original route, now using snakeToCamel for response)
 app.patch('/api/v1/bookings/:id/status', async (req, res) => {
-  const params = req.params as Record<string, string>;
-const id = params[paramName];
+  const id = req.params.id;
+
   const { status } = req.body;
   try {
     const result = await pool.query('UPDATE bookings SET status = $1 WHERE id = $2 RETURNING *', [status, id]);
