@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, UserRole, SubscriptionType, BookingStatus } from '../types';
+import { Host, Apartment, Booking, UserRole, SubscriptionType, BookingStatus, PremiumConfig, PremiumSection } from '../types';
 import { CORE_ICONS } from './GuestLandingPage'; // Import CORE_ICONS
 
 
@@ -85,13 +84,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         country: editingHost.country || 'USA',
         phoneNumber: editingHost.phoneNumber || '',
         notes: editingHost.notes || '',
-        airbnbCalendarLink: editingHost.airbnbCalendarLink || ''
+        airbnbCalendarLink: editingHost.airbnbCalendarLink || '',
+        premiumConfig: editingHost.premiumConfig || { isEnabled: false, images: [], sections: [] }
       };
       onUpdateHosts([...hosts, host]);
     }
     
     setShowHostModal(false);
     setEditingHost(null);
+  };
+
+  const updatePremiumConfig = (updates: Partial<PremiumConfig>) => {
+    if (!editingHost) return;
+    const currentConfig = editingHost.premiumConfig || { isEnabled: false, images: [], sections: [] };
+    setEditingHost({
+      ...editingHost,
+      premiumConfig: { ...currentConfig, ...updates }
+    });
+  };
+
+  const addPremiumSection = () => {
+    const currentSections = editingHost?.premiumConfig?.sections || [];
+    updatePremiumConfig({ sections: [...currentSections, { title: '', content: '' }] });
+  };
+
+  const updatePremiumSection = (idx: number, updates: Partial<PremiumSection>) => {
+    const sections = [...(editingHost?.premiumConfig?.sections || [])];
+    sections[idx] = { ...sections[idx], ...updates };
+    updatePremiumConfig({ sections });
+  };
+
+  const removePremiumSection = (idx: number) => {
+    const sections = (editingHost?.premiumConfig?.sections || []).filter((_, i) => i !== idx);
+    updatePremiumConfig({ sections });
   };
 
   const currentYear = new Date().getFullYear();
@@ -105,10 +130,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
         <button 
           onClick={() => { setEditingHost({}); setShowHostModal(true); }}
-          className="bg-stone-100 hover:bg-white text-stone-950 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all shadow-xl shadow-stone-500/10 active:scale-95 flex items-center space-x-2"
+          className="bg-transparent border border-[#cfcece] text-[#cfcece] px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all hover:bg-stone-300/10 active:scale-95 flex items-center space-x-2"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-          <span>Onboard elite host</span>
+          <span className="capitalize">Onboard host</span>
         </button>
       </div>
 
@@ -116,40 +141,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Sub. revenue / mo</p>
           <h4 className="text-3xl font-bold text-white">${stats.monthlySubscription.toLocaleString()}</h4>
-          <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
-            <span className="text-coral-500">Fixed tier yield</span>
+          <div className="mt-4 flex items-center text-xs font-bold uppercase tracking-tighter text-[#cfcece]">
+            <span className="text-[#cfcece]">Fixed tier yield</span>
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Total commissions</p>
           <h4 className="text-3xl font-bold text-coral-500">${stats.totalCommission.toLocaleString()}</h4>
-          <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
+          <div className="mt-4 flex items-center text-xs font-bold uppercase tracking-tighter text-[#cfcece]">
             <span>Aggregated 3-6% cut</span>
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Active assets</p>
           <h4 className="text-3xl font-bold text-white">{stats.totalAssets}</h4>
-          <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
-            <span>Managed units</span> {/* Changed from "Managed luxury units" to "Managed units" */}
+          <div className="mt-4 flex items-center text-xs font-bold uppercase tracking-tighter text-[#cfcece]">
+            <span>Managed units</span>
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Total Bookings ({currentYear})</p>
           <h4 className="text-3xl font-bold text-white">{stats.totalBookingsThisYear}</h4>
-          <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
+          <div className="mt-4 flex items-center text-xs font-bold uppercase tracking-tighter text-[#cfcece]">
             <span>Across all active hosts</span>
           </div>
         </div>
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-2xl font-dm text-white px-2">Ecosystem management</h3> {/* Added font-dm */}
+        <h3 className="text-2xl font-dm text-white px-2">Ecosystem management</h3>
         <div className="bg-stone-900/20 border border-stone-800/60 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-sm">
           <table className="w-full text-left">
             <thead>
               <tr className="bg-stone-900/60 border-b border-stone-800">
-                {/* Updated table header styles */}
                 <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Host</th>
                 <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Bookings ({currentYear})</th>
                 <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Commission ({currentYear})</th>
@@ -177,11 +201,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
                     </td>
-                    <td className="px-8 py-6"> {/* Bookings (this year) */}
-                        <p className="text-xl font-bold text-white">{hostBookingsThisYear.length}</p> {/* Changed to text-xl */}
+                    <td className="px-8 py-6">
+                        <p className="text-xl font-bold text-white">{hostBookingsThisYear.length}</p>
                     </td>
-                    <td className="px-8 py-6"> {/* Commission (this year) */}
-                        <p className="text-xl font-bold text-white">${commissionThisYear.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p> {/* Changed to text-xl */}
+                    <td className="px-8 py-6">
+                        <p className="text-xl font-bold text-white">${commissionThisYear.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
                     </td>
                     <td className="px-8 py-6 text-right">
                       <button onClick={() => { setEditingHost(h); setShowHostModal(true); }} className="p-2 rounded-lg text-stone-600 hover:text-white transition-colors">
@@ -202,7 +226,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <button onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="absolute top-8 right-8 text-stone-600 hover:text-white transition-colors"><svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" /></svg></button>
               <h3 className="text-3xl font-serif font-bold text-white leading-none">{editingHost.id ? 'Edit Host Profile' : 'Onboard New Elite Host'}</h3>
 
-              <form onSubmit={handleSaveHost} className="space-y-8">
+              <form onSubmit={handleSaveHost} className="space-y-10">
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Basic Info */}
                     <div className="space-y-6">
@@ -214,78 +238,119 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                           <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Host Slug (Subdomain)</label>
                           <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                        </div>
-                       <div>
-                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Avatar URL</label>
-                          <input type="text" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
-                       </div>
-                       <div>
-                          <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Bio</label>
-                          <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[120px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+                       <div className="grid grid-cols-2 gap-4">
+                          <div>
+                              <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Commission Rate (%)</label>
+                              <select required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                                <option value={3}>3%</option>
+                                <option value={4}>4%</option>
+                                <option value={5}>5%</option>
+                                <option value={6}>6%</option>
+                              </select>
+                          </div>
+                          <div>
+                              <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Subscription Tier</label>
+                              <select required value={editingHost.subscriptionType || SubscriptionType.BASIC} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                                <option value={SubscriptionType.BASIC}>Basic (${SUBSCRIPTION_PRICES[SubscriptionType.BASIC]}/mo)</option>
+                                <option value={SubscriptionType.PRO}>Pro (${SUBSCRIPTION_PRICES[SubscriptionType.PRO]}/mo)</option>
+                                <option value={SubscriptionType.ENTERPRISE}>Enterprise (${SUBSCRIPTION_PRICES[SubscriptionType.ENTERPRISE]}/mo)</option>
+                              </select>
+                          </div>
                        </div>
                     </div>
                     
-                    {/* Contact & Configuration */}
                     <div className="space-y-6">
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Contact Email</label>
-                            <input type="email" value={editingHost.contactEmail || ''} onChange={e => setEditingHost({...editingHost, contactEmail: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Bio / Philosophy</label>
+                            <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                         </div>
                         <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Physical Address</label>
-                            <input type="text" value={editingHost.physicalAddress || ''} onChange={e => setEditingHost({...editingHost, physicalAddress: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                           <div>
-                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Country</label>
-                               <select value={editingHost.country || 'USA'} onChange={e => setEditingHost({...editingHost, country: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
-                                  <option value="USA">USA</option>
-                                  <option value="Switzerland">Switzerland</option>
-                                  <option value="Japan">Japan</option>
-                                  <option value="Italy">Italy</option>
-                                  <option value="France">France</option>
-                                  <option value="Germany">Germany</option>
-                                  <option value="UK">UK</option>
-                               </select>
-                           </div>
-                           <div>
-                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Phone Number</label>
-                               <input type="text" value={editingHost.phoneNumber || ''} onChange={e => setEditingHost({...editingHost, phoneNumber: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
-                           </div>
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Notes / Internal Memo</label>
-                            <textarea value={editingHost.notes || ''} onChange={e => setEditingHost({...editingHost, notes: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Airbnb Calendar Link (iCal)</label>
+                            <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Airbnb iCal Link</label>
                             <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
                         </div>
-                        
-                        <div className="grid grid-cols-2 gap-4">
-                           <div>
-                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Commission Rate (%)</label>
-                               <select required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
-                                  <option value={3}>3%</option>
-                                  <option value={4}>4%</option>
-                                  <option value={5}>5%</option>
-                                  <option value={6}>6%</option>
-                               </select>
-                           </div>
-                           <div>
-                               <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Subscription Tier</label>
-                               <select required value={editingHost.subscriptionType || SubscriptionType.BASIC} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
-                                  <option value={SubscriptionType.BASIC}>Basic (${SUBSCRIPTION_PRICES[SubscriptionType.BASIC]}/mo)</option>
-                                  <option value={SubscriptionType.PRO}>Pro (${SUBSCRIPTION_PRICES[SubscriptionType.PRO]}/mo)</option>
-                                  <option value={SubscriptionType.ENTERPRISE}>Enterprise (${SUBSCRIPTION_PRICES[SubscriptionType.ENTERPRISE]}/mo)</option>
-                               </select>
-                           </div>
-                        </div>
                     </div>
+                 </div>
+
+                 {/* Premium Feature Config */}
+                 <div className="pt-10 border-t border-stone-800/60 space-y-8">
+                    <div className="flex items-center justify-between">
+                       <div>
+                          <h4 className="text-xl font-serif font-bold text-white mb-1">Premium Landing Extension</h4>
+                          <p className="text-xs font-medium" style={{ color: LABEL_COLOR }}>Custom host story template below listings</p>
+                       </div>
+                       <label className="relative inline-flex items-center cursor-pointer">
+                          <input 
+                            type="checkbox" 
+                            className="sr-only peer" 
+                            checked={editingHost.premiumConfig?.isEnabled || false} 
+                            onChange={e => updatePremiumConfig({ isEnabled: e.target.checked })}
+                          />
+                          <div className="w-11 h-6 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-stone-500 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white"></div>
+                       </label>
+                    </div>
+
+                    {editingHost.premiumConfig?.isEnabled && (
+                       <div className="space-y-10 animate-in fade-in slide-in-from-top-4">
+                          <div className="space-y-4">
+                             <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: LABEL_COLOR }}>Extension Images (3-5 URLs)</label>
+                             <div className="grid grid-cols-1 gap-3">
+                                {[0, 1, 2, 3, 4].map(idx => (
+                                   <input 
+                                     key={idx}
+                                     type="text" 
+                                     placeholder={`Image URL ${idx + 1} ${idx < 3 ? '(Required)' : '(Optional)'}`}
+                                     value={editingHost.premiumConfig?.images[idx] || ''}
+                                     onChange={e => {
+                                       const images = [...(editingHost.premiumConfig?.images || [])];
+                                       images[idx] = e.target.value;
+                                       updatePremiumConfig({ images });
+                                     }}
+                                     className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-xs text-white outline-none"
+                                   />
+                                ))}
+                             </div>
+                          </div>
+
+                          <div className="space-y-4">
+                             <div className="flex items-center justify-between">
+                                <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: LABEL_COLOR }}>Story Sections</label>
+                                <button type="button" onClick={addPremiumSection} className="text-[10px] font-bold text-emerald-400 uppercase tracking-widest hover:text-emerald-300">+ Add Content Block</button>
+                             </div>
+                             <div className="space-y-4">
+                                {editingHost.premiumConfig?.sections.map((section, idx) => (
+                                   <div key={idx} className="bg-stone-950/50 border border-stone-800 p-6 rounded-2xl relative group">
+                                      <button type="button" onClick={() => removePremiumSection(idx)} className="absolute top-4 right-4 text-stone-700 hover:text-rose-500 transition-colors opacity-0 group-hover:opacity-100">
+                                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" /></svg>
+                                      </button>
+                                      <input 
+                                        type="text" 
+                                        placeholder="Section Title (e.g. Our History)"
+                                        value={section.title}
+                                        onChange={e => updatePremiumSection(idx, { title: e.target.value })}
+                                        className="w-full bg-transparent border-b border-stone-800 mb-4 pb-2 text-sm font-bold text-white outline-none focus:border-emerald-500 transition-colors"
+                                      />
+                                      <textarea 
+                                        placeholder="Section Content..."
+                                        value={section.content}
+                                        onChange={e => updatePremiumSection(idx, { content: e.target.value })}
+                                        className="w-full bg-transparent text-sm text-stone-400 outline-none min-h-[80px] resize-none"
+                                      />
+                                   </div>
+                                ))}
+                                {(!editingHost.premiumConfig?.sections || editingHost.premiumConfig.sections.length === 0) && (
+                                   <div className="py-8 border border-dashed border-stone-800 rounded-2xl flex items-center justify-center">
+                                      <span className="text-stone-700 text-[10px] font-bold uppercase tracking-widest">No custom sections defined</span>
+                                   </div>
+                                )}
+                             </div>
+                          </div>
+                       </div>
+                    )}
                  </div>
                  
                  <div className="flex space-x-4 pt-6 border-t border-stone-800/60">
                     <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800/60 text-[10px] uppercase tracking-widest hover:text-white transition-colors" style={{ color: LABEL_COLOR }}>Discard</button>
-                    <button type="submit" className="flex-1 bg-coral-500 text-white font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest shadow-2xl shadow-coral-500/30 active:scale-95">Save Host</button>
+                    <button type="submit" className="flex-1 bg-coral-500 text-white font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest shadow-2xl shadow-coral-500/30 active:scale-95">Save Host Profile</button>
                  </div>
               </form>
            </div>

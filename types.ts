@@ -26,6 +26,17 @@ export interface User {
   avatar?: string;
 }
 
+export interface PremiumSection {
+  title: string;
+  content: string;
+}
+
+export interface PremiumConfig {
+  isEnabled: boolean;
+  images: string[];
+  sections: PremiumSection[];
+}
+
 export interface Host {
   id: string;
   slug: string; 
@@ -38,8 +49,10 @@ export interface Host {
   physicalAddress?: string;
   country?: string;
   phoneNumber?: string;
-  notes?: string; // For internal memos or additional info
-  airbnbCalendarLink?: string; // New: iCal link for external calendar sync
+  notes?: string; 
+  airbnbCalendarLink?: string;
+  premiumConfig?: PremiumConfig;
+  paymentInstructions?: string; // New: To be included in confirmation emails
 }
 
 export interface PriceRule {
@@ -60,12 +73,12 @@ export interface Apartment {
   capacity: number;
   bedrooms: number;
   bathrooms: number;
-  pricePerNight: number; // Base price
-  priceOverrides?: PriceRule[]; // Seasonal rates
+  pricePerNight: number; 
+  priceOverrides?: PriceRule[]; 
   amenities: string[];
   photos: string[];
   isActive: boolean; 
-  mapEmbedUrl?: string; // New: Google Maps embed URL
+  mapEmbedUrl?: string;
 }
 
 export interface Booking {
@@ -79,7 +92,8 @@ export interface Booking {
   status: BookingStatus;
   totalPrice: number;
   isDepositPaid: boolean; 
-  guestMessage?: string; // New: Optional message from guest
+  guestMessage?: string;
+  depositAmount?: number; // New: Calculated for confirmation
 }
 
 export interface BlockedDate {

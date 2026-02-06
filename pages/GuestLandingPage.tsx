@@ -1,13 +1,41 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Host, Apartment, Booking, BlockedDate, BookingStatus } from '../types';
-import { isOverlapping } from '../services/bookingService'; // Import for date range checks
+import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig } from '../types';
+import { isOverlapping } from '../services/bookingService'; 
+import { 
+  Bed, 
+  Bath, 
+  Users, 
+  MapPin, 
+  Calendar, 
+  Search, 
+  Building2, 
+  Clock, 
+  ClipboardList, 
+  DollarSign, 
+  Mail, 
+  Phone, 
+  Edit3,
+  Wifi,
+  Utensils,
+  ParkingCircle,
+  Flame,
+  Wind,
+  WashingMachine,
+  Waves,
+  Tv,
+  Coffee,
+  Umbrella,
+  ShowerHead,
+  FlameKindling,
+  CircleHelp
+} from 'lucide-react';
 
 interface GuestLandingPageProps {
   host: Host;
   apartments: Apartment[];
   bookings: Booking[];
-  blockedDates: BlockedDate[]; // Manual blocked dates from host
-  airbnbCalendarDates: string[]; // Airbnb iCal blocked dates for current host
+  blockedDates: BlockedDate[]; 
+  airbnbCalendarDates: string[]; 
   onNewBooking: (booking: Booking) => void;
   onSelectApartment: (id: string) => void;
 }
@@ -25,43 +53,35 @@ export const UNIT_TITLE_STYLE: React.CSSProperties = {
 };
 
 export const CORE_ICONS = {
-  Bed: (c: string) => (
-    <svg className={c} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M7 13v-2h10v2h2v-6a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v6h2zm11-4h1V7h-1v2zM5 7h1V7H5v2zM21 14H3a1 1 0 0 0-1 1v4a1 1 /0 0 0 1 1h18a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1zm-1 4H4v-2h16v2z"/>
-    </svg>
-  ),
-  Bath: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M10 4L8 6M17 19v2M2 12h20M7 19v2M9 5L7.6 3.6A2 2 0 004 5v12a2 2 0 002 2h12a2 2 0 002-2v-5" /></svg>,
-  Guests: (c: string) => (
-    <svg className={c} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-    </svg>
-  ),
-  Location: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>,
-  Calendar: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2" /><path d="M16 2v4M8 2v4M3 10h18" /></svg>,
-  Search: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /></svg>,
-  Building: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>,
-  Pending: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  Bookings: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>,
-  Dollar: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  Mail: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>,
-  Phone: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg>,
-  Edit: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+  Bed: (c: string) => <Bed className={c} strokeWidth={1.5} />,
+  Bath: (c: string) => <Bath className={c} strokeWidth={1.5} />,
+  Guests: (c: string) => <Users className={c} strokeWidth={1.5} />,
+  Location: (c: string) => <MapPin className={c} strokeWidth={1.5} />,
+  Calendar: (c: string) => <Calendar className={c} strokeWidth={1.5} />,
+  Search: (c: string) => <Search className={c} strokeWidth={2.5} />,
+  Building: (c: string) => <Building2 className={c} strokeWidth={1.5} />,
+  Pending: (c: string) => <Clock className={c} strokeWidth={1.5} />,
+  Bookings: (c: string) => <ClipboardList className={c} strokeWidth={1.5} />,
+  Dollar: (c: string) => <DollarSign className={c} strokeWidth={1.5} />,
+  Mail: (c: string) => <Mail className={c} strokeWidth={1.5} />,
+  Phone: (c: string) => <Phone className={c} strokeWidth={1.5} />,
+  Edit: (c: string) => <Edit3 className={c} strokeWidth={1.5} />
 };
 
 export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {
-  'Wifi': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0" /></svg>,
-  'Kitchen': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 3h18v18H3V3z" /><path strokeLinecap="round" strokeLinejoin="round" d="M9 3v18M3 9h18" /></svg>,
-  'Free Parking': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M5 10h14m-14 4h14M5 10v4m14-4v4M5 10l-2 8h18l-2-8M9 10v4m3-4v4m3-4v4" /></svg>,
-  'Fireplace': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857" /></svg>,
-  'Air Conditioning': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18M3 15h18M3 18h18" /></svg>,
-  'Washer': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>,
-  'Pool': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M3 12h18" /></svg>,
-  'TV': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M6 9h14M4 15h14" /></svg>,
-  'Coffee Maker': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>,
-  'Beach Access': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>,
-  'Outdoor Shower': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3" /></svg>,
-  'BBQ Grill': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4" /></svg>,
-  'Default': (c) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10" /></svg>
+  'Wifi': (c) => <Wifi className={c} strokeWidth={1.5} />,
+  'Kitchen': (c) => <Utensils className={c} strokeWidth={1.5} />,
+  'Free Parking': (c) => <ParkingCircle className={c} strokeWidth={1.5} />,
+  'Fireplace': (c) => <Flame className={c} strokeWidth={1.5} />,
+  'Air Conditioning': (c) => <Wind className={c} strokeWidth={1.5} />,
+  'Washer': (c) => <WashingMachine className={c} strokeWidth={1.5} />,
+  'Pool': (c) => <Waves className={c} strokeWidth={1.5} />,
+  'TV': (c) => <Tv className={c} strokeWidth={1.5} />,
+  'Coffee Maker': (c) => <Coffee className={c} strokeWidth={1.5} />,
+  'Beach Access': (c) => <Umbrella className={c} strokeWidth={1.5} />,
+  'Outdoor Shower': (c) => <ShowerHead className={c} strokeWidth={1.5} />,
+  'BBQ Grill': (c) => <FlameKindling className={c} strokeWidth={1.5} />,
+  'Default': (c) => <CircleHelp className={c} strokeWidth={1.5} />
 };
 
 export const formatDate = (dateStr: string) => {
@@ -74,10 +94,10 @@ export const HeroCalendar: React.FC<{
   onSelect: (start: string, end: string) => void,
   startDate: string,
   endDate: string,
-  apartment?: Apartment, // For price display if provided
-  allBookings: Booking[], // Added
-  allBlockedDates: BlockedDate[], // Added (manual blocks from host)
-  airbnbBlockedDates: string[], // Added (iCal blocks for current host)
+  apartment?: Apartment, 
+  allBookings: Booking[], 
+  allBlockedDates: BlockedDate[], 
+  airbnbBlockedDates: string[], 
 }> = ({ onSelect, startDate, endDate, apartment, allBookings, allBlockedDates, airbnbBlockedDates }) => {
   const [month, setMonth] = useState(new Date());
   
@@ -93,9 +113,9 @@ export const HeroCalendar: React.FC<{
   const isBooked = (dateStr: string) =>
     allBookings.some(
       (b) =>
-        b.apartmentId === apartment?.id && // Only check for current apartment
+        b.apartmentId === apartment?.id && 
         (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID) &&
-        isOverlapping(dateStr, dateStr + 'T23:59:59', b.startDate, b.endDate) // Check if date is within booking range
+        isOverlapping(dateStr, dateStr + 'T23:59:59', b.startDate, b.endDate) 
     );
 
   const isBlockedManually = (dateStr: string) =>
@@ -109,7 +129,7 @@ export const HeroCalendar: React.FC<{
 
   const handleDayClick = (dateStr: string) => {
     const isDayUnavailable = isBooked(dateStr) || isBlockedManually(dateStr) || isAirbnbBlocked(dateStr);
-    if (isDayUnavailable) return; // Prevent selection of blocked dates
+    if (isDayUnavailable) return; 
 
     if (!startDate || (startDate && endDate)) {
       onSelect(dateStr, '');
@@ -136,21 +156,20 @@ export const HeroCalendar: React.FC<{
     const isCurrentlyAirbnbBlocked = isAirbnbBlocked(dStr);
     const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked;
 
-    let dayClass = 'text-stone-300 hover:bg-stone-800'; // Default available
+    let dayClass = 'text-stone-300 hover:bg-stone-800'; 
     
-    // Precedence: Selected > In Range > Unavailable > Available
     if (isSelected) {
       dayClass = 'bg-coral-500 text-white border-coral-500';
     } else if (inRange) {
       dayClass = 'bg-coral-500/20 text-coral-500 border-coral-500/10';
     } else if (isUnavailable) {
-      dayClass = 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed line-through'; // Visual for blocked
+      dayClass = 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed line-through'; 
     }
 
     days.push(
       <button 
         key={dStr} onClick={() => handleDayClick(dStr)}
-        disabled={isUnavailable} // Disable button if unavailable
+        disabled={isUnavailable} 
         className={`flex flex-col items-center justify-center rounded-xl transition-all ${
           apartment ? 'h-14 w-full border border-transparent' : 'h-10 w-10'
         } ${dayClass}`}
@@ -164,9 +183,9 @@ export const HeroCalendar: React.FC<{
   return (
     <div className={`p-6 bg-stone-950 border border-stone-800 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 ${apartment ? 'w-full' : 'w-[320px]'}`}>
       <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M15 19l-7-7 7-7" strokeWidth={3}/></svg></button>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7"/></svg></button>
         <span className="text-white font-serif font-bold text-sm">{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M9 5l7 7-7 7" strokeWidth={3}/></svg></button>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
       <div className="grid grid-cols-7 gap-1 text-[9px] font-black text-stone-600 text-center mb-2 uppercase tracking-widest">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d}>{d}</div>)}
@@ -209,8 +228,83 @@ const GuestPopover: React.FC<{
   );
 };
 
+const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: string }> = ({ config, hostName }) => {
+  if (!config.isEnabled) return null;
+
+  return (
+    <div className="mt-40 space-y-40 animate-in fade-in duration-1000">
+      {/* Introduction Header */}
+      <div className="max-w-4xl mx-auto text-center space-y-8">
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">Host Feature</span>
+        <h2 className="text-5xl md:text-7xl font-serif font-bold text-white tracking-tight leading-tight">
+          Beyond the <span className="text-coral-500 italic">Ordinary</span>
+        </h2>
+        <p className="text-xl text-[#cfcece] font-medium leading-relaxed max-w-2xl mx-auto">
+          We don't just provide accommodation; we curate environments where memories take root and flourish. Explore the heart of our hospitality.
+        </p>
+      </div>
+
+      {/* Feature Blocks - Integrated Text & Images */}
+      <div className="space-y-32">
+        {config.sections.map((section, idx) => {
+          const isEven = idx % 2 === 0;
+          const imageUrl = config.images[idx % config.images.length];
+          const secondImageUrl = config.images[(idx + 1) % config.images.length];
+
+          return (
+            <div key={idx} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-16 lg:gap-24 items-center`}>
+              {/* Image Block */}
+              <div className="w-full lg:w-1/2 relative">
+                <div className={`aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-stone-800 shadow-2xl relative z-10 ${isEven ? 'ml-0' : 'ml-auto'}`}>
+                  <img src={imageUrl} className="w-full h-full object-cover" alt={section.title} />
+                  <div className="absolute inset-0 bg-stone-950/10 hover:bg-transparent transition-colors duration-500" />
+                </div>
+                {/* Accent Small Image Floating */}
+                <div className={`absolute -bottom-12 ${isEven ? '-right-12' : '-left-12'} hidden lg:block w-48 h-64 rounded-2xl overflow-hidden border-4 border-stone-950 shadow-2xl z-20`}>
+                   <img src={secondImageUrl} className="w-full h-full object-cover" alt="Detail" />
+                </div>
+              </div>
+
+              {/* Text Block */}
+              <div className="w-full lg:w-1/2 space-y-8">
+                <div className="flex items-center space-x-4">
+                  <span className="text-coral-500 font-serif text-5xl opacity-30 italic">0{idx + 1}</span>
+                  <div className="h-px w-12 bg-stone-800"></div>
+                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">{section.title}</h3>
+                </div>
+                <p className="text-xl leading-relaxed text-[#cfcece] font-medium">
+                  {section.content}
+                </p>
+                <div className="pt-4">
+                  <div className="inline-flex items-center space-x-3 text-stone-500 border-b border-stone-800 pb-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest">Wanderlust Verified</span>
+                    <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Final Visual Montage Section */}
+      {config.images.length > 3 && (
+        <div className="pt-20">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
+            {config.images.slice(0, 4).map((img, i) => (
+              <div key={i} className={`rounded-3xl overflow-hidden border border-stone-800 relative group h-full ${i % 2 === 0 ? 'mt-8' : 'mb-8'}`}>
+                <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={`Gallery ${i}`} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({ 
-  apartments, onSelectApartment, bookings, blockedDates, airbnbCalendarDates
+  host, apartments, onSelectApartment, bookings, blockedDates, airbnbCalendarDates
 }) => {
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
@@ -349,6 +443,9 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             </div>
           ))}
         </div>
+
+        {/* PREMIUM EXTENSION MOVED HERE (BELOW FEATURED STAYS) */}
+        {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
       </section>
     </div>
   );

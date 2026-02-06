@@ -1,7 +1,10 @@
+
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Host, Apartment, Booking, BlockedDate, BookingStatus, PriceRule } from '../types';
+// Added BlockedDate to imports
+import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
-import { fetchAndParseIcal } from '../services/api'; // Import from services/api
+import { fetchAndParseIcal } from '../services/api'; 
+import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
 
 interface HostDashboardProps {
   host: Host;
@@ -11,8 +14,8 @@ interface HostDashboardProps {
   onUpdateBookings: (bookings: Booking[]) => void;
   onUpdateBlockedDates: (dates: BlockedDate[]) => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
-  airbnbCalendarDates: string[]; // New prop from App.tsx
-  loadingAirbnbIcal: boolean; // New prop from App.tsx
+  airbnbCalendarDates: string[]; 
+  loadingAirbnbIcal: boolean; 
 }
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
@@ -38,8 +41,8 @@ const AvailabilityCalendar: React.FC<{
   aptId: string, 
   bookings: Booking[], 
   blockedDates: BlockedDate[], 
-  airbnbCalendarDates: string[], // New prop for iCal dates
-  loadingIcal: boolean, // New prop for iCal loading state
+  airbnbCalendarDates: string[], 
+  loadingIcal: boolean, 
   onToggle: (date: string) => void 
 }> = ({ aptId, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -65,21 +68,20 @@ const AvailabilityCalendar: React.FC<{
       const blockedManually = isBlockedManually(dateStr);
       const airbnbBlocked = isAirbnbBlocked(dateStr);
 
-      let dayClass = 'bg-stone-900 border-stone-800 text-stone-500 hover:text-white'; // Default available
+      let dayClass = 'bg-stone-900 border-stone-800 text-stone-500 hover:text-white'; 
       
-      // Precedence: HostHub Bookings > Manual Blocks > Airbnb iCal Blocks
       if (booked) { 
-        dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; // HostHub bookings (e.g. blue for confirmed/paid)
+        dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
         const bookingForDay = bookings.find(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate);
         if (bookingForDay?.status === BookingStatus.REQUESTED) {
-            dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; // Amber for requested
+            dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
         } else if (bookingForDay?.status === BookingStatus.PAID) {
-            dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; // Emerald for paid
+            dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
         }
       } else if (blockedManually) { 
-        dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; // Manual blocks (red)
+        dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; 
       } else if (airbnbBlocked) {
-        dayClass = 'bg-yellow-500/20 border-yellow-500/40 text-yellow-500'; // Airbnb iCal blocks (yellow)
+        dayClass = 'bg-yellow-500/20 border-yellow-500/40 text-yellow-500'; 
       }
 
       days.push(
@@ -143,13 +145,14 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all'); // New state for status filter
+  const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all');
+  const [previewBooking, setPreviewBooking] = useState<{booking: Booking, type: 'confirmation' | 'cancellation'} | null>(null);
 
   const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   
   const stats = useMemo(() => {
     const today = new Date();
-    const currentMonthNum = today.getMonth(); // 0-indexed
+    const currentMonthNum = today.getMonth(); 
     const currentYear = today.getFullYear();
 
     const getBookingsForPeriod = (month?: number, year: number = currentYear) => {
@@ -157,43 +160,39 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
             const bookingStartDate = new Date(b.startDate);
             const bookingYear = bookingStartDate.getFullYear();
             const bookingMonth = bookingStartDate.getMonth();
-            
             const matchYear = bookingYear === year;
             const matchMonth = month === undefined || bookingMonth === month;
-            
             return matchYear && matchMonth;
         });
     };
 
-    // Calculate for current month
     const currentMonthBookings = getBookingsForPeriod(currentMonthNum, currentYear);
-    const pendingMonth = currentMonthBookings.filter(b => b.status === BookingStatus.REQUESTED).length;
-    const confirmedMonth = currentMonthBookings.filter(b => b.status === BookingStatus.CONFIRMED).length;
-    const paidMonth = currentMonthBookings.filter(b => b.status === BookingStatus.PAID).length;
     const revenueMonth = currentMonthBookings.filter(b => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID).reduce((sum, b) => sum + b.totalPrice, 0);
-
-    // Calculate for current year
-    const currentYearBookings = getBookingsForPeriod(undefined, currentYear); // Pass undefined for month to get all year
-    const pendingYear = currentYearBookings.filter(b => b.status === BookingStatus.REQUESTED).length;
-    const confirmedYear = currentYearBookings.filter(b => b.status === BookingStatus.CONFIRMED).length;
-    const paidYear = currentYearBookings.filter(b => b.status === BookingStatus.PAID).length;
+    const currentYearBookings = getBookingsForPeriod(undefined, currentYear); 
     const revenueYear = currentYearBookings.filter(b => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID).reduce((sum, b) => sum + b.totalPrice, 0);
 
     return {
-        assets: apartments.length, // Total units
-        pendingMonth, 
-        confirmedMonth, 
-        paidMonth, 
+        assets: apartments.length,
+        pendingMonth: currentMonthBookings.filter(b => b.status === BookingStatus.REQUESTED).length, 
+        confirmedMonth: currentMonthBookings.filter(b => b.status === BookingStatus.CONFIRMED).length, 
+        paidMonth: currentMonthBookings.filter(b => b.status === BookingStatus.PAID).length, 
         revenueMonth,
-        pendingYear, 
-        confirmedYear, 
-        paidYear, 
+        pendingYear: currentYearBookings.filter(b => b.status === BookingStatus.REQUESTED).length, 
+        confirmedYear: currentYearBookings.filter(b => b.status === BookingStatus.CONFIRMED).length, 
+        paidYear: currentYearBookings.filter(b => b.status === BookingStatus.PAID).length, 
         revenueYear,
     };
   }, [apartments, myBookings]);
 
-  const handleUpdateStatus = (id: string, status: BookingStatus) => {
-    onUpdateBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+  const handleUpdateStatus = (booking: Booking, status: BookingStatus) => {
+    onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
+    
+    // Trigger preview when confirming or rejecting
+    if (status === BookingStatus.CONFIRMED) {
+      setPreviewBooking({ booking, type: 'confirmation' });
+    } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
+      setPreviewBooking({ booking, type: 'cancellation' });
+    }
   };
 
   const toggleManualBlock = (aptId: string, date: string) => {
@@ -226,7 +225,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         description: editingApt.description || '',
         city: editingApt.city || '',
         isActive: true,
-        mapEmbedUrl: editingApt.mapEmbedUrl || undefined, // Include mapEmbedUrl
+        mapEmbedUrl: editingApt.mapEmbedUrl || undefined, 
       } as Apartment;
       onUpdateApartments([...apartments, newApt]);
     }
@@ -259,14 +258,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     setEditingApt({ ...editingApt, photos: currentPhotos.filter((_, i) => i !== idx) });
   };
 
-  // Group and sort bookings for the 'bookings' tab
   const groupedAndSortedBookings = useMemo(() => {
     const today = new Date().toISOString().split('T')[0];
-    
-    // Filter out past bookings and sort upcoming ones soonest to furthest
     const upcomingBookings = myBookings
-        .filter(b => b.startDate >= today) // Keeps only upcoming bookings
-        .filter(b => statusFilter === 'all' || b.status === statusFilter) // Apply status filter
+        .filter(b => statusFilter === 'all' || b.status === statusFilter) 
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const groups = new Map<string, Booking[]>();
@@ -281,15 +276,12 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         }
     }
     
-    // Sort groups by the earliest booking date in each group
-    const sortedGroups = Array.from(groups.entries()).sort(([, bookingsA], [, bookingsB]) => {
+    return Array.from(groups.entries()).sort(([, bookingsA], [, bookingsB]) => {
         const earliestA = bookingsA[0] ? new Date(bookingsA[0].startDate).getTime() : Infinity;
         const earliestB = bookingsB[0] ? new Date(bookingsB[0].startDate).getTime() : Infinity;
         return earliestA - earliestB;
     });
-
-    return sortedGroups;
-}, [myBookings, apartments, statusFilter]); // Re-run when statusFilter changes
+  }, [myBookings, apartments, statusFilter]); 
 
 
   return (
@@ -299,57 +291,54 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
           <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Host studio</h1>
           <p className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: LABEL_COLOR }}>Operational management</p>
         </div>
-        <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-coral-500 hover:bg-coral-600 text-white px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest shadow-xl">Add unit</button>
+        <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest transition-all">Add unit</button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {/* Total Units Card */}
         <div key="total-units" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
             <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Building("w-8 h-8")}</div>
             <div className="flex flex-col">
-                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}>{stats.assets}</h4> {/* Changed to font-dm and text-stone-500 */}
-                <p className="font-medium" style={{ color: LABEL_COLOR, fontSize: '0.875rem' }}>Total Units</p>
+                <h4 className={`text-2xl font-dm font-bold text-[#cfcece] leading-none`}>
+                  {stats.assets} <span className="text-xl font-bold text-[#cfcece] ml-2">Total Units</span>
+                </h4>
             </div>
         </div>
-        {/* Pending Requests Card */}
         <div key="pending-requests" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
             <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Pending("w-8 h-8")}</div>
             <div className="flex flex-col">
-                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                <h4 className={`text-2xl font-dm font-bold text-[#cfcece] leading-none mb-1`}>
                     {stats.pendingMonth}
-                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                    <span className="text-xl font-bold text-[#cfcece] ml-2">this month</span>
                 </h4>
-                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                <p className="font-medium text-[#cfcece]" style={{ fontSize: '0.875rem' }}>
                     {stats.pendingYear}
-                    <span className="text-stone-500 ml-1">this year</span>
+                    <span className="text-[#cfcece] ml-1">this year</span>
                 </p>
             </div>
         </div>
-        {/* Confirmed Stays Card */}
         <div key="confirmed-stays" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
             <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Bookings("w-8 h-8")}</div>
             <div className="flex flex-col">
-                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                <h4 className={`text-2xl font-dm font-bold text-[#cfcece] leading-none mb-1`}>
                     {stats.confirmedMonth}
-                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                    <span className="text-xl font-bold text-[#cfcece] ml-2">this month</span>
                 </h4>
-                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                <p className="font-medium text-[#cfcece]" style={{ fontSize: '0.875rem' }}>
                     {stats.confirmedYear}
-                    <span className="text-stone-500 ml-1">this year</span>
+                    <span className="text-[#cfcece] ml-1">this year</span>
                 </p>
             </div>
         </div>
-        {/* Total Revenue Card */}
         <div key="total-revenue" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
             <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Dollar("w-8 h-8")}</div>
             <div className="flex flex-col">
-                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                <h4 className={`text-2xl font-dm font-bold text-[#cfcece] leading-none mb-1`}>
                     ${stats.revenueMonth.toLocaleString()}
-                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                    <span className="text-xl font-bold text-[#cfcece] ml-2">this month</span>
                 </h4>
-                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                <p className="font-medium text-[#cfcece]" style={{ fontSize: '0.875rem' }}>
                     ${stats.revenueYear.toLocaleString()}
-                    <span className="text-stone-500 ml-1">this year</span>
+                    <span className="text-[#cfcece] ml-1">this year</span>
                 </p>
             </div>
         </div>
@@ -364,7 +353,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
           <button 
             key={tab.id} 
             onClick={() => setActiveTab(tab.id as any)} 
-            className={`px-8 py-4 rounded-lg text-base font-medium transition-all flex items-center space-x-3 ${activeTab === tab.id ? 'bg-stone-800 text-white shadow-lg' : 'text-stone-600 hover:text-stone-300'}`}
+            className={`px-8 py-4 rounded-lg text-base font-medium transition-all flex items-center space-x-3 ${activeTab === tab.id ? 'bg-stone-800 text-white shadow-lg' : 'text-[#cfcece] hover:text-white'}`}
           >
             <div style={{ color: activeTab === tab.id ? 'white' : EMERALD_ACCENT }}>{tab.icon}</div>
             <span>{tab.label}</span>
@@ -373,7 +362,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       </div>
 
       {activeTab === 'bookings' && (
-        <div className="space-y-12"> {/* Increased gap between apartment groups */}
+        <div className="space-y-12">
           <div className="flex space-x-3 mb-8 px-2">
             {[
                 { label: 'All', value: 'all' },
@@ -387,7 +376,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
                         statusFilter === filter.value
                             ? 'bg-coral-500 text-white shadow-md shadow-coral-500/20'
-                            : 'bg-stone-900 border border-stone-800 text-stone-500 hover:text-white'
+                            : 'bg-stone-900 border border-stone-800 text-[#cfcece] hover:text-white'
                     }`}
                 >
                     {filter.label}
@@ -420,8 +409,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                           </span>
                         </div>
 
-                        {/* Removed apt?.city from here */}
-
                         <div className="flex flex-wrap items-center gap-x-12 gap-y-4"> 
                           <div className="flex items-center space-x-3">
                               <div className="text-coral-500">{CORE_ICONS.Calendar("w-5 h-5")}</div>
@@ -449,17 +436,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                               </div>
                             </div>
                             <div className="flex space-x-3">
-                                {(b.status === BookingStatus.REQUESTED || b.status === BookingStatus.CONFIRMED) && ( // Allow rejecting Confirmed bookings
+                                {(b.status === BookingStatus.REQUESTED || b.status === BookingStatus.CONFIRMED) && (
                                   <>
                                     {b.status === BookingStatus.REQUESTED && (
-                                      <button onClick={() => handleUpdateStatus(b.id, BookingStatus.CONFIRMED)} className="bg-white text-black px-6 py-2.5 rounded-xl text-[10px] font-medium uppercase tracking-widest hover:bg-stone-200 transition-all active:scale-95">Confirm</button>
+                                      <button onClick={() => handleUpdateStatus(b, BookingStatus.CONFIRMED)} className="bg-white text-black px-6 py-2.5 rounded-xl text-[10px] font-medium uppercase tracking-widest hover:bg-stone-200 transition-all active:scale-95">Confirm</button>
                                     )}
-                                    <button onClick={() => handleUpdateStatus(b.id, BookingStatus.REJECTED)} className="border border-rose-700 text-rose-500 px-6 py-2.5 rounded-xl text-[10px] font-medium uppercase tracking-widest hover:bg-rose-700/10 transition-all">Reject</button>
+                                    <button onClick={() => handleUpdateStatus(b, BookingStatus.REJECTED)} className="border border-rose-700 text-rose-500 px-6 py-2.5 rounded-xl text-[10px] font-medium uppercase tracking-widest hover:bg-rose-700/10 transition-all">Reject</button>
                                   </>
                                 )}
                                 {b.status === BookingStatus.CONFIRMED && (
                                   <button 
-                                    onClick={() => handleUpdateStatus(b.id, BookingStatus.PAID)} 
+                                    onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} 
                                     className="border border-emerald-500 text-emerald-500 px-6 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/10 transition-all active:scale-95"
                                   >
                                     Mark as paid
@@ -487,14 +474,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 <div className="lg:col-span-2 space-y-6">
                    <h3 className="text-3xl font-serif font-bold text-white tracking-tight">{apt.title}</h3>
                    <p className="text-sm font-medium" style={{ color: LABEL_COLOR }}>Manage manual overrides and view occupancy for this unit.</p>
-                   {host.airbnbCalendarLink && (
-                     <p className="text-xs font-medium text-stone-600">
-                        Airbnb iCal synced: <a href={host.airbnbCalendarLink} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">View link</a>
-                     </p>
-                   )}
-                   {!host.airbnbCalendarLink && (
-                     <p className="text-xs font-medium text-stone-600">No Airbnb iCal link configured for this host.</p>
-                   )}
                 </div>
                 <div className="lg:col-span-3">
                    <AvailabilityCalendar 
@@ -529,6 +508,44 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         </div>
       )}
 
+      {/* Email Preview Modal */}
+      {previewBooking && (
+        <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
+          <div className="w-full max-w-2xl space-y-8 my-12">
+            <div className="flex items-center justify-between text-white">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <h3 className="text-xl font-bold">Automatic Notification Sent</h3>
+              </div>
+              <button onClick={() => setPreviewBooking(null)} className="text-stone-500 hover:text-white transition-colors">
+                <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth={2} /></svg>
+              </button>
+            </div>
+            
+            <p className="text-stone-400 text-center text-sm">Preview of the email dispatched to <span className="text-white font-bold">{previewBooking.booking.guestEmail}</span></p>
+
+            {previewBooking.type === 'confirmation' ? (
+              <BookingConfirmationTemplate 
+                host={host} 
+                booking={previewBooking.booking} 
+                apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} 
+              />
+            ) : (
+              <BookingCancellationTemplate 
+                host={host} 
+                booking={previewBooking.booking} 
+                apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} 
+              />
+            )}
+
+            <button onClick={() => setPreviewBooking(null)} className="w-full py-5 bg-stone-800 text-white font-bold rounded-2xl uppercase text-[10px] tracking-widest hover:bg-stone-700 transition-colors">Close Preview</button>
+          </div>
+        </div>
+      )}
+
+      {/* Unit Edit Modal */}
       {showAptModal && editingApt && (
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
            <div className="bg-[#1c1a19] border border-stone-800/60 w-full max-w-4xl rounded-3xl p-8 md:p-12 shadow-2xl space-y-10 my-12 relative">
@@ -556,130 +573,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     <div>
                        <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Description</label>
                        <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[120px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
-                    </div>
-                 </div>
-
-                 <div className="space-y-6">
-                    <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Map Embed URL (Google Maps iframe src)</label>
-                    <input type="url" value={editingApt.mapEmbedUrl || ''} onChange={e => setEditingApt({...editingApt, mapEmbedUrl: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" placeholder="e.g. https://www.google.com/maps/embed?pb=!1m18!..." />
-                 </div>
-
-                 <div className="space-y-6">
-                    <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Photos Management</label>
-                    <div className="flex space-x-4 mb-6">
-                       <input 
-                         type="text" 
-                         placeholder="Paste image URL here" 
-                         value={newPhotoUrl} 
-                         onChange={(e) => setNewPhotoUrl(e.target.value)}
-                         className="flex-1 bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" 
-                       />
-                       <button 
-                         type="button" 
-                         onClick={handleAddPhoto}
-                         className="px-6 py-4 bg-stone-800 text-white rounded-xl font-bold uppercase text-[10px] tracking-widest hover:bg-stone-700"
-                       >
-                         Add Photo
-                       </button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                       {editingApt.photos?.map((photo, idx) => (
-                         <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden border border-stone-800">
-                           <img src={photo} alt={`Unit photo ${idx + 1}`} className="w-full h-full object-cover" />
-                           <button 
-                             type="button"
-                             onClick={() => handleRemovePhoto(idx)}
-                             className="absolute top-2 right-2 bg-rose-500 text-white p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
-                           >
-                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth={3} /></svg>
-                           </button>
-                         </div>
-                       ))}
-                       {(!editingApt.photos || editingApt.photos.length === 0) && (
-                         <div className="col-span-full py-8 border border-dashed border-stone-800 rounded-xl flex items-center justify-center">
-                            <span className="text-stone-600 text-xs font-medium">No photos added yet</span>
-                         </div>
-                       )}
-                    </div>
-                 </div>
-
-                 <div className="space-y-6">
-                    <div className="flex items-center justify-between">
-                       <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: LABEL_COLOR }}>Seasonal Rates & Overrides</label>
-                       <button type="button" onClick={addPriceOverride} className="text-xs font-bold text-coral-500 hover:text-coral-600 uppercase tracking-widest">+ Add Override</button>
-                    </div>
-                    <div className="space-y-4">
-                       {editingApt.priceOverrides?.map((rule, idx) => (
-                         <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-3 bg-stone-950/50 p-4 rounded-xl border border-stone-800/40 items-end">
-                            <div className="md:col-span-1">
-                               <label className="block text-[9px] font-bold text-stone-600 uppercase mb-2">Label</label>
-                               <input type="text" placeholder="e.g. Christmas" value={rule.label} onChange={e => {
-                                 const updated = [...(editingApt.priceOverrides || [])];
-                                 updated[idx].label = e.target.value;
-                                 setEditingApt({...editingApt, priceOverrides: updated});
-                               }} className="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-xs text-white outline-none" />
-                            </div>
-                            <div>
-                               <label className="block text-[9px] font-bold text-stone-600 uppercase mb-2">Start Date</label>
-                               <input type="date" value={rule.startDate} onChange={e => {
-                                 const updated = [...(editingApt.priceOverrides || [])];
-                                 updated[idx].startDate = e.target.value;
-                                 setEditingApt({...editingApt, priceOverrides: updated});
-                               }} className="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-xs text-white outline-none [color-scheme:dark]" />
-                            </div>
-                            <div>
-                               <label className="block text-[9px] font-bold text-stone-600 uppercase mb-2">End Date</label>
-                               <input type="date" value={rule.endDate} onChange={e => {
-                                 const updated = [...(editingApt.priceOverrides || [])];
-                                 updated[idx].endDate = e.target.value;
-                                 setEditingApt({...editingApt, priceOverrides: updated});
-                               }} className="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-xs text-white outline-none [color-scheme:dark]" />
-                            </div>
-                            <div className="flex items-center space-x-2">
-                               <div className="flex-1">
-                                  <label className="block text-[9px] font-bold text-stone-600 uppercase mb-2">Override Price</label>
-                                  <input type="number" value={rule.price} onChange={e => {
-                                    const updated = [...(editingApt.priceOverrides || [])];
-                                    updated[idx].price = parseInt(e.target.value);
-                                    setEditingApt({...editingApt, priceOverrides: updated});
-                                  }} className="w-full bg-stone-950 border border-stone-800 rounded-lg p-2.5 text-xs text-white outline-none" />
-                               </div>
-                               <button type="button" onClick={() => removePriceOverride(rule.id)} className="p-2.5 text-stone-700 hover:text-rose-500 transition-colors">
-                                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1  0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                               </button>
-                            </div>
-                         </div>
-                       ))}
-                       {(!editingApt.priceOverrides || editingApt.priceOverrides.length === 0) && (
-                         <p className="text-[10px] text-stone-800 font-bold uppercase tracking-widest text-center py-4 border border-dashed border-stone-900 rounded-xl">No active overrides configured</p>
-                       )}
-                    </div>
-                 </div>
-
-                 <div className="space-y-6">
-                    <label className="block text-xs font-bold uppercase tracking-widest" style={{ color: LABEL_COLOR }}>Amenities Selection</label>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                       {ALL_AMENITIES.map(amenity => (
-                         <button 
-                           key={amenity}
-                           type="button"
-                           onClick={() => {
-                             const current = editingApt.amenities || [];
-                             if (current.includes(amenity)) {
-                               setEditingApt({ ...editingApt, amenities: current.filter(a => a !== amenity) });
-                             } else {
-                               setEditingApt({ ...editingApt, amenities: [...current, amenity] });
-                             }
-                           }}
-                           className={`px-4 py-3 rounded-xl border text-[10px] font-bold transition-all ${
-                             editingApt.amenities?.includes(amenity) 
-                               ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400' 
-                               : 'bg-stone-900 border-stone-800 text-stone-500 hover:border-stone-600'
-                           }`}
-                         >
-                           {amenity}
-                         </button>
-                       ))}
                     </div>
                  </div>
                  
