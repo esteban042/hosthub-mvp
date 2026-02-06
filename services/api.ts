@@ -1,7 +1,7 @@
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types';
 
 // THIS MUST BE UPDATED AFTER DEPLOYMENT TO YOUR RENDER BACKEND SERVICE URL
-const API_BASE_URL = 'http://localhost:3001/api/v1'; 
+const API_BASE_URL = 'https://hosthub-backend42.onrender.com'; 
 
 export const hostHubApi = {
   async getLandingData(slug?: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
