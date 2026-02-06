@@ -3,6 +3,11 @@ import cors from 'cors';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import { SubscriptionType, Host, Apartment, Booking, BlockedDate } from './types'; // Import types
+import { fileURLToPath } from 'url';
+import path from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -14,6 +19,7 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
+app.use(express.static(path.join(__dirname, 'client')));
 
 app.use(cors());
 app.use(express.json());
@@ -494,4 +500,8 @@ app.put('/api/v1/blocked-dates', async (req, res) => {
 
 app.listen(port, () => {
   console.log(`Boutique Backend running on port ${port}`);
+
+  app.get('*', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'client', 'index.html'));
+});
 });
