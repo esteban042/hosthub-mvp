@@ -1,149 +1,286 @@
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types';
+import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData';
 
-const STORAGE_KEY_HOSTS = 'hosthub_hosts_v2';
-const STORAGE_KEY_BOOKINGS = 'hosthub_bookings_v2';
-const STORAGE_KEY_APARTMENTS = 'hosthub_apartments_v2';
-const STORAGE_KEY_BLOCKED = 'hosthub_blocked_v2';
+const SUPABASE_URL = 'https://dmldmpdflblwwoppbvkv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_lYCWq0C3KkMvjnGYjL-VJg_WewYCS_q';
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const getStored = <T>(key: string, fallback: T): T => {
-  const stored = localStorage.getItem(key);
-  try {
-    return stored ? JSON.parse(stored) : fallback;
-  } catch (e) {
-    console.warn(`Failed to parse stored data for ${key}. Using fallback.`, e);
-    return fallback;
-  }
-};
+// Helper to map DB snake_case to Frontend camelCase
+const mapHost = (h: any): Host => ({
+  id: h.id,
+  slug: h.slug,
+  name: h.name,
+  bio: h.bio,
+  avatar: h.avatar,
+  subscriptionType: h.subscription_type,
+  commissionRate: h.commission_rate,
+  contactEmail: h.contact_email,
+  physicalAddress: h.physical_address,
+  country: h.country,
+  phoneNumber: h.phone_number,
+  notes: h.notes,
+  airbnbCalendarLink: h.airbnb_calendar_link,
+  premiumConfig: h.premium_config,
+  paymentInstructions: h.payment_instructions
+});
 
-// Persistent singletons
-let sessionHosts: Host[] = getStored(STORAGE_KEY_HOSTS, [...MOCK_HOSTS]);
-let sessionApartments: Apartment[] = getStored(STORAGE_KEY_APARTMENTS, [...MOCK_APARTMENTS]);
-let sessionBookings: Booking[] = getStored(STORAGE_KEY_BOOKINGS, [...MOCK_BOOKINGS]);
-let sessionBlockedDates: BlockedDate[] = getStored(STORAGE_KEY_BLOCKED, []);
+const mapApartment = (a: any): Apartment => ({
+  id: a.id,
+  hostId: a.host_id,
+  title: a.title,
+  description: a.description,
+  city: a.city,
+  address: a.address,
+  capacity: a.capacity,
+  bedrooms: a.bedrooms,
+  bathrooms: a.bathrooms,
+  pricePerNight: a.price_per_night,
+  priceOverrides: a.price_overrides,
+  amenities: a.amenities || [],
+  photos: a.photos || [],
+  isActive: a.is_active,
+  mapEmbedUrl: a.map_embed_url
+});
 
-const commitToDisk = () => {
-  localStorage.setItem(STORAGE_KEY_HOSTS, JSON.stringify(sessionHosts));
-  localStorage.setItem(STORAGE_KEY_BOOKINGS, JSON.stringify(sessionBookings));
-  localStorage.setItem(STORAGE_KEY_APARTMENTS, JSON.stringify(sessionApartments));
-  localStorage.setItem(STORAGE_KEY_BLOCKED, JSON.stringify(sessionBlockedDates));
-  console.log("HostHub DB Sync: Successfully committed to localStorage");
-};
+const mapBooking = (b: any): Booking => ({
+  id: b.id,
+  apartmentId: b.apartment_id,
+  guestEmail: b.guest_email,
+  guestPhone: b.guest_phone,
+  numGuests: b.num_guests,
+  startDate: b.start_date,
+  endDate: b.end_date,
+  status: b.status as BookingStatus,
+  totalPrice: b.total_price,
+  isDepositPaid: b.is_deposit_paid,
+  guestMessage: b.guest_message,
+  depositAmount: b.deposit_amount
+});
 
-/**
- * Simulated iCal parser
- * In a real application, you'd use a library like ical.js and fetch the URL.
- * For this exercise, we'll return a hardcoded set of blocked dates.
- */
+const mapBlockedDate = (d: any): BlockedDate => ({
+  id: d.id,
+  apartmentId: d.apartment_id,
+  date: d.date,
+  reason: d.reason
+});
+
 export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
   console.log(`Simulating fetching and parsing iCal from: ${icalUrl}`);
-  await delay(800); // Simulate network delay
-  
+  await delay(800);
   const today = new Date();
   const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
-
-  // Generate some dummy blocked dates for the current and next month
+  const month = today.getMonth();
   const dummyBlockedDates: string[] = [];
-  // Block 3 days in current month
   for (let i = 0; i < 3; i++) {
-    const day = Math.floor(Math.random() * 20) + 1; // Random day in first 20 days
+    const day = Math.floor(Math.random() * 20) + 1;
     dummyBlockedDates.push(new Date(year, month, day).toISOString().split('T')[0]);
   }
-  // Block 2 days in next month
-  for (let i = 0; i < 2; i++) {
-    const day = Math.floor(Math.random() * 20) + 1; // Random day in first 20 days
-    dummyBlockedDates.push(new Date(year, month + 1, day).toISOString().split('T')[0]);
-  }
-
-  return Array.from(new Set(dummyBlockedDates)); // Ensure unique dates
+  return Array.from(new Set(dummyBlockedDates));
 };
-
 
 export const hostHubApi = {
   async getLandingData(slug?: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
-    await delay(150);
+    let hostQuery = supabase.from('hosts').select('*');
+    if (slug) {
+      hostQuery = hostQuery.eq('slug', slug);
+    } else {
+      hostQuery = hostQuery.limit(1);
+    }
     
-    // Attempt to find host by slug (from URL), then by subdomain, then fallback to first host
-    const host = sessionHosts.find(h => h.slug === slug) || 
-                 sessionHosts.find(h => h.slug === window.location.hostname.split('.')[0]) || 
-                 sessionHosts[0];
-    
-    if (!host) throw new Error("Critical: No hosts available in database.");
+    const { data: hostData, error: hostError } = await hostQuery.maybeSingle();
+    if (hostError) console.error("Host Fetch Error:", hostError);
 
-    const apartments = sessionApartments.filter(a => a.hostId === host.id);
-    const apartmentIds = apartments.map(a => a.id);
-    const bookings = sessionBookings.filter(b => apartmentIds.includes(b.apartmentId));
-    const blockedDates = sessionBlockedDates.filter(d => apartmentIds.includes(d.apartmentId) || d.apartmentId === 'all');
+    const finalHostData = hostData || (await supabase.from('hosts').select('*').limit(1).maybeSingle()).data;
     
-    return {
-      host,
-      apartments,
-      bookings,
-      blockedDates
-    };
+    if (!finalHostData) throw new Error("Database is empty or connection failed. Please run the SQL initialization in Supabase and then use the 'Seed System' button in the Admin Dashboard.");
+    
+    const host = mapHost(finalHostData);
+    const { data: aptsData } = await supabase.from('apartments').select('*').eq('host_id', host.id);
+    const apartments = (aptsData || []).map(mapApartment);
+    const apartmentIds = apartments.map(a => a.id);
+
+    const { data: bookingsData } = await supabase.from('bookings').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
+    const bookings = (bookingsData || []).map(mapBooking);
+
+    const { data: blockedData } = await supabase.from('blocked_dates')
+      .select('*')
+      .or(apartmentIds.length > 0 ? `apartment_id.eq.all,apartment_id.in.(${apartmentIds.join(',')})` : `apartment_id.eq.all`);
+    const blockedDates = (blockedData || []).map(mapBlockedDate);
+    
+    return { host, apartments, bookings, blockedDates };
   },
 
   async getAllHosts(): Promise<Host[]> {
-    await delay(100);
-    return [...sessionHosts];
+    const { data } = await supabase.from('hosts').select('*');
+    return (data || []).map(mapHost);
   },
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
-    await delay(300);
-    const newBooking = {
-      ...data,
-      id: data.id || `book-local-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    const payload = {
+      id: data.id || `book-${Date.now()}`,
+      apartment_id: data.apartmentId,
+      guest_email: data.guestEmail,
+      guest_phone: data.guestPhone,
+      num_guests: data.numGuests,
+      start_date: data.startDate,
+      end_date: data.endDate,
       status: data.status || BookingStatus.REQUESTED,
-      isDepositPaid: data.isDepositPaid ?? false
-    } as Booking;
+      total_price: data.totalPrice,
+      is_deposit_paid: data.isDepositPaid || false,
+      guest_message: data.guestMessage,
+      deposit_amount: data.depositAmount
+    };
     
-    sessionBookings.push(newBooking);
-    commitToDisk();
-    return newBooking;
+    const { data: result, error } = await supabase.from('bookings').insert(payload).select().single();
+    if (error) throw error;
+    return mapBooking(result);
   },
 
   async updateHosts(updatedList: Host[]): Promise<Host[]> {
-    await delay(200);
-    if (!updatedList || updatedList.length === 0) return sessionHosts;
-    sessionHosts = updatedList.map(updatedHost => {
-      const existingHost = sessionHosts.find(h => h.id === updatedHost.id);
-      return { ...existingHost, ...updatedHost }; // Merge existing with updates
+    const promises = updatedList.map(h => {
+      const payload = {
+        name: h.name,
+        slug: h.slug,
+        bio: h.bio,
+        avatar: h.avatar,
+        subscription_type: h.subscriptionType,
+        commission_rate: h.commissionRate,
+        contact_email: h.contactEmail,
+        physical_address: h.physicalAddress,
+        country: h.country,
+        phone_number: h.phoneNumber,
+        notes: h.notes,
+        airbnb_calendar_link: h.airbnbCalendarLink,
+        premium_config: h.premiumConfig,
+        payment_instructions: h.paymentInstructions
+      };
+      return supabase.from('hosts').update(payload).eq('id', h.id);
     });
-    commitToDisk();
-    return sessionHosts;
+    
+    await Promise.all(promises);
+    return this.getAllHosts();
   },
 
   async updateApartments(updatedList: Apartment[]): Promise<Apartment[]> {
-    await delay(200);
-    if (!updatedList || updatedList.length === 0) return sessionApartments;
-    const updatedIds = new Set(updatedList.map(u => u.id));
-    sessionApartments = [
-      ...sessionApartments.filter(sa => !updatedIds.has(sa.id)),
-      ...updatedList
-    ];
-    commitToDisk();
-    return sessionApartments;
+    const promises = updatedList.map(a => {
+      const payload = {
+        host_id: a.hostId,
+        title: a.title,
+        description: a.description,
+        city: a.city,
+        address: a.address,
+        capacity: a.capacity,
+        bedrooms: a.bedrooms,
+        bathrooms: a.bathrooms,
+        price_per_night: a.pricePerNight,
+        price_overrides: a.priceOverrides,
+        amenities: a.amenities,
+        photos: a.photos,
+        is_active: a.isActive,
+        map_embed_url: a.mapEmbedUrl
+      };
+      return supabase.from('apartments').upsert({ id: a.id, ...payload });
+    });
+    
+    await Promise.all(promises);
+    return updatedList; 
   },
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
-    await delay(200);
-    if (!updatedList || updatedList.length === 0) return sessionBookings;
-    const updatedIds = new Set(updatedList.map(u => u.id));
-    sessionBookings = [
-      ...sessionBookings.filter(sb => !updatedIds.has(sb.id)),
-      ...updatedList
-    ];
-    commitToDisk();
-    return sessionBookings;
+    const promises = updatedList.map(b => {
+      const payload = {
+        status: b.status,
+        is_deposit_paid: b.isDepositPaid,
+        total_price: b.totalPrice
+      };
+      return supabase.from('bookings').update(payload).eq('id', b.id);
+    });
+    
+    await Promise.all(promises);
+    return updatedList;
   },
 
   async updateBlockedDates(updatedList: BlockedDate[]): Promise<BlockedDate[]> {
-    await delay(100);
-    sessionBlockedDates = updatedList;
-    commitToDisk();
-    return sessionBlockedDates;
+    const promises = updatedList.map(d => {
+      return supabase.from('blocked_dates').upsert({
+        id: d.id,
+        apartment_id: d.apartmentId,
+        date: d.date,
+        reason: d.reason
+      });
+    });
+    await Promise.all(promises);
+    return updatedList;
+  },
+
+  async seedDatabase(): Promise<void> {
+    console.log("Seeding Supabase Database...");
+    
+    // 1. Seed Hosts
+    const hostPayloads = MOCK_HOSTS.map(h => ({
+      id: h.id,
+      slug: h.slug,
+      name: h.name,
+      bio: h.bio,
+      avatar: h.avatar,
+      subscription_type: h.subscriptionType,
+      commission_rate: h.commissionRate,
+      contact_email: h.contactEmail,
+      physical_address: h.physicalAddress,
+      country: h.country,
+      phone_number: h.phoneNumber,
+      notes: h.notes,
+      airbnb_calendar_link: h.airbnbCalendarLink,
+      premium_config: h.premiumConfig,
+      payment_instructions: h.paymentInstructions
+    }));
+    
+    const { error: hostErr } = await supabase.from('hosts').upsert(hostPayloads);
+    if (hostErr) throw new Error(`Host Seeding Failed: ${hostErr.message}. Ensure the 'hosts' table exists and RLS is disabled or allows inserts.`);
+
+    // 2. Seed Apartments
+    const aptPayloads = MOCK_APARTMENTS.map(a => ({
+      id: a.id,
+      host_id: a.hostId,
+      title: a.title,
+      description: a.description,
+      city: a.city,
+      address: a.address,
+      capacity: a.capacity,
+      bedrooms: a.bedrooms,
+      bathrooms: a.bathrooms,
+      price_per_night: a.pricePerNight,
+      price_overrides: a.priceOverrides,
+      amenities: a.amenities,
+      photos: a.photos,
+      is_active: a.isActive,
+      map_embed_url: a.mapEmbedUrl
+    }));
+    const { error: aptErr } = await supabase.from('apartments').upsert(aptPayloads);
+    if (aptErr) throw new Error(`Apartment Seeding Failed: ${aptErr.message}`);
+
+    // 3. Seed Bookings
+    const bookingPayloads = MOCK_BOOKINGS.map(b => ({
+      id: b.id,
+      apartment_id: b.apartmentId,
+      guest_email: b.guestEmail,
+      guest_phone: b.guestPhone,
+      num_guests: b.numGuests || 1,
+      start_date: b.startDate,
+      end_date: b.endDate,
+      status: b.status,
+      total_price: b.totalPrice,
+      is_deposit_paid: b.isDepositPaid,
+      guest_message: b.guestMessage,
+      deposit_amount: b.depositAmount || 0
+    }));
+    const { error: bookErr } = await supabase.from('bookings').upsert(bookingPayloads);
+    if (bookErr) throw new Error(`Booking Seeding Failed: ${bookErr.message}`);
+
+    console.log("Seeding Complete!");
   }
 };

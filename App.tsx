@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
-import { hostHubApi, fetchAndParseIcal } from './services/api'; // Import fetchAndParseIcal
+import { hostHubApi, fetchAndParseIcal } from './services/api';
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
+import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
 
 const ADMIN_EMAIL = 'admin@hosthub.com';
 const ADMIN_PWD = 'admin123';
@@ -14,6 +15,8 @@ const DEFAULT_HOST_PWD = 'password123';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [seeding, setSeeding] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [currentRole, setCurrentRole] = useState<UserRole>(UserRole.GUEST);
   const [currentHost, setCurrentHost] = useState<Host | null>(null);
@@ -25,9 +28,9 @@ const App: React.FC = () => {
   const [currentHostAirbnbBlockedDates, setCurrentHostAirbnbBlockedDates] = useState<string[]>([]);
   const [loadingAirbnbIcal, setLoadingAirbnbIcal] = useState(false);
 
-
   const fetchData = async (slug?: string) => {
     setLoading(true);
+    setError(null);
     try {
       const data = await hostHubApi.getLandingData(slug);
       setCurrentHost(data.host);
@@ -37,8 +40,9 @@ const App: React.FC = () => {
       
       const allHosts = await hostHubApi.getAllHosts();
       setHosts(allHosts);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Data Sync Failure:", err);
+      setError(err.message || "Failed to connect to database cluster.");
     } finally {
       setLoading(false);
     }
@@ -48,7 +52,6 @@ const App: React.FC = () => {
     fetchData();
   }, []);
 
-  // Effect to load iCal data for the current host
   useEffect(() => {
     const loadAirbnbIcal = async () => {
       if (currentHost?.airbnbCalendarLink) {
@@ -63,15 +66,25 @@ const App: React.FC = () => {
           setLoadingAirbnbIcal(false);
         }
       } else {
-        setCurrentHostAirbnbBlockedDates([]); // Clear if no link
+        setCurrentHostAirbnbBlockedDates([]);
       }
     };
     loadAirbnbIcal();
-  }, [currentHost]); // Re-run when currentHost changes
+  }, [currentHost]);
 
+  const handleSeed = async () => {
+    setSeeding(true);
+    try {
+      await hostHubApi.seedDatabase();
+      await fetchData();
+    } catch (err: any) {
+      alert("Seeding failed: " + err.message);
+    } finally {
+      setSeeding(false);
+    }
+  };
 
   const handleAuth = (email: string, pass: string) => {
-    // 1. Check Admin
     if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
       const adminUser: User = { id: 'admin-1', email, name: 'Platform Admin', role: UserRole.ADMIN, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=200&h=200' };
       setUser(adminUser);
@@ -79,14 +92,12 @@ const App: React.FC = () => {
       return;
     }
 
-    // 2. Check Hosts
     const matchingHost = hosts.find(h => email === `${h.slug}@host.com`);
     if (matchingHost && pass === DEFAULT_HOST_PWD) {
       const hostUser: User = { id: matchingHost.id, email, name: matchingHost.name, role: UserRole.HOST, avatar: matchingHost.avatar };
       setUser(hostUser);
       setCurrentHost(matchingHost);
       setCurrentRole(UserRole.HOST);
-      // Re-fetch data for this specific host context
       fetchData(matchingHost.slug);
       return;
     }
@@ -131,8 +142,6 @@ const App: React.FC = () => {
     const allHosts = await hostHubApi.getAllHosts();
     setHosts(allHosts);
     
-    // If we're an admin, we stay in admin role. 
-    // If we were a host and our own info changed, we might need to update currentHost.
     if (user && user.role === UserRole.HOST) {
       const self = allHosts.find(h => h.id === user.id);
       if (self) setCurrentHost(self);
@@ -145,11 +154,51 @@ const App: React.FC = () => {
     setBlockedDates(data.blockedDates);
   };
 
-  if (loading || !currentHost) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4">
-        <div className="w-12 h-12 border-4 border-amber-700/10 border-t-amber-700 rounded-full animate-spin"></div>
+        <div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div>
         <p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Boutique Cluster...</p>
+      </div>
+    );
+  }
+
+  if (!currentHost) {
+    return (
+      <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm">
+        <div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10 shadow-2xl">
+          <Database className="w-10 h-10 text-emerald-400" />
+        </div>
+        <h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight leading-tight">System Unprovisioned</h2>
+        <p className="text-stone-500 max-w-md mx-auto mb-12 leading-relaxed">
+          The database cluster is reachable but contains no environment data. Initialize the mock ecosystem to begin.
+        </p>
+
+        {error && (
+          <div className="mb-10 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-left max-w-lg mx-auto">
+            <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" />
+            <p className="text-xs text-rose-400 font-medium">{error}</p>
+          </div>
+        )}
+
+        <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4">
+          <button 
+            disabled={seeding}
+            onClick={handleSeed}
+            className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-emerald-500/20 flex items-center space-x-3"
+          >
+            {seeding ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}
+            <span>Provision Mock Data</span>
+          </button>
+          <button 
+            onClick={() => setCurrentRole(UserRole.ADMIN)}
+            className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all"
+          >
+            Access Admin Console
+          </button>
+        </div>
+        
+        <p className="mt-20 text-[9px] font-black uppercase tracking-[0.5em] text-stone-700">Wanderlust Engine v3.1</p>
       </div>
     );
   }
@@ -163,7 +212,7 @@ const App: React.FC = () => {
             <ApartmentDetailPage 
               apartment={apt} host={currentHost}
               bookings={bookings} blockedDates={blockedDates}
-              airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to ApartmentDetailPage
+              airbnbCalendarDates={currentHostAirbnbBlockedDates}
               onBack={() => setSelectedAptId(null)}
               onNewBooking={handleNewBooking}
             />
@@ -174,7 +223,7 @@ const App: React.FC = () => {
         <GuestLandingPage 
           host={currentHost} apartments={apartments}
           bookings={bookings} blockedDates={blockedDates}
-          airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to GuestLandingPage
+          airbnbCalendarDates={currentHostAirbnbBlockedDates}
           onSelectApartment={(id) => setSelectedAptId(id)}
           onNewBooking={handleNewBooking}
         />
@@ -194,8 +243,8 @@ const App: React.FC = () => {
             onUpdateBookings={handleUpdateBookings}
             onUpdateBlockedDates={handleUpdateBlockedDates}
             onUpdateApartments={handleUpdateApartments}
-            airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to HostDashboard
-            loadingAirbnbIcal={loadingAirbnbIcal} // Pass to HostDashboard
+            airbnbCalendarDates={currentHostAirbnbBlockedDates}
+            loadingAirbnbIcal={loadingAirbnbIcal}
           />
         );
       default: return null;
