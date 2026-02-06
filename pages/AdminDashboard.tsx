@@ -1,6 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, UserRole, SubscriptionType, BookingStatus } from '../types';
 import { CORE_ICONS } from './GuestLandingPage'; // Import CORE_ICONS
+
 
 interface AdminDashboardProps {
   hosts: Host[];
@@ -129,7 +131,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <p className="text-[10px] font-bold uppercase tracking-widest mb-3" style={{ color: THEME_GRAY }}>Active assets</p>
           <h4 className="text-3xl font-bold text-white">{stats.totalAssets}</h4>
           <div className="mt-4 flex items-center text-[9px] font-bold uppercase tracking-tighter text-stone-600">
-            <span>Managed luxury units</span>
+            <span>Managed units</span> {/* Changed from "Managed luxury units" to "Managed units" */}
           </div>
         </div>
         <div className="bg-stone-900/30 border border-stone-800/60 p-8 rounded-[1.5rem]">
@@ -142,17 +144,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-2xl font-serif text-white px-2">Ecosystem management</h3>
+        <h3 className="text-2xl font-dm text-white px-2">Ecosystem management</h3> {/* Added font-dm */}
         <div className="bg-stone-900/20 border border-stone-800/60 rounded-[2rem] overflow-hidden shadow-2xl backdrop-blur-sm">
           <table className="w-full text-left">
             <thead>
-              <tr className="bg-stone-900/60 border-b border-stone-800 text-[10px] font-bold text-stone-500 uppercase tracking-[0.2em]">
-                <th className="px-8 py-6">Host</th> {/* Renamed from Host identity */}
-                {/* Removed Status / tier column */}
-                {/* Removed Performance column */}
-                <th className="px-8 py-6">Bookings ({currentYear})</th> {/* Existing column */}
-                <th className="px-8 py-6">Commission ({currentYear})</th> {/* Existing column */}
-                <th className="px-8 py-6 text-right">Settings</th>
+              <tr className="bg-stone-900/60 border-b border-stone-800">
+                {/* Updated table header styles */}
+                <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Host</th>
+                <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Bookings ({currentYear})</th>
+                <th className="px-8 py-6 font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Commission ({currentYear})</th>
+                <th className="px-8 py-6 text-right font-dm text-lg font-bold" style={{ color: LABEL_COLOR }}>Settings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stone-800/40">
@@ -176,15 +177,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
                     </td>
-                    {/* Removed td for Status / tier */}
-                    {/* Removed td for Performance */}
                     <td className="px-8 py-6"> {/* Bookings (this year) */}
-                        <p className="text-white font-bold text-sm">{hostBookingsThisYear.length}</p>
-                        <p className="text-[9px] font-bold text-stone-600">bookings</p>
+                        <p className="text-xl font-bold text-white">{hostBookingsThisYear.length}</p> {/* Changed to text-xl */}
                     </td>
                     <td className="px-8 py-6"> {/* Commission (this year) */}
-                        <p className="text-white font-bold text-sm">${commissionThisYear.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
-                        <p className="text-[9px] font-bold text-stone-600">commission</p>
+                        <p className="text-xl font-bold text-white">${commissionThisYear.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p> {/* Changed to text-xl */}
                     </td>
                     <td className="px-8 py-6 text-right">
                       <button onClick={() => { setEditingHost(h); setShowHostModal(true); }} className="p-2 rounded-lg text-stone-600 hover:text-white transition-colors">

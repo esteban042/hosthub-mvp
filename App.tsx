@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
-import { hostHubApi } from './services/api';
+import { hostHubApi, fetchAndParseIcal } from './services/api'; // Import fetchAndParseIcal
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -22,6 +22,9 @@ const App: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
   const [selectedAptId, setSelectedAptId] = useState<string | null>(null);
+  const [currentHostAirbnbBlockedDates, setCurrentHostAirbnbBlockedDates] = useState<string[]>([]);
+  const [loadingAirbnbIcal, setLoadingAirbnbIcal] = useState(false);
+
 
   const fetchData = async (slug?: string) => {
     setLoading(true);
@@ -44,6 +47,28 @@ const App: React.FC = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  // Effect to load iCal data for the current host
+  useEffect(() => {
+    const loadAirbnbIcal = async () => {
+      if (currentHost?.airbnbCalendarLink) {
+        setLoadingAirbnbIcal(true);
+        try {
+          const dates = await fetchAndParseIcal(currentHost.airbnbCalendarLink);
+          setCurrentHostAirbnbBlockedDates(dates);
+        } catch (error) {
+          console.error("Failed to load Airbnb iCal data:", error);
+          setCurrentHostAirbnbBlockedDates([]);
+        } finally {
+          setLoadingAirbnbIcal(false);
+        }
+      } else {
+        setCurrentHostAirbnbBlockedDates([]); // Clear if no link
+      }
+    };
+    loadAirbnbIcal();
+  }, [currentHost]); // Re-run when currentHost changes
+
 
   const handleAuth = (email: string, pass: string) => {
     // 1. Check Admin
@@ -138,6 +163,7 @@ const App: React.FC = () => {
             <ApartmentDetailPage 
               apartment={apt} host={currentHost}
               bookings={bookings} blockedDates={blockedDates}
+              airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to ApartmentDetailPage
               onBack={() => setSelectedAptId(null)}
               onNewBooking={handleNewBooking}
             />
@@ -148,6 +174,7 @@ const App: React.FC = () => {
         <GuestLandingPage 
           host={currentHost} apartments={apartments}
           bookings={bookings} blockedDates={blockedDates}
+          airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to GuestLandingPage
           onSelectApartment={(id) => setSelectedAptId(id)}
           onNewBooking={handleNewBooking}
         />
@@ -167,6 +194,8 @@ const App: React.FC = () => {
             onUpdateBookings={handleUpdateBookings}
             onUpdateBlockedDates={handleUpdateBlockedDates}
             onUpdateApartments={handleUpdateApartments}
+            airbnbCalendarDates={currentHostAirbnbBlockedDates} // Pass to HostDashboard
+            loadingAirbnbIcal={loadingAirbnbIcal} // Pass to HostDashboard
           />
         );
       default: return null;

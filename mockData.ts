@@ -79,7 +79,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
       { id: 'pr-1', startDate: '2025-12-20', endDate: '2026-01-05', price: 450, label: 'Holiday Season' }
     ],
     amenities: ['Wifi', 'Kitchen', 'Free Parking', 'Fireplace', 'Air Conditioning'],
-    photos: ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600', 'https://images.unsplash.com/photo-1449156003053-c3ca32454685?auto=format&fit=crop&q=80&w=800&h=600']
+    photos: ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600', 'https://images.unsplash.com/photo-1449156003053-c3ca32454685?auto=format&fit=crop&q=80&w=800&h=600'],
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus' // Dummy Google Maps embed URL
   },
   {
     id: 'apt-2',
@@ -93,7 +94,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     pricePerNight: 125,
     isActive: true,
     amenities: ['Wifi', 'Coffee Maker', 'Fireplace', 'Washer'],
-    photos: ['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800&h=600']
+    photos: ['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800&h=600'],
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus' // Dummy Google Maps embed URL
   },
   {
     id: 'apt-3',
@@ -110,7 +112,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
       { id: 'pr-2', startDate: '2025-03-25', endDate: '2025-04-10', price: 320, label: 'Cherry Blossom Peak' }
     ],
     amenities: ['Wifi', 'Air Conditioning', 'Washer', 'Kitchen'],
-    photos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800&h=600']
+    photos: ['https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&q=80&w=800&h=600'],
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12965.433221971714!2d139.69234839845348!3d35.66070624009714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35ef4b64a13d702d%3A0x6b1c2b5d4e1a1b1a!2sShibuya%2C%20Tokyo%2C%20Japan!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us' // Dummy Google Maps embed URL
   },
   {
     id: 'apt-4',
@@ -124,7 +127,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     pricePerNight: 450,
     isActive: true,
     amenities: ['Kitchen', 'Free Parking', 'Fireplace', 'Washer', 'Air Conditioning'],
-    photos: ['https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=800&h=600']
+    photos: ['https://images.unsplash.com/photo-1523217582562-09d0def993a6?auto=format&fit=crop&q=80&w=800&h=600'],
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2891.8906967011033!2d11.33230831557999!3d43.31885507913417!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132bc2072129a7d3%3A0x959828e8a6096d24!2sSiena%2C%20Province%20of%20Siena%2C%20Italy!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us' // Dummy Google Maps embed URL
   },
   {
     id: 'apt-5',
@@ -138,7 +142,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     pricePerNight: 600,
     isActive: true,
     amenities: ['Wifi', 'Pool', 'Beach Access', 'Outdoor Shower', 'BBQ Grill', 'Kitchen', 'Air Conditioning'],
-    photos: ['https://images.unsplash.com/photo-1600596542815-ffad4d6cdb19?auto=format&fit=crop&q=80&w=800&h=600']
+    photos: ['https://images.unsplash.com/photo-1600596542815-ffad4d6cdb19?auto=format&fit=crop&q=80&w=800&h=600'],
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d114979.62688028717!2d-80.28695846101967!3d25.782361661339656!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b0a20ec8c111%3A0xff96f271ddad4f65!2sMiami%2C%20FL%2C%20USA!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us' // Dummy Google Maps embed URL
   }
 ];
 

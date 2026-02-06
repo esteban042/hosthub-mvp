@@ -65,6 +65,7 @@ export interface Apartment {
   amenities: string[];
   photos: string[];
   isActive: boolean; 
+  mapEmbedUrl?: string; // New: Google Maps embed URL
 }
 
 export interface Booking {
@@ -78,6 +79,7 @@ export interface Booking {
   status: BookingStatus;
   totalPrice: number;
   isDepositPaid: boolean; 
+  guestMessage?: string; // New: Optional message from guest
 }
 
 export interface BlockedDate {

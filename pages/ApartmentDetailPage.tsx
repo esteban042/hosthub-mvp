@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
 import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, CARD_BORDER, HeroCalendar, formatDate } from './GuestLandingPage';
 
@@ -7,6 +7,7 @@ interface ApartmentDetailPageProps {
   host: Host;
   bookings: Booking[];
   blockedDates: BlockedDate[];
+  airbnbCalendarDates: string[]; // New prop from App.tsx
   onBack: () => void;
   onNewBooking: (booking: Booking) => void;
 }
@@ -18,21 +19,40 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   host,
   bookings,
   blockedDates,
+  airbnbCalendarDates, // Destructure new prop
   onBack,
   onNewBooking
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState(''); // New state for guest phone
   const [numGuests, setNumGuests] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [message, setMessage] = useState(''); // New state for guest message
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [success, setSuccess] = useState(false);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
+  const [isMapEnlarged, setIsMapEnlarged] = useState(false); // New state for map modal
+
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [mapContainerHeight, setMapContainerHeight] = useState<number | 'auto'>('auto');
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+
+  useEffect(() => {
+    const updateMapHeight = () => {
+      if (statsRef.current) {
+        setMapContainerHeight(statsRef.current.clientHeight);
+      }
+    };
+
+    updateMapHeight();
+    window.addEventListener('resize', updateMapHeight);
+    return () => window.removeEventListener('resize', updateMapHeight);
+  }, [apartment, statsRef]); // Re-run if apartment data changes, or if ref changes
 
   const totalPrice = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -58,12 +78,14 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       id: `book-${Date.now()}`,
       apartmentId: apartment.id,
       guestEmail: email,
+      guestPhone: phone, // Include guest phone
       numGuests: numGuests,
       startDate: startDate,
       endDate: endDate,
       status: BookingStatus.REQUESTED,
       totalPrice: totalPrice, 
-      isDepositPaid: false
+      isDepositPaid: false,
+      guestMessage: message // Include guest message
     });
     setSuccess(true);
   };
@@ -121,37 +143,71 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       <div className="grid grid-cols-1 gap-16">
         <div className="space-y-16">
           
-          <div className="flex flex-wrap justify-around gap-y-4 sm:grid sm:grid-cols-3 sm:gap-6 p-2 rounded-3xl border border-stone-800" style={{ backgroundColor: CARD_BG }}> {/* Changed from grid grid-cols-1 sm:grid-cols-3 */}
-             <div className="flex items-center space-x-5 p-6">
-                <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center text-stone-500 flex-shrink-0 border border-stone-800/40">
-                   {CORE_ICONS.Bed("w-6 h-6")}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16"> {/* Grid for 2/3 and 1/3 split */}
+             {/* Stats column (2/3 width) */}
+             <div ref={statsRef} className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6"> 
+                {/* Bedrooms Card */}
+                <div className="flex items-center space-x-5 p-5 rounded-3xl border border-stone-800" style={{ backgroundColor: CARD_BG }}>
+                   <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center flex-shrink-0 border border-stone-800/40" style={{ color: AMENITY_GREEN }}>
+                      {CORE_ICONS.Bed("w-6 h-6")}
+                   </div>
+                   <div className="flex flex-col">
+                      <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Bedrooms</p>
+                      <p className="text-white text-2xl font-medium leading-none">{apartment.bedrooms}</p>
+                   </div>
                 </div>
-                <div className="flex flex-col">
-                   <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Bedrooms</p>
-                   <p className="text-white text-2xl font-medium leading-none">{apartment.bedrooms}</p> {/* Changed text-3xl to text-2xl */}
+                {/* Bathrooms Card */}
+                <div className="flex items-center space-x-5 p-5 rounded-3xl border border-stone-800" style={{ backgroundColor: CARD_BG }}>
+                   <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center flex-shrink-0 border border-stone-800/40" style={{ color: AMENITY_GREEN }}>
+                      {CORE_ICONS.Bath("w-6 h-6")}
+                   </div>
+                   <div className="flex flex-col">
+                      <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Bathrooms</p>
+                      <p className="text-white text-2xl font-medium leading-none">{apartment.bathrooms}</p>
+                   </div>
+                </div>
+                {/* Max guests Card - Now spans 1 column */}
+                <div className="md:col-span-1 flex items-center space-x-5 p-5 rounded-3xl border border-stone-800" style={{ backgroundColor: CARD_BG }}>
+                   <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center flex-shrink-0 border border-stone-800/40" style={{ color: AMENITY_GREEN }}>
+                      {CORE_ICONS.Guests("w-6 h-6")}
+                   </div>
+                   <div className="flex flex-col">
+                      <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Max guests</p>
+                      <p className="text-white text-2xl font-medium leading-none">{apartment.capacity}</p>
+                   </div>
                 </div>
              </div>
-             <div className="flex items-center space-x-5 p-6">
-                <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center text-stone-500 flex-shrink-0 border border-stone-800/40">
-                   {CORE_ICONS.Bath("w-6 h-6")}
-                </div>
-                <div className="flex flex-col">
-                   <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Bathrooms</p>
-                   <p className="text-white text-2xl font-medium leading-none">{apartment.bathrooms}</p> {/* Changed text-3xl to text-2xl */}
-                </div>
+             {/* Map column (1/3 width) */}
+             <div className="md:col-span-1 space-y-8">
+                {apartment.mapEmbedUrl ? (
+                    <div 
+                      className="relative w-full overflow-hidden rounded-2xl border border-stone-800 shadow-xl cursor-pointer" 
+                      style={{ height: mapContainerHeight }}
+                      onClick={() => setIsMapEnlarged(true)} // Open modal on map click
+                    >
+                      <iframe
+                        src={apartment.mapEmbedUrl}
+                        width="100%"
+                        height="100%"
+                        style={{ border: 0 }}
+                        allowFullScreen={false}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Apartment Location"
+                      ></iframe>
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 hover:opacity-100 transition-opacity duration-300 text-white font-bold text-lg">
+                        <span className="px-4 py-2 bg-stone-900/60 rounded-lg backdrop-blur-sm border border-stone-700">View Larger Map</span>
+                      </div>
+                    </div>
+                ) : (
+                   <p className="text-lg leading-relaxed font-medium text-stone-400">
+                     Location map not available for this unit.
+                   </p>
+                )}
              </div>
-             <div className="flex items-center space-x-5 p-6">
-                <div className="w-12 h-12 bg-stone-900/60 rounded-xl flex items-center justify-center text-stone-500 flex-shrink-0 border border-stone-800/40">
-                   {CORE_ICONS.Guests("w-6 h-6")}
-                </div>
-                <div className="flex flex-col">
-                   <p className="text-sm font-medium leading-none mb-2" style={{ color: LABEL_COLOR }}>Max guests</p>
-                   <p className="text-white text-2xl font-medium leading-none">{apartment.capacity}</p> {/* Changed text-3xl to text-2xl */}
-                </div>
-             </div>
-          </div>
+          </div> {/* END grid for 2/3 and 1/3 split */}
 
-          <div className="space-y-6">
+          <div className="space-y-6"> {/* Single column for description */}
              <h3 className="text-2xl font-serif font-bold text-white tracking-tight">About this place</h3>
              <p className="text-lg leading-relaxed font-medium text-stone-400">
                {apartment.description}
@@ -228,6 +284,9 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                             setEndDate(e);
                             if (s && e) setIsCalendarOpen(false);
                           }}
+                          allBookings={bookings} // Pass bookings
+                          allBlockedDates={blockedDates} // Pass manual blocked dates
+                          airbnbBlockedDates={airbnbCalendarDates} // Pass Airbnb blocked dates
                         />
                       </div>
                     )}
@@ -262,8 +321,28 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                    />
                  </div>
 
+                 {/* New phone number field */}
+                 <div className="space-y-2">
+                   <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact phone (optional)</label>
+                   <input 
+                     type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
+                     className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   />
+                 </div>
+
+                 {/* New message field */}
+                 <div className="space-y-2">
+                    <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Your message to the host (optional)</label>
+                    <textarea
+                        value={message}
+                        onChange={e => setMessage(e.target.value)}
+                        className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700 h-[100px] resize-y"
+                        placeholder="Any special requests or questions?"
+                    ></textarea>
+                 </div>
+
                  <button 
-                   disabled={!startDate || !endDate}
+                   disabled={!name || !email || !startDate || !endDate} // All mandatory fields
                    className="w-full bg-coral-500 hover:bg-coral-600 disabled:bg-stone-800 disabled:text-stone-600 disabled:cursor-not-allowed text-white font-black py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-coral-500/30 active:scale-[0.98]"
                  >
                    Book now
@@ -273,6 +352,35 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
            </div>
         </div>
       </div>
+
+      {isMapEnlarged && apartment.mapEmbedUrl && (
+        <div 
+          className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-300"
+          onClick={() => setIsMapEnlarged(false)} // Close modal if background is clicked
+        >
+           <button 
+             onClick={() => setIsMapEnlarged(false)} 
+             className="absolute top-8 right-8 text-stone-300 hover:text-white transition-colors z-[210]"
+           >
+             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12" strokeWidth={2.5} /></svg>
+           </button>
+           <div 
+             className="relative w-full h-full max-w-6xl max-h-[80vh] rounded-2xl overflow-hidden border border-stone-700 shadow-2xl"
+             onClick={e => e.stopPropagation()} // Prevent closing when clicking inside the map
+           >
+              <iframe
+                src={apartment.mapEmbedUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen={true} // Allow full screen within the modal
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Enlarged Apartment Location"
+              ></iframe>
+           </div>
+        </div>
+      )}
     </div>
   );
 };

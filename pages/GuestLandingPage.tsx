@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Host, Apartment, Booking, BlockedDate, BookingStatus } from '../types';
+import { isOverlapping } from '../services/bookingService'; // Import for date range checks
 
 interface GuestLandingPageProps {
   host: Host;
   apartments: Apartment[];
   bookings: Booking[];
-  blockedDates: BlockedDate[];
+  blockedDates: BlockedDate[]; // Manual blocked dates from host
+  airbnbCalendarDates: string[]; // Airbnb iCal blocked dates for current host
   onNewBooking: (booking: Booking) => void;
   onSelectApartment: (id: string) => void;
 }
@@ -25,7 +27,7 @@ export const UNIT_TITLE_STYLE: React.CSSProperties = {
 export const CORE_ICONS = {
   Bed: (c: string) => (
     <svg className={c} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M7 13v-2h10v2h2v-6a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v6h2zm11-4h1V7h-1v2zM5 7h1V7H5v2zM21 14H3a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1zm-1 4H4v-2h16v2z"/>
+      <path d="M7 13v-2h10v2h2v-6a3 3 0 0 0-3-3H8a3 3 0 0 0-3 3v6h2zm11-4h1V7h-1v2zM5 7h1V7H5v2zM21 14H3a1 1 0 0 0-1 1v4a1 1 /0 0 0 1 1h18a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1zm-1 4H4v-2h16v2z"/>
     </svg>
   ),
   Bath: (c: string) => <svg className={c} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M10 4L8 6M17 19v2M2 12h20M7 19v2M9 5L7.6 3.6A2 2 0 004 5v12a2 2 0 002 2h12a2 2 0 002-2v-5" /></svg>,
@@ -72,8 +74,11 @@ export const HeroCalendar: React.FC<{
   onSelect: (start: string, end: string) => void,
   startDate: string,
   endDate: string,
-  apartment?: Apartment // For price display if provided
-}> = ({ onSelect, startDate, endDate, apartment }) => {
+  apartment?: Apartment, // For price display if provided
+  allBookings: Booking[], // Added
+  allBlockedDates: BlockedDate[], // Added (manual blocks from host)
+  airbnbBlockedDates: string[], // Added (iCal blocks for current host)
+}> = ({ onSelect, startDate, endDate, apartment, allBookings, allBlockedDates, airbnbBlockedDates }) => {
   const [month, setMonth] = useState(new Date());
   
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -85,7 +90,27 @@ export const HeroCalendar: React.FC<{
     return override ? override.price : apartment.pricePerNight;
   };
 
+  const isBooked = (dateStr: string) =>
+    allBookings.some(
+      (b) =>
+        b.apartmentId === apartment?.id && // Only check for current apartment
+        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID) &&
+        isOverlapping(dateStr, dateStr + 'T23:59:59', b.startDate, b.endDate) // Check if date is within booking range
+    );
+
+  const isBlockedManually = (dateStr: string) =>
+    allBlockedDates.some(
+      (d) =>
+        (d.apartmentId === apartment?.id || d.apartmentId === 'all') &&
+        d.date === dateStr
+    );
+
+  const isAirbnbBlocked = (dateStr: string) => airbnbBlockedDates.includes(dateStr);
+
   const handleDayClick = (dateStr: string) => {
+    const isDayUnavailable = isBooked(dateStr) || isBlockedManually(dateStr) || isAirbnbBlocked(dateStr);
+    if (isDayUnavailable) return; // Prevent selection of blocked dates
+
     if (!startDate || (startDate && endDate)) {
       onSelect(dateStr, '');
     } else {
@@ -106,21 +131,32 @@ export const HeroCalendar: React.FC<{
     const inRange = startDate && endDate && dStr >= startDate && dStr <= endDate;
     const price = getPriceForDate(dStr);
 
+    const isCurrentlyBooked = isBooked(dStr);
+    const isCurrentlyBlockedManually = isBlockedManually(dStr);
+    const isCurrentlyAirbnbBlocked = isAirbnbBlocked(dStr);
+    const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked;
+
+    let dayClass = 'text-stone-300 hover:bg-stone-800'; // Default available
+    
+    // Precedence: Selected > In Range > Unavailable > Available
+    if (isSelected) {
+      dayClass = 'bg-coral-500 text-white border-coral-500';
+    } else if (inRange) {
+      dayClass = 'bg-coral-500/20 text-coral-500 border-coral-500/10';
+    } else if (isUnavailable) {
+      dayClass = 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed line-through'; // Visual for blocked
+    }
+
     days.push(
       <button 
         key={dStr} onClick={() => handleDayClick(dStr)}
+        disabled={isUnavailable} // Disable button if unavailable
         className={`flex flex-col items-center justify-center rounded-xl transition-all ${
           apartment ? 'h-14 w-full border border-transparent' : 'h-10 w-10'
-        } ${
-          isSelected 
-            ? 'bg-coral-500 text-white border-coral-500' 
-            : inRange 
-              ? 'bg-coral-500/20 text-coral-500 border-coral-500/10' 
-              : 'text-stone-300 hover:bg-stone-800'
-        }`}
+        } ${dayClass}`}
       >
         <span className={`${apartment ? 'text-[11px] font-bold' : 'text-xs font-bold'}`}>{d}</span>
-        {price && <span className={`text-[8px] font-medium ${isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
+        {price && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-700' : isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
       </button>
     );
   }
@@ -174,7 +210,7 @@ const GuestPopover: React.FC<{
 };
 
 export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({ 
-  apartments, onSelectApartment 
+  apartments, onSelectApartment, bookings, blockedDates, airbnbCalendarDates
 }) => {
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
@@ -220,6 +256,9 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                         setDates({ start: s, end: e });
                         if (s && e) setIsDatesOpen(false);
                       }} 
+                      allBookings={bookings}
+                      allBlockedDates={blockedDates}
+                      airbnbBlockedDates={airbnbCalendarDates}
                     />
                   </div>
                 )}

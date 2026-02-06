@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Host, Apartment, Booking, BlockedDate, BookingStatus, PriceRule } from '../types';
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
+import { fetchAndParseIcal } from '../services/api'; // Import from services/api
 
 interface HostDashboardProps {
   host: Host;
@@ -10,6 +11,8 @@ interface HostDashboardProps {
   onUpdateBookings: (bookings: Booking[]) => void;
   onUpdateBlockedDates: (dates: BlockedDate[]) => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
+  airbnbCalendarDates: string[]; // New prop from App.tsx
+  loadingAirbnbIcal: boolean; // New prop from App.tsx
 }
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
@@ -29,33 +32,6 @@ const formatBookingRange = (start: string, end: string) => {
       {startStr} - {endStr} <span className="text-stone-500 text-[13px] ml-1">({diffDays} night{diffDays !== 1 ? 's' : ''})</span>
     </span>
   );
-};
-
-// Simulated iCal parser
-// In a real application, you'd use a library like ical.js and fetch the URL.
-// For this exercise, we'll return a hardcoded set of blocked dates.
-const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
-  console.log(`Simulating fetching and parsing iCal from: ${icalUrl}`);
-  await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network delay
-  
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
-
-  // Generate some dummy blocked dates for the current and next month
-  const dummyBlockedDates: string[] = [];
-  // Block 3 days in current month
-  for (let i = 0; i < 3; i++) {
-    const day = Math.floor(Math.random() * 20) + 1; // Random day in first 20 days
-    dummyBlockedDates.push(new Date(year, month, day).toISOString().split('T')[0]);
-  }
-  // Block 2 days in next month
-  for (let i = 0; i < 2; i++) {
-    const day = Math.floor(Math.random() * 20) + 1; // Random day in first 20 days
-    dummyBlockedDates.push(new Date(year, month + 1, day).toISOString().split('T')[0]);
-  }
-
-  return Array.from(new Set(dummyBlockedDates)); // Ensure unique dates
 };
 
 const AvailabilityCalendar: React.FC<{ 
@@ -161,24 +137,60 @@ const AvailabilityCalendar: React.FC<{
 };
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments
+  host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
   const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'apartments'>('bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [newPhotoUrl, setNewPhotoUrl] = useState('');
-  const [airbnbCalendarDates, setAirbnbCalendarDates] = useState<string[]>([]);
-  const [loadingIcal, setLoadingIcal] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all'); // New state for status filter
 
   const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   
-  const stats = useMemo(() => ({
-    assets: apartments.length,
-    pending: myBookings.filter(b => b.status === BookingStatus.REQUESTED).length,
-    confirmed: myBookings.filter(b => b.status === BookingStatus.CONFIRMED).length,
-    paid: myBookings.filter(b => b.status === BookingStatus.PAID).length, // New stat for paid bookings
-    revenue: myBookings.filter(b => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID).reduce((sum, b) => sum + b.totalPrice, 0)
-  }), [apartments, myBookings]);
+  const stats = useMemo(() => {
+    const today = new Date();
+    const currentMonthNum = today.getMonth(); // 0-indexed
+    const currentYear = today.getFullYear();
+
+    const getBookingsForPeriod = (month?: number, year: number = currentYear) => {
+        return myBookings.filter(b => {
+            const bookingStartDate = new Date(b.startDate);
+            const bookingYear = bookingStartDate.getFullYear();
+            const bookingMonth = bookingStartDate.getMonth();
+            
+            const matchYear = bookingYear === year;
+            const matchMonth = month === undefined || bookingMonth === month;
+            
+            return matchYear && matchMonth;
+        });
+    };
+
+    // Calculate for current month
+    const currentMonthBookings = getBookingsForPeriod(currentMonthNum, currentYear);
+    const pendingMonth = currentMonthBookings.filter(b => b.status === BookingStatus.REQUESTED).length;
+    const confirmedMonth = currentMonthBookings.filter(b => b.status === BookingStatus.CONFIRMED).length;
+    const paidMonth = currentMonthBookings.filter(b => b.status === BookingStatus.PAID).length;
+    const revenueMonth = currentMonthBookings.filter(b => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID).reduce((sum, b) => sum + b.totalPrice, 0);
+
+    // Calculate for current year
+    const currentYearBookings = getBookingsForPeriod(undefined, currentYear); // Pass undefined for month to get all year
+    const pendingYear = currentYearBookings.filter(b => b.status === BookingStatus.REQUESTED).length;
+    const confirmedYear = currentYearBookings.filter(b => b.status === BookingStatus.CONFIRMED).length;
+    const paidYear = currentYearBookings.filter(b => b.status === BookingStatus.PAID).length;
+    const revenueYear = currentYearBookings.filter(b => b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID).reduce((sum, b) => sum + b.totalPrice, 0);
+
+    return {
+        assets: apartments.length, // Total units
+        pendingMonth, 
+        confirmedMonth, 
+        paidMonth, 
+        revenueMonth,
+        pendingYear, 
+        confirmedYear, 
+        paidYear, 
+        revenueYear,
+    };
+  }, [apartments, myBookings]);
 
   const handleUpdateStatus = (id: string, status: BookingStatus) => {
     onUpdateBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
@@ -213,7 +225,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         title: editingApt.title || 'Untitled sanctuary',
         description: editingApt.description || '',
         city: editingApt.city || '',
-        isActive: true
+        isActive: true,
+        mapEmbedUrl: editingApt.mapEmbedUrl || undefined, // Include mapEmbedUrl
       } as Apartment;
       onUpdateApartments([...apartments, newApt]);
     }
@@ -252,7 +265,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     
     // Filter out past bookings and sort upcoming ones soonest to furthest
     const upcomingBookings = myBookings
-        .filter(b => b.startDate >= today)
+        .filter(b => b.startDate >= today) // Keeps only upcoming bookings
+        .filter(b => statusFilter === 'all' || b.status === statusFilter) // Apply status filter
         .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const groups = new Map<string, Booking[]>();
@@ -275,23 +289,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     });
 
     return sortedGroups;
-}, [myBookings, apartments]);
-
-  // Effect to load iCal data when calendar tab is active and host has a link
-  useEffect(() => {
-    if (activeTab === 'calendar' && host.airbnbCalendarLink) {
-      setLoadingIcal(true);
-      fetchAndParseIcal(host.airbnbCalendarLink)
-        .then(setAirbnbCalendarDates)
-        .catch(error => {
-          console.error("Failed to load iCal data:", error);
-          setAirbnbCalendarDates([]); // Clear on error
-        })
-        .finally(() => setLoadingIcal(false));
-    } else {
-      setAirbnbCalendarDates([]); // Clear iCal dates if not on calendar tab or no link
-    }
-  }, [activeTab, host.airbnbCalendarLink]);
+}, [myBookings, apartments, statusFilter]); // Re-run when statusFilter changes
 
 
   return (
@@ -305,20 +303,56 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        {[
-          { label: 'Pending requests', value: stats.pending, icon: CORE_ICONS.Pending("w-8 h-8"), color: 'text-amber-500' },
-          { label: 'Confirmed stays', value: stats.confirmed, icon: CORE_ICONS.Bookings("w-8 h-8"), color: 'text-emerald-500' },
-          { label: 'Paid stays', value: stats.paid, icon: CORE_ICONS.Dollar("w-8 h-8"), color: 'text-white' }, // Paid stays card
-          { label: 'Total revenue', value: `$${stats.revenue.toLocaleString()}`, icon: CORE_ICONS.Dollar("w-8 h-8"), color: 'text-white' }
-        ].map(stat => (
-          <div key={stat.label} className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
-            <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{stat.icon}</div>
+        {/* Total Units Card */}
+        <div key="total-units" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
+            <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Building("w-8 h-8")}</div>
             <div className="flex flex-col">
-              <h4 className={`text-2xl font-bold ${stat.color} leading-none mb-1`}>{stat.value}</h4>
-              <p className="font-medium" style={{ color: LABEL_COLOR, fontSize: '0.875rem' }}>{stat.label}</p>
+                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}>{stats.assets}</h4> {/* Changed to font-dm and text-stone-500 */}
+                <p className="font-medium" style={{ color: LABEL_COLOR, fontSize: '0.875rem' }}>Total Units</p>
             </div>
-          </div>
-        ))}
+        </div>
+        {/* Pending Requests Card */}
+        <div key="pending-requests" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
+            <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Pending("w-8 h-8")}</div>
+            <div className="flex flex-col">
+                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                    {stats.pendingMonth}
+                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                </h4>
+                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                    {stats.pendingYear}
+                    <span className="text-stone-500 ml-1">this year</span>
+                </p>
+            </div>
+        </div>
+        {/* Confirmed Stays Card */}
+        <div key="confirmed-stays" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
+            <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Bookings("w-8 h-8")}</div>
+            <div className="flex flex-col">
+                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                    {stats.confirmedMonth}
+                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                </h4>
+                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                    {stats.confirmedYear}
+                    <span className="text-stone-500 ml-1">this year</span>
+                </p>
+            </div>
+        </div>
+        {/* Total Revenue Card */}
+        <div key="total-revenue" className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border-[1px]" style={{ borderColor: CARD_BORDER }}>
+            <div className="flex-shrink-0" style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Dollar("w-8 h-8")}</div>
+            <div className="flex flex-col">
+                <h4 className={`text-2xl font-dm font-bold text-stone-500 leading-none mb-1`}> {/* Changed to font-dm and text-stone-500 */}
+                    ${stats.revenueMonth.toLocaleString()}
+                    <span className="text-xl font-bold text-stone-500 ml-2">this month</span>
+                </h4>
+                <p className="font-medium text-stone-500" style={{ fontSize: '0.875rem' }}>
+                    ${stats.revenueYear.toLocaleString()}
+                    <span className="text-stone-500 ml-1">this year</span>
+                </p>
+            </div>
+        </div>
       </div>
 
       <div className="flex bg-[#141211] border border-stone-800/60 p-2 rounded-xl w-fit mb-12">
@@ -340,6 +374,27 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       {activeTab === 'bookings' && (
         <div className="space-y-12"> {/* Increased gap between apartment groups */}
+          <div className="flex space-x-3 mb-8 px-2">
+            {[
+                { label: 'All', value: 'all' },
+                { label: 'Pending', value: BookingStatus.REQUESTED },
+                { label: 'Confirmed', value: BookingStatus.CONFIRMED },
+                { label: 'Paid', value: BookingStatus.PAID },
+            ].map(filter => (
+                <button
+                    key={filter.value}
+                    onClick={() => setStatusFilter(filter.value as any)}
+                    className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
+                        statusFilter === filter.value
+                            ? 'bg-coral-500 text-white shadow-md shadow-coral-500/20'
+                            : 'bg-stone-900 border border-stone-800 text-stone-500 hover:text-white'
+                    }`}
+                >
+                    {filter.label}
+                </button>
+            ))}
+          </div>
+
           {groupedAndSortedBookings.length > 0 ? (
             groupedAndSortedBookings.map(([aptTitle, bookingsInGroup]) => (
               <div key={aptTitle} className="space-y-6">
@@ -347,7 +402,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 {bookingsInGroup.map(b => {
                   const apt = apartments.find(a => a.id === b.apartmentId);
                   return (
-                    <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-6 md:p-8 border-[1px] animate-in slide-in-from-bottom-4" style={{ borderColor: CARD_BORDER }}>
+                    <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-3 md:p-4 border-[1px] animate-in slide-in-from-bottom-4" style={{ borderColor: CARD_BORDER }}>
                         <div className="flex items-center space-x-4 mb-3">
                           <h3 className="text-2xl font-serif text-white leading-none font-normal">
                             {b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1)}
@@ -367,7 +422,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
                         {/* Removed apt?.city from here */}
 
-                        <div className="flex flex-wrap items-center gap-x-12 gap-y-4 mb-4">
+                        <div className="flex flex-wrap items-center gap-x-12 gap-y-4"> 
                           <div className="flex items-center space-x-3">
                               <div className="text-coral-500">{CORE_ICONS.Calendar("w-5 h-5")}</div>
                               <span className="text-white font-normal text-base">{formatBookingRange(b.startDate, b.endDate)}</span>
@@ -419,7 +474,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
             ))
           ) : (
             <div className="py-24 text-center">
-              <p className="text-stone-500 font-serif text-xl">No upcoming bookings for your units.</p>
+              <p className="text-stone-500 font-serif text-xl">No upcoming bookings for your units with the current filter.</p>
             </div>
           )}
         </div>
@@ -447,7 +502,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                       bookings={bookings} 
                       blockedDates={blockedDates} 
                       airbnbCalendarDates={airbnbCalendarDates}
-                      loadingIcal={loadingIcal}
+                      loadingIcal={loadingAirbnbIcal}
                       onToggle={(d) => toggleManualBlock(apt.id, d)} 
                    />
                 </div>
@@ -502,6 +557,11 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                        <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Description</label>
                        <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white h-[120px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
+                 </div>
+
+                 <div className="space-y-6">
+                    <label className="block text-xs font-bold uppercase tracking-widest mb-3" style={{ color: LABEL_COLOR }}>Map Embed URL (Google Maps iframe src)</label>
+                    <input type="url" value={editingApt.mapEmbedUrl || ''} onChange={e => setEditingApt({...editingApt, mapEmbedUrl: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" placeholder="e.g. https://www.google.com/maps/embed?pb=!1m18!..." />
                  </div>
 
                  <div className="space-y-6">
