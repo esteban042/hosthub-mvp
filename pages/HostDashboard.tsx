@@ -2,20 +2,9 @@
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
-import { BookingConfirmationTemplate, BookingConfirmationTemplate as BookingConfirmation, BookingCancellationTemplate } from '../components/EmailTemplates';
-import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone } from 'lucide-react';
-
-interface HostDashboardProps {
-  host: Host;
-  apartments: Apartment[];
-  bookings: Booking[];
-  blockedDates: BlockedDate[];
-  onUpdateBookings: (bookings: Booking[]) => void;
-  onUpdateBlockedDates: (dates: BlockedDate[]) => void;
-  onUpdateApartments: (apartments: Apartment[]) => void;
-  airbnbCalendarDates: string[]; 
-  loadingAirbnbIcal: boolean; 
-}
+import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
+import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
+import { hostHubApi } from '../services/api';
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
 
@@ -25,10 +14,8 @@ const formatBookingRange = (start: string, end: string) => {
   const e = new Date(end);
   const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  
   const diffTime = Math.abs(e.getTime() - s.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
   return (
     <span>
       {startStr} — {endStr} <span className="text-[13px] ml-1 opacity-60">({diffDays} night{diffDays !== 1 ? 's' : ''})</span>
@@ -36,6 +23,7 @@ const formatBookingRange = (start: string, end: string) => {
   );
 };
 
+// Sub-component for managing manual availability overrides
 const AvailabilityCalendar: React.FC<{ 
   aptId: string, 
   bookings: Booking[], 
@@ -115,7 +103,7 @@ const AvailabilityCalendar: React.FC<{
         <div className="mt-8 pt-6 border-t border-stone-800/60 flex flex-wrap gap-4 justify-center text-[10px] uppercase tracking-widest font-bold">
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500/20 border border-blue-500/40"></span>
-                <span className="text-blue-500/70">Wanderlust Booked</span>
+                <span className="text-blue-500/70">HostHub Booked</span>
             </div>
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500/20 border border-rose-500/40"></span>
@@ -133,6 +121,21 @@ const AvailabilityCalendar: React.FC<{
   return renderMonth(currentMonth);
 };
 
+/**
+ * Added missing HostDashboardProps interface definition.
+ */
+interface HostDashboardProps {
+  host: Host;
+  apartments: Apartment[];
+  bookings: Booking[];
+  blockedDates: BlockedDate[];
+  onUpdateBookings: (bookings: Booking[]) => void;
+  onUpdateBlockedDates: (dates: BlockedDate[]) => void;
+  onUpdateApartments: (apartments: Apartment[]) => void;
+  airbnbCalendarDates: string[]; 
+  loadingAirbnbIcal: boolean; 
+}
+
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
   host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
@@ -141,34 +144,82 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all');
   const [previewBooking, setPreviewBooking] = useState<{booking: Booking, type: 'confirmation' | 'cancellation'} | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   const todayStr = new Date().toISOString().split('T')[0];
 
+  const shareableUrl = useMemo(() => {
+    if (typeof window === 'undefined') return '';
+    return `${window.location.origin}/?host=${host.slug}`;
+  }, [host.slug]);
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(shareableUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   const stats = useMemo(() => {
     const currentYear = new Date().getFullYear();
-
     const pending = myBookings.filter(b => b.status === BookingStatus.REQUESTED && b.endDate >= todayStr).length;
     const active = myBookings.filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && b.endDate >= todayStr).length;
     const pastCount = myBookings.filter(b => b.endDate < todayStr).length;
     const revenueYear = myBookings
         .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
         .reduce((sum, b) => sum + b.totalPrice, 0);
-
-    return {
-        pending,
-        active,
-        past: pastCount,
-        revenueYear
-    };
+    return { pending, active, past: pastCount, revenueYear };
   }, [myBookings, todayStr]);
 
-  const handleUpdateStatus = (booking: Booking, status: BookingStatus) => {
+  // Fix: Ensure groupedAndSortedBookings is defined before the main return statement.
+  const groupedAndSortedBookings = useMemo(() => {
+    const filtered = myBookings.filter(b => {
+      const isPast = b.endDate < todayStr;
+      if (statusFilter === 'past') return isPast;
+      if (isPast) return false; 
+      if (statusFilter === 'all') return true;
+      return b.status === statusFilter;
+    });
+
+    const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    const groups = new Map<string, Booking[]>();
+    for (const booking of sorted) {
+        const apt = apartments.find(a => a.id === booking.apartmentId);
+        if (apt) {
+            const aptTitle = apt.title;
+            if (!groups.has(aptTitle)) groups.set(aptTitle, []);
+            groups.get(aptTitle)?.push(booking);
+        }
+    }
+    return Array.from(groups.entries());
+  }, [myBookings, apartments, statusFilter, todayStr]);
+
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-    if (status === BookingStatus.CONFIRMED) {
+    const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+    if (!bookedApartment) return;
+
+    if (status === BookingStatus.CONFIRMED || status === BookingStatus.PAID) {
       setPreviewBooking({ booking, type: 'confirmation' });
+      await hostHubApi.sendEmail(
+        booking.guestEmail,
+        `Your HostHub Booking for ${bookedApartment.title} has been Confirmed!`,
+        'BookingConfirmation',
+        booking,
+        bookedApartment,
+        host
+      );
     } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
       setPreviewBooking({ booking, type: 'cancellation' });
+      await hostHubApi.sendEmail(
+        booking.guestEmail,
+        `Update on your HostHub Booking Request for ${bookedApartment.title}`,
+        'BookingCancellation',
+        booking,
+        bookedApartment,
+        host
+      );
     }
   };
 
@@ -230,35 +281,31 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     });
   };
 
-  const groupedAndSortedBookings = useMemo(() => {
-    const filtered = myBookings.filter(b => {
-      const isPast = b.endDate < todayStr;
-      if (statusFilter === 'past') return isPast;
-      if (isPast) return false; 
-      if (statusFilter === 'all') return true;
-      return b.status === statusFilter;
-    });
-
-    const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-    const groups = new Map<string, Booking[]>();
-    for (const booking of sorted) {
-        const apt = apartments.find(a => a.id === booking.apartmentId);
-        if (apt) {
-            const aptTitle = apt.title;
-            if (!groups.has(aptTitle)) groups.set(aptTitle, []);
-            groups.get(aptTitle)?.push(booking);
-        }
-    }
-    return Array.from(groups.entries());
-  }, [myBookings, apartments, statusFilter, todayStr]); 
-
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-700 font-dm">
-      <div className="flex justify-between items-end mb-12">
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div>
           <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Host Studio</h1>
           <p className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: LABEL_COLOR }}>Asset Operations</p>
+        </div>
+        
+        {/* Shareable Link Card */}
+        <div className="bg-[#1c1a19] border border-stone-800 p-4 rounded-2xl flex items-center justify-between w-full md:w-[450px] shadow-xl">
+           <div className="flex items-center space-x-4 overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                <Share2 className="w-5 h-5" />
+              </div>
+              <div className="overflow-hidden">
+                 <p className="text-[9px] font-black text-stone-600 uppercase tracking-widest mb-1">Your Booking Link</p>
+                 <p className="text-xs text-stone-400 font-medium truncate">{shareableUrl}</p>
+              </div>
+           </div>
+           <button 
+             onClick={handleCopyLink}
+             className={`ml-4 p-3 rounded-xl transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-stone-900 text-stone-500 hover:text-white border border-stone-800'}`}
+           >
+              {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+           </button>
         </div>
         <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest transition-all">Add Unit</button>
       </div>
@@ -337,8 +384,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">{title}</h3>
                 {bks.map(b => (
                   <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
-                    <div className="space-y-4 flex-1">
-                       {/* Line 1: Name (White) & Status */}
+                    <div className="space-y-4 flex-1 text-left">
                        <div className="flex items-center space-x-4">
                           <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
                           <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
@@ -348,7 +394,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                           }`}>{b.status}</span>
                        </div>
                        
-                       {/* Line 2: Dates, Guests, Price (Gray) */}
                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
                           <div className="flex items-center space-x-2">
                             <CalendarDays className="w-4 h-4" />
@@ -364,7 +409,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                           </div>
                        </div>
 
-                       {/* Line 3: Email & Phone (Gray) */}
                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium text-xs" style={{ color: LABEL_COLOR }}>
                           <div className="flex items-center space-x-2">
                              <Mail className="w-3.5 h-3.5" />
@@ -403,7 +447,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         <div className="space-y-20">
            {apartments.map(apt => (
              <div key={apt.id} className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                <div className="lg:col-span-2 space-y-6">
+                <div className="lg:col-span-2 space-y-6 text-left">
                    <h3 className="text-3xl font-serif font-bold text-white tracking-tight">{apt.title}</h3>
                    <p className="text-sm text-stone-500">Manage manual overrides and view occupancy for this unit.</p>
                 </div>
@@ -427,7 +471,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
            {apartments.map(apt => (
              <div key={apt.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
                 <img src={apt.photos[0]} className="aspect-video w-full object-cover" alt={apt.title} />
-                <div className="p-8">
+                <div className="p-8 text-left">
                    <h4 className="text-xl font-bold text-white mb-2 leading-tight" style={UNIT_TITLE_STYLE}>{apt.title}</h4>
                    <p className="text-[10px] font-bold tracking-widest mb-10 text-stone-600 uppercase">{apt.city}</p>
                    <div className="flex justify-between items-center pt-6 border-t border-stone-800/60">
@@ -531,7 +575,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
               <button onClick={() => setPreviewBooking(null)} className="text-stone-500 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
             </div>
             {previewBooking.type === 'confirmation' ? (
-              <BookingConfirmation host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
+              <BookingConfirmationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
             ) : (
               <BookingCancellationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
             )}

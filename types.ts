@@ -1,5 +1,5 @@
 
-import { Type } from "@google/genai";
+// Removed `import { Type } from "@google/genai";` as it is not used in the application.
 
 export enum BookingStatus {
   REQUESTED = 'requested',

@@ -1,5 +1,5 @@
 {
-  "name": "HostHub Pro | Multi-Tenant Booking Engine",
+  "name": "HostHub",
   "description": "High-performance booking platform for boutique Airbnb hosts with subdomain multi-tenancy and dark premium UI.",
   "requestFramePermissions": []
 }

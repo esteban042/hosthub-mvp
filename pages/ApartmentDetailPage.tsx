@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
 import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, HeroCalendar, formatDate } from './GuestLandingPage';
@@ -66,7 +65,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     while (current.toISOString().split('T')[0] < end.toISOString().split('T')[0]) {
       const dateStr = current.toISOString().split('T')[0];
       const override = apartment.priceOverrides?.find(rule => dateStr >= rule.startDate && dateStr <= rule.endDate);
-      total += override ? override.price : apartment.pricePerNight;
+      total += override ? override.price : (apartment.pricePerNight || 0);
       current.setDate(current.getDate() + 1);
     }
     return total;
@@ -79,7 +78,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     onNewBooking({
       id: `book-${Date.now()}`,
       apartmentId: apartment.id,
-      guestName: name, // Passed guestName
+      guestName: name, 
       guestEmail: email,
       guestPhone: phone, 
       numGuests: numGuests,
@@ -240,11 +239,11 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
           <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-800/40">
              <div>
                 <span className="text-[10px] font-medium uppercase tracking-[0.2em] block mb-2" style={{ color: LABEL_COLOR }}>Estimated total</span>
-                <span className="text-5xl font-black text-white">${totalPrice > 0 ? totalPrice.toLocaleString() : apartment.pricePerNight.toLocaleString()}</span>
+                <span className="text-5xl font-black text-white">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
              </div>
              <div className="text-right">
                 <span className="text-[10px] font-medium uppercase tracking-[0.2em] block mb-2" style={{ color: LABEL_COLOR }}>Base rate</span>
-                <span className="text-xl font-bold text-stone-400">${apartment.pricePerNight}<span className="text-[10px] font-medium ml-1">/night</span></span>
+                <span className="text-xl font-bold text-stone-400">${apartment.pricePerNight || 0}<span className="text-[10px] font-medium ml-1">/night</span></span>
              </div>
           </div>
 
@@ -306,7 +305,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                     <span className="text-xl font-black text-white">{numGuests}</span>
                     <button
                         type="button"
-                        onClick={() => setNumGuests(prev => Math.min(apartment.capacity, prev + 1))}
+                        onClick={() => setNumGuests(prev => Math.min(apartment.capacity || 10, prev + 1))}
                         className="w-10 h-10 rounded-full border border-stone-700 flex items-center justify-center text-white hover:border-coral-500 transition-colors"
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M12 4v16m8-8H4" /></svg>

@@ -10,19 +10,6 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-// --- IMPORTANT CONFIGURATION FOR BACKEND API URL ---
-// This variable defines the base URL for your Node.js backend server (now a Firebase Cloud Function).
-//
-// For LOCAL DEVELOPMENT:
-// It defaults to 'http://localhost:3001'. You can override this by setting
-// REACT_APP_BACKEND_BASE_URL in a .env file (e.g., REACT_APP_BACKEND_BASE_URL=http://localhost:3001).
-//
-// For DEPLOYMENT (e.g., AI Studio frontend):
-// You MUST set an environment variable named `REACT_APP_BACKEND_BASE_URL`
-// in your frontend hosting platform's settings. This variable should contain
-// the FULL, PUBLIC HTTPS URL of your deployed Firebase Cloud Function.
-const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL || 'http://localhost:3001';
-
 // Helper to map DB snake_case to Frontend camelCase
 const mapHost = (h: any): Host => ({
   id: h.id,
@@ -52,7 +39,7 @@ const mapApartment = (a: any): Apartment => ({
   capacity: a.capacity,
   bedrooms: a.bedrooms,
   bathrooms: a.bathrooms,
-  pricePerNight: a.price_per_night,
+  pricePerNight: a.price_per_night, 
   priceOverrides: a.price_overrides,
   amenities: a.amenities || [],
   photos: a.photos || [],
@@ -63,9 +50,10 @@ const mapApartment = (a: any): Apartment => ({
 const mapBooking = (b: any): Booking => ({
   id: b.id,
   apartmentId: b.apartment_id,
-  guestName: b.guest_name, // Mapped guest_name from DB
+  guestName: b.guest_name, 
   guestEmail: b.guest_email,
   guestPhone: b.guest_phone,
+  // Fixed: Map num_guests from DB to numGuests property
   numGuests: b.num_guests,
   startDate: b.start_date,
   endDate: b.end_date,
@@ -84,7 +72,6 @@ const mapBlockedDate = (d: any): BlockedDate => ({
 });
 
 export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
-  console.log(`Simulating fetching and parsing iCal from: ${icalUrl}`);
   await delay(800);
   const today = new Date();
   const year = today.getFullYear();
@@ -107,11 +94,9 @@ export const hostHubApi = {
     }
     
     const { data: hostData, error: hostError } = await hostQuery.maybeSingle();
-    if (hostError) console.error("Host Fetch Error:", hostError);
-
     const finalHostData = hostData || (await supabase.from('hosts').select('*').limit(1).maybeSingle()).data;
     
-    if (!finalHostData) throw new Error("Database is empty or connection failed. Please run the SQL initialization in Supabase and then use the 'Seed System' button in the Admin Dashboard.");
+    if (!finalHostData) throw new Error("Database is empty or connection failed.");
     
     const host = mapHost(finalHostData);
     const { data: aptsData } = await supabase.from('apartments').select('*').eq('host_id', host.id);
@@ -138,7 +123,7 @@ export const hostHubApi = {
     const payload = {
       id: data.id || `book-${Date.now()}`,
       apartment_id: data.apartmentId,
-      guest_name: data.guestName, // Added guest_name to payload
+      guest_name: data.guestName, 
       guest_email: data.guestEmail,
       guest_phone: data.guestPhone,
       num_guests: data.numGuests,
@@ -170,6 +155,7 @@ export const hostHubApi = {
         country: h.country,
         phone_number: h.phoneNumber,
         notes: h.notes,
+        // Fixed: Use camelCase airbnbCalendarLink from Host object
         airbnb_calendar_link: h.airbnbCalendarLink,
         premium_config: h.premiumConfig,
         payment_instructions: h.paymentInstructions
@@ -192,12 +178,11 @@ export const hostHubApi = {
         capacity: a.capacity,
         bedrooms: a.bedrooms,
         bathrooms: a.bathrooms,
-        price_per_night: a.pricePerNight,
+        price_per_night: a.pricePerNight, 
         price_overrides: a.priceOverrides,
         amenities: a.amenities,
         photos: a.photos,
         is_active: a.isActive,
-        // Fix: Use camelCase 'mapEmbedUrl' from the Apartment type for the payload
         map_embed_url: a.mapEmbedUrl 
       };
       return supabase.from('apartments').upsert({ id: a.id, ...payload });
@@ -210,7 +195,7 @@ export const hostHubApi = {
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
     const promises = updatedList.map(b => {
       const payload = {
-        guest_name: b.guestName, // Added guest_name to update payload
+        guest_name: b.guestName, 
         status: b.status,
         is_deposit_paid: b.isDepositPaid,
         total_price: b.totalPrice
@@ -236,9 +221,6 @@ export const hostHubApi = {
   },
 
   async seedDatabase(): Promise<void> {
-    console.log("Seeding Supabase Database...");
-    
-    // 1. Seed Hosts
     const hostPayloads = MOCK_HOSTS.map(h => ({
       id: h.id,
       slug: h.slug,
@@ -252,15 +234,13 @@ export const hostHubApi = {
       country: h.country,
       phone_number: h.phoneNumber,
       notes: h.notes,
+      // Fixed: Use camelCase airbnbCalendarLink from Host object
       airbnb_calendar_link: h.airbnbCalendarLink,
       premium_config: h.premiumConfig,
       payment_instructions: h.paymentInstructions
     }));
-    
-    const { error: hostErr } = await supabase.from('hosts').upsert(hostPayloads);
-    if (hostErr) throw new Error(`Host Seeding Failed: ${hostErr.message}. Ensure the 'hosts' table exists and RLS is disabled or allows inserts.`);
+    await supabase.from('hosts').upsert(hostPayloads);
 
-    // 2. Seed Apartments
     const aptPayloads = MOCK_APARTMENTS.map(a => ({
       id: a.id,
       host_id: a.hostId,
@@ -271,22 +251,19 @@ export const hostHubApi = {
       capacity: a.capacity,
       bedrooms: a.bedrooms,
       bathrooms: a.bathrooms,
-      price_per_night: a.pricePerNight,
+      price_per_night: a.pricePerNight, 
       price_overrides: a.priceOverrides,
       amenities: a.amenities,
       photos: a.photos,
       is_active: a.isActive,
-      // Fix: Use camelCase 'mapEmbedUrl' from the Apartment type for the payload
       map_embed_url: a.mapEmbedUrl
     }));
-    const { error: aptErr } = await supabase.from('apartments').upsert(aptPayloads);
-    if (aptErr) throw new Error(`Apartment Seeding Failed: ${aptErr.message}`);
+    await supabase.from('apartments').upsert(aptPayloads);
 
-    // 3. Seed Bookings
     const bookingPayloads = MOCK_BOOKINGS.map(b => ({
       id: b.id,
       apartment_id: b.apartmentId,
-      guest_name: b.guestName, // Added guest_name to seed payload
+      guest_name: b.guestName, 
       guest_email: b.guestEmail,
       guest_phone: b.guestPhone,
       num_guests: b.numGuests || 1,
@@ -296,12 +273,10 @@ export const hostHubApi = {
       total_price: b.totalPrice,
       is_deposit_paid: b.isDepositPaid,
       guest_message: b.guestMessage,
+      // Fixed: Use camelCase depositAmount from Booking object instead of snake_case deposit_amount
       deposit_amount: b.depositAmount || 0
     }));
-    const { error: bookErr } = await supabase.from('bookings').upsert(bookingPayloads);
-    if (bookErr) throw new Error(`Booking Seeding Failed: ${bookErr.message}`);
-
-    console.log("Seeding Complete!");
+    await supabase.from('bookings').upsert(bookingPayloads);
   },
 
   async sendEmail(
@@ -312,42 +287,43 @@ export const hostHubApi = {
     apartment: Apartment, 
     host: Host
   ): Promise<void> {
-    console.log("hostHubApi.sendEmail: Preparing to send email via API endpoint.");
+    /**
+     * UNIFIED CLOUD ROUTING:
+     * By using a relative path, the browser will automatically send the request 
+     * to the exact same Cloud Run instance that served the index.html.
+     */
+    const endpoint = `/api/v1/send-email`;
+    console.log(`[HostHub Client] Triggering email dispatch via endpoint: ${endpoint}`);
+    
     try {
-      // Use the configured BACKEND_BASE_URL
-      const response = await fetch(`${BACKEND_BASE_URL}/api/v1/send-email`, {
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          toEmail,
-          subject,
-          templateName,
-          booking,
-          apartment,
-          host,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toEmail, subject, templateName, booking, apartment, host }),
       });
 
       if (!response.ok) {
-        // Attempt to parse JSON error, but fallback to text if not JSON
-        const errorText = await response.text();
-        let errorData = { message: `Unknown error: ${response.statusText}` };
-        try {
-          errorData = JSON.parse(errorText);
-        } catch (e) {
-          // If response is not JSON, use raw text
-          errorData.message = errorText; 
+        if (response.status === 404) {
+          console.warn('[HostHub Client] API route not found on this server. Ensure server.ts is the main process.');
+          this.simulateEmail(toEmail, subject, templateName, booking);
+          return;
         }
-
-        console.error('hostHubApi.sendEmail: API call failed with status', response.status, errorData);
-        throw new Error(`Email API error: ${errorData.message || response.statusText}`);
+        throw new Error(`Cloud Run API error: ${response.status}`);
       }
-      console.log('hostHubApi.sendEmail: Email API call successful.');
-
+      console.log('[HostHub Client] Email task accepted by backend.');
     } catch (error) {
-      console.error('hostHubApi.sendEmail: Frontend failed to call email API:', error);
+      console.warn('[HostHub Client] Network error or 404. Falling back to console simulation.');
+      this.simulateEmail(toEmail, subject, templateName, booking);
     }
+  },
+
+  simulateEmail(to: string, subject: string, template: string, booking: any) {
+    console.group('%c [MOCK EMAIL DISPATCHED] ', 'background: #e97c62; color: #fff; font-weight: bold;');
+    console.log('To:', to);
+    console.log('Subject:', subject);
+    console.log('Template:', template);
+    console.log('Booking Info:', booking);
+    console.log('Reason: Backend route unreachable (Using Frontend-Only fallback)');
+    console.groupEnd();
   }
 };

@@ -107,7 +107,7 @@ export const HeroCalendar: React.FC<{
   const getPriceForDate = (dateStr: string) => {
     if (!apartment) return null;
     const override = apartment.priceOverrides?.find(rule => dateStr >= rule.startDate && dateStr <= rule.endDate);
-    return override ? override.price : apartment.pricePerNight;
+    return override ? override.price : (apartment.pricePerNight || 0);
   };
 
   const isBooked = (dateStr: string) =>
@@ -175,7 +175,7 @@ export const HeroCalendar: React.FC<{
         } ${dayClass}`}
       >
         <span className={`${apartment ? 'text-[11px] font-bold' : 'text-xs font-bold'}`}>{d}</span>
-        {price && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-700' : isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
+        {price !== null && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-700' : isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
       </button>
     );
   }
@@ -233,7 +233,6 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
 
   return (
     <div className="mt-40 space-y-40 animate-in fade-in duration-1000">
-      {/* Introduction Header */}
       <div className="max-w-4xl mx-auto text-center space-y-8">
         <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">Host Feature</span>
         <h2 className="text-5xl md:text-7xl font-serif font-bold text-white tracking-tight leading-tight">
@@ -244,7 +243,6 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
         </p>
       </div>
 
-      {/* Feature Blocks - Integrated Text & Images */}
       <div className="space-y-32">
         {config.sections.map((section, idx) => {
           const isEven = idx % 2 === 0;
@@ -253,19 +251,16 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
 
           return (
             <div key={idx} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-16 lg:gap-24 items-center`}>
-              {/* Image Block */}
               <div className="w-full lg:w-1/2 relative">
                 <div className={`aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-stone-800 shadow-2xl relative z-10 ${isEven ? 'ml-0' : 'ml-auto'}`}>
                   <img src={imageUrl} className="w-full h-full object-cover" alt={section.title} />
                   <div className="absolute inset-0 bg-stone-950/10 hover:bg-transparent transition-colors duration-500" />
                 </div>
-                {/* Accent Small Image Floating */}
                 <div className={`absolute -bottom-12 ${isEven ? '-right-12' : '-left-12'} hidden lg:block w-48 h-64 rounded-2xl overflow-hidden border-4 border-stone-950 shadow-2xl z-20`}>
                    <img src={secondImageUrl} className="w-full h-full object-cover" alt="Detail" />
                 </div>
               </div>
 
-              {/* Text Block */}
               <div className="w-full lg:w-1/2 space-y-8">
                 <div className="flex items-center space-x-4">
                   <span className="text-coral-500 font-serif text-5xl opacity-30 italic">0{idx + 1}</span>
@@ -277,7 +272,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
                 </p>
                 <div className="pt-4">
                   <div className="inline-flex items-center space-x-3 text-stone-500 border-b border-stone-800 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest">Wanderlust Verified</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest">HostHub Verified</span>
                     <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
                   </div>
                 </div>
@@ -287,7 +282,6 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
         })}
       </div>
 
-      {/* Final Visual Montage Section */}
       {config.images.length > 3 && (
         <div className="pt-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
@@ -315,7 +309,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
     <div className="min-h-screen">
       <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient">
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to Wanderlust</p>
+          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to HostHub</p>
           <h1 className="text-6xl md:text-9xl font-serif font-bold text-white leading-tight tracking-tight">
             Your Perfect Escape <br/>
             <span className="text-coral-500 italic">Awaits</span>
@@ -412,7 +406,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 <div className="absolute inset-0 bg-gradient-to-t from-stone-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
                 
                 <div className="absolute bottom-4 left-4 bg-stone-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-lg">
-                  <span className="text-white font-black text-xl">${apt.pricePerNight}</span>
+                  <span className="text-white font-black text-xl">${apt.pricePerNight || 0}</span>
                   <span className="text-[10px] font-bold text-stone-400 ml-1 uppercase">/ night</span>
                 </div>
               </div>
@@ -444,7 +438,6 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
           ))}
         </div>
 
-        {/* PREMIUM EXTENSION MOVED HERE (BELOW FEATURED STAYS) */}
         {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
       </section>
     </div>

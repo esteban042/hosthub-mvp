@@ -1,8 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
-import { BookingConfirmationTemplate, BookingConfirmationTemplate as BookingConfirmation, BookingCancellationTemplate } from '../components/EmailTemplates';
+import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone } from 'lucide-react';
 import { hostHubApi } from '../services/api'; // Import hostHubApi to send emails
 
@@ -172,11 +171,14 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
     if (!bookedApartment) {
       console.error("Apartment not found for booking:", booking.id);
+      // Even if apartment not found, we might still want to show preview or log.
+      // For now, we'll just return.
       return;
     }
 
     if (status === BookingStatus.CONFIRMED || status === BookingStatus.PAID) {
       setPreviewBooking({ booking, type: 'confirmation' });
+      // Dispatch confirmation email
       await hostHubApi.sendEmail(
         booking.guestEmail,
         `Your Wanderlust Booking for ${bookedApartment.title} has been Confirmed!`,
@@ -187,6 +189,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       );
     } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
       setPreviewBooking({ booking, type: 'cancellation' });
+      // Dispatch cancellation/rejection email
       await hostHubApi.sendEmail(
         booking.guestEmail,
         `Update on your Wanderlust Booking Request for ${bookedApartment.title}`,
@@ -557,7 +560,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
               <button onClick={() => setPreviewBooking(null)} className="text-stone-500 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
             </div>
             {previewBooking.type === 'confirmation' ? (
-              <BookingConfirmation host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
+              <BookingConfirmationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
             ) : (
               <BookingCancellationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
             )}

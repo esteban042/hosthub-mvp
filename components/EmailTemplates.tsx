@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Host, Apartment, Booking, BookingStatus } from '../types';
 import { formatDate } from '../pages/GuestLandingPage';
@@ -72,12 +71,12 @@ export const BookingConfirmationTemplate: React.FC<TemplateProps> = ({ host, apa
       <div className="space-y-4">
         <h3 className="text-xs font-bold uppercase tracking-widest text-white">Payment Instructions</h3>
         <p className="text-sm text-stone-400 leading-relaxed bg-stone-800/30 p-4 rounded-xl border border-stone-800/40 italic">
-          {host.paymentInstructions || "Please contact Sarah via the Wanderlust platform to arrange payment of the deposit. Bookings are held for 24 hours pending deposit receipt."}
+          {host.paymentInstructions || "Please contact your host via the HostHub platform to arrange payment of the deposit. Bookings are held for 24 hours pending deposit receipt."}
         </p>
       </div>
 
       <div className="mt-12 pt-8 border-t border-stone-800/40 text-center">
-        <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.2em] mb-4">Managed by Wanderlust Pro</p>
+        <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.2em] mb-4">Managed by HostHub Pro</p>
         <div className="flex items-center justify-center space-x-3">
           <img src={host.avatar} className="w-6 h-6 rounded-full grayscale" alt={host.name} />
           <span className="text-xs text-stone-500">Your host, {host.name}</span>
@@ -129,7 +128,7 @@ export const BookingCancellationTemplate: React.FC<TemplateProps> = ({ host, apa
       </div>
 
       <div className="mt-12 pt-8 border-t border-stone-800/40 text-center text-stone-600">
-        <p className="text-[10px] font-bold uppercase tracking-[0.2em]">Boutique Property Network</p>
+        <p className="text-[10px] font-bold uppercase tracking-[0.2em]">HostHub Property Network</p>
       </div>
     </div>
   );
@@ -187,7 +186,7 @@ export const BookingRequestReceivedTemplate: React.FC<TemplateProps> = ({ host, 
       </div>
 
       <div className="mt-12 pt-8 border-t border-stone-800/40 text-center">
-        <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.2em] mb-4">Managed by Wanderlust Pro</p>
+        <p className="text-[10px] font-bold text-stone-600 uppercase tracking-[0.2em] mb-4">Managed by HostHub Pro</p>
         <div className="flex items-center justify-center space-x-3">
           <img src={host.avatar} className="w-6 h-6 rounded-full grayscale" alt={host.name} />
           <span className="text-xs text-stone-500">Your host, {host.name}</span>
