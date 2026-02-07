@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
 import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, HeroCalendar, formatDate } from './GuestLandingPage';
@@ -78,6 +79,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     onNewBooking({
       id: `book-${Date.now()}`,
       apartmentId: apartment.id,
+      guestName: name, // Passed guestName
       guestEmail: email,
       guestPhone: phone, 
       numGuests: numGuests,

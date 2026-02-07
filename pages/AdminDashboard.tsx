@@ -1,7 +1,8 @@
+
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, SubscriptionType, BookingStatus, PremiumConfig, PremiumSection } from '../types';
-import { hostHubApi } from '../services/api';
-import { Building2, Calendar, DollarSign, Crown, Edit3, MoreHorizontal, ChevronRight, Plus, Globe, Trash2, Image, Type, Info, Database } from 'lucide-react';
+// Added Crown to the lucide-react imports
+import { Building2, Calendar, DollarSign, Edit3, MoreHorizontal, ChevronRight, Plus, Globe, Trash2, Image, Type, Info, Check, Crown } from 'lucide-react';
 
 interface AdminDashboardProps {
   hosts: Host[];
@@ -11,7 +12,6 @@ interface AdminDashboardProps {
 }
 
 const THEME_GRAY = 'hsl(30 5% 55%)';
-const LABEL_COLOR = 'rgb(168, 162, 158)';
 
 const SUBSCRIPTION_PRICES = {
   [SubscriptionType.BASIC]: 20,
@@ -29,7 +29,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [editingHost, setEditingHost] = useState<Partial<Host> | null>(null);
   const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content'>('basics');
   const [newImageUrl, setNewImageUrl] = useState('');
-  const [seeding, setSeeding] = useState(false);
 
   const currentYear = new Date().getFullYear();
 
@@ -60,20 +59,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       totalBookingsThisYear: totalBookingsAllHostsThisYear
     };
   }, [hosts, apartments, bookings, currentYear]);
-
-  const handleSeedDatabase = async () => {
-    // Removed confirm() due to sandboxing issues.
-    setSeeding(true);
-    try {
-      await hostHubApi.seedDatabase();
-      alert("Success! Supabase tables have been seeded. Please refresh the app to see the live data.");
-      window.location.reload();
-    } catch (e: any) {
-      alert("Seed Failed: " + e.message + "\n\nEnsure you have run the SQL script to create tables and RLS policies in your Supabase project.");
-    } finally {
-      setSeeding(false);
-    }
-  };
 
   const handleSaveHost = (e: React.FormEvent) => {
     e.preventDefault();
@@ -153,14 +138,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <p className="text-coral-500 font-bold uppercase tracking-[0.3em] text-[10px]">Platform HQ</p>
         </div>
         <div className="flex items-center space-x-4">
-          <button 
-            disabled={seeding}
-            onClick={handleSeedDatabase}
-            className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all hover:bg-emerald-500/20 active:scale-95 flex items-center space-x-2"
-          >
-            <Database className={`w-4 h-4 ${seeding ? 'animate-pulse' : ''}`} />
-            <span>{seeding ? 'Syncing...' : 'Seed System'}</span>
-          </button>
           <button 
             onClick={() => { setEditingHost({}); setShowHostModal(true); setActiveModalTab('basics'); }}
             className="bg-transparent border border-white text-white px-8 py-4 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all hover:bg-white/10 active:scale-95 flex items-center space-x-2"
@@ -277,9 +254,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <button onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="text-stone-600 hover:text-white transition-colors"><MoreHorizontal className="w-8 h-8 rotate-45" /></button>
               </div>
 
-              <form onSubmit={handleSaveHost} className="flex-1 overflow-y-auto">
+              <form onSubmit={handleSaveHost} className="flex-1 overflow-y-auto p-12 text-left">
                 {activeModalTab === 'basics' ? (
-                  <div className="p-12 space-y-12 text-left">
+                  <div className="space-y-12">
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                         <div className="space-y-8">
                            <div>
@@ -287,158 +264,117 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                               <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                            </div>
                            <div>
-                              <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Host Slug</label>
-                              <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                              <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Subdomain Slug</label>
+                              <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
                            </div>
-                           <div className="grid grid-cols-2 gap-6">
+                           <div className="grid grid-cols-2 gap-4">
                               <div>
-                                  <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Commission (%)</label>
-                                  <select value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none">
-                                    {[3, 4, 5, 6].map(v => <option key={v} value={v}>{v}%</option>)}
-                                  </select>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Subscription</label>
+                                <select value={editingHost.subscriptionType || SubscriptionType.BASIC} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none">
+                                  {Object.values(SubscriptionType).map(v => <option key={v} value={v}>{v.toUpperCase()}</option>)}
+                                </select>
                               </div>
                               <div>
-                                  <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Subscription</label>
-                                  <select value={editingHost.subscriptionType || SubscriptionType.BASIC} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none">
-                                    <option value={SubscriptionType.BASIC}>Basic</option>
-                                    <option value={SubscriptionType.PRO}>Pro</option>
-                                    <option value={SubscriptionType.ENTERPRISE}>Enterprise</option>
-                                  </select>
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Commission %</label>
+                                <input type="number" min="3" max="6" value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
                               </div>
                            </div>
                         </div>
                         <div className="space-y-8">
-                            <div>
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Bio / Brand Story</label>
-                                <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white h-[142px] resize-none outline-none" />
-                            </div>
+                           <div>
+                              <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Biography</label>
+                              <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white h-[142px] resize-none outline-none" />
+                           </div>
+                           <div>
+                              <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Avatar URL</label>
+                              <input type="text" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
+                           </div>
                         </div>
                      </div>
                   </div>
                 ) : (
-                  <div className="p-12 space-y-16 text-left">
-                     {/* Premium Toggle */}
-                     <div className="flex items-center justify-between p-8 bg-stone-950 border border-stone-800 rounded-3xl shadow-xl">
-                        <div className="flex items-center space-x-5">
-                          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20 text-emerald-400">
-                            <Crown className="w-6 h-6" />
-                          </div>
-                          <div>
-                            <h4 className="text-white font-bold text-lg leading-none mb-2">Premium Experience Extensions</h4>
-                            <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Showcase storytelling sections on the guest landing page</p>
-                          </div>
+                  <div className="space-y-12">
+                     <div className="flex items-center justify-between p-8 bg-stone-950 rounded-[2rem] border border-stone-800">
+                        <div className="flex items-center space-x-6">
+                           <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${editingHost.premiumConfig?.isEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-stone-900 text-stone-700'}`}>
+                              <Crown className="w-6 h-6" />
+                           </div>
+                           <div>
+                              <h4 className="text-xl font-bold text-white">Premium Landing Extension</h4>
+                              <p className="text-xs text-stone-500 font-medium">Enable narrative-driven sections and a visual gallery.</p>
+                           </div>
                         </div>
-                        <label className="relative inline-flex items-center cursor-pointer">
-                           <input type="checkbox" className="sr-only peer" checked={editingHost.premiumConfig?.isEnabled || false} onChange={e => updatePremiumConfig({ isEnabled: e.target.checked })} />
-                           <div className="w-14 h-8 bg-stone-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-stone-500 after:border-stone-400 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500 peer-checked:after:bg-white"></div>
-                        </label>
+                        <button 
+                          type="button"
+                          onClick={() => updatePremiumConfig({ isEnabled: !editingHost.premiumConfig?.isEnabled })}
+                          className={`px-10 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${editingHost.premiumConfig?.isEnabled ? 'bg-emerald-500 text-white shadow-xl shadow-emerald-500/20' : 'border border-stone-800 text-stone-600 hover:text-white'}`}
+                        >
+                           {editingHost.premiumConfig?.isEnabled ? 'Active' : 'Disabled'}
+                        </button>
                      </div>
 
                      {editingHost.premiumConfig?.isEnabled && (
-                       <div className="space-y-16 animate-in slide-in-from-bottom-4 duration-500">
-                          {/* Gallery Management */}
-                          <div className="space-y-6">
-                            <div className="flex items-center space-x-3 mb-2">
-                               <Image className="w-5 h-5 text-emerald-400" />
-                               <h4 className="text-xl font-serif font-bold text-white">Brand Imagery</h4>
-                            </div>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                               {editingHost.premiumConfig.images.map((img, i) => (
-                                 <div key={i} className="group relative aspect-[3/4] rounded-2xl overflow-hidden border border-stone-800 bg-stone-950">
-                                    <img src={img} className="w-full h-full object-cover" alt={`Gallery ${i}`} />
-                                    <button 
-                                      type="button" 
-                                      onClick={() => removeImage(i)}
-                                      className="absolute top-2 right-2 p-2 bg-stone-900/80 backdrop-blur-md rounded-lg text-stone-400 hover:text-rose-500 opacity-0 group-hover:opacity-100 transition-all border border-stone-800"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </button>
+                        <div className="space-y-16 animate-in slide-in-from-bottom-4 duration-500">
+                           <div className="space-y-8">
+                              <div className="flex items-center space-x-3">
+                                 <Image className="w-5 h-5 text-emerald-400" />
+                                 <h4 className="text-xl font-bold text-white tracking-tight">Gallery Curation</h4>
+                              </div>
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                 {editingHost.premiumConfig.images.map((img, i) => (
+                                    <div key={i} className="relative aspect-square group rounded-2xl overflow-hidden border border-stone-800">
+                                       <img src={img} className="w-full h-full object-cover" alt="" />
+                                       <button type="button" onClick={() => removeImage(i)} className="absolute top-2 right-2 bg-black/60 p-2 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity text-rose-500"><Trash2 className="w-4 h-4" /></button>
+                                    </div>
+                                 ))}
+                                 <div className="aspect-square bg-stone-950 border border-stone-800 border-dashed rounded-2xl flex flex-col items-center justify-center p-4 space-y-4">
+                                    <input type="text" placeholder="Image URL..." value={newImageUrl} onChange={e => setNewImageUrl(e.target.value)} className="w-full bg-stone-900 border border-stone-800 rounded-lg p-2 text-[10px] text-white outline-none" />
+                                    <button type="button" onClick={addImage} className="w-full py-2 bg-stone-800 text-stone-400 rounded-lg text-[9px] font-black uppercase tracking-widest hover:text-white transition-colors">Add</button>
                                  </div>
-                               ))}
-                               <div className="aspect-[3/4] rounded-2xl border-2 border-dashed border-stone-800 flex flex-col items-center justify-center p-6 text-center space-y-4">
-                                  <div className="space-y-2 w-full">
-                                    <input 
-                                      type="text" 
-                                      placeholder="Paste URL..." 
-                                      value={newImageUrl} 
-                                      onChange={e => setNewImageUrl(e.target.value)}
-                                      className="w-full bg-stone-950 border border-stone-800 rounded-xl p-3 text-[10px] text-white outline-none"
-                                    />
-                                    <button 
-                                      type="button" 
-                                      onClick={addImage}
-                                      className="w-full bg-stone-800 text-white font-bold py-2 rounded-xl text-[9px] uppercase tracking-widest hover:bg-stone-700 transition-colors"
-                                    >
-                                      Add Image
-                                    </button>
-                                  </div>
-                               </div>
-                            </div>
-                          </div>
+                              </div>
+                           </div>
 
-                          {/* Storytelling Sections */}
-                          <div className="space-y-6">
-                            <div className="flex items-center justify-between mb-2">
-                               <div className="flex items-center space-x-3">
-                                  <Type className="w-5 h-5 text-emerald-400" />
-                                  <h4 className="text-xl font-serif font-bold text-white">Narrative Sections</h4>
-                               </div>
-                               <button 
-                                 type="button" 
-                                 onClick={addSection}
-                                 className="text-[9px] font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/20 bg-emerald-500/5 px-4 py-2 rounded-xl hover:bg-emerald-500/10 transition-colors"
-                               >
-                                 + Add Section
-                               </button>
-                            </div>
-                            
-                            <div className="space-y-6">
-                               {editingHost.premiumConfig.sections.map((section, i) => (
-                                 <div key={i} className="bg-stone-950 border border-stone-800 rounded-3xl p-8 relative group shadow-lg">
-                                    <button 
-                                      type="button" 
-                                      onClick={() => removeSection(i)}
-                                      className="absolute top-6 right-8 text-stone-700 hover:text-rose-500 transition-colors"
-                                    >
-                                      <Trash2 className="w-5 h-5" />
-                                    </button>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                                       <div className="md:col-span-1 space-y-2">
-                                          <label className="block text-[9px] font-black uppercase text-stone-600 tracking-widest">Section Title</label>
-                                          <input 
-                                            type="text" 
-                                            value={section.title} 
-                                            onChange={e => updateSection(i, { title: e.target.value })}
-                                            className="w-full bg-stone-900 border border-stone-800 rounded-xl p-4 text-sm text-white outline-none font-bold"
-                                          />
+                           <div className="space-y-8">
+                              <div className="flex items-center justify-between">
+                                 <div className="flex items-center space-x-3">
+                                    <Type className="w-5 h-5 text-emerald-400" />
+                                    <h4 className="text-xl font-bold text-white tracking-tight">Narrative Sections</h4>
+                                 </div>
+                                 <button type="button" onClick={addSection} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all">+ Add Story Block</button>
+                              </div>
+                              <div className="space-y-6">
+                                 {editingHost.premiumConfig.sections.map((section, i) => (
+                                    <div key={i} className="bg-stone-950 border border-stone-800 p-8 rounded-[2rem] space-y-6 relative group animate-in slide-in-from-bottom-2">
+                                       <button type="button" onClick={() => removeSection(i)} className="absolute top-6 right-6 text-stone-800 hover:text-rose-500 transition-colors"><Trash2 className="w-5 h-5" /></button>
+                                       <div>
+                                          <label className="block text-[9px] font-black uppercase text-stone-600 mb-2">Block Heading</label>
+                                          <input type="text" value={section.title} onChange={e => updateSection(i, { title: e.target.value })} className="w-full bg-transparent border-b border-stone-800 p-0 py-2 text-xl font-serif font-bold text-white focus:border-emerald-400 outline-none transition-all" />
                                        </div>
-                                       <div className="md:col-span-2 space-y-2">
-                                          <label className="block text-[9px] font-black uppercase text-stone-600 tracking-widest">Narrative Content</label>
-                                          <textarea 
-                                            value={section.content} 
-                                            onChange={e => updateSection(i, { content: e.target.value })}
-                                            className="w-full bg-stone-900 border border-stone-800 rounded-xl p-4 text-sm text-white h-24 resize-none outline-none leading-relaxed"
-                                          />
+                                       <div>
+                                          <label className="block text-[9px] font-black uppercase text-stone-600 mb-2">Narrative Content</label>
+                                          <textarea value={section.content} onChange={e => updateSection(i, { content: e.target.value })} className="w-full bg-transparent border-none p-0 text-sm text-stone-400 leading-relaxed h-24 resize-none outline-none" />
                                        </div>
                                     </div>
-                                 </div>
-                               ))}
-                               {editingHost.premiumConfig.sections.length === 0 && (
-                                 <div className="py-16 border border-dashed border-stone-800 rounded-[2.5rem] flex flex-col items-center justify-center text-stone-600 italic space-y-2">
-                                    <Info className="w-8 h-8 opacity-20" />
-                                    <p className="text-sm">No storytelling sections defined yet.</p>
-                                 </div>
-                               )}
-                            </div>
-                          </div>
-                       </div>
+                                 ))}
+                                 {editingHost.premiumConfig.sections.length === 0 && (
+                                    <div className="py-12 border border-dashed border-stone-800 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
+                                       <Info className="w-6 h-6 mb-2 opacity-20" />
+                                       <span>No narrative sections defined for this host.</span>
+                                    </div>
+                                 )}
+                              </div>
+                           </div>
+                        </div>
                      )}
                   </div>
                 )}
-
-                <div className="p-10 border-t border-stone-800 bg-stone-900/30 flex space-x-4 sticky bottom-0 z-20">
-                  <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-colors">Discard</button>
-                  <button type="submit" className="flex-1 bg-coral-500 text-white font-bold py-5 rounded-full text-[10px] uppercase tracking-widest shadow-2xl shadow-coral-500/30 active:scale-95 transition-all">Save Host Data</button>
+                
+                <div className="sticky bottom-0 bg-[#1c1a19] p-10 border-t border-stone-800 flex space-x-4 mt-auto">
+                   <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-all">Discard</button>
+                   <button type="submit" className="flex-1 bg-white text-black font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest hover:bg-stone-200 active:scale-95 flex items-center justify-center space-x-2">
+                      <Check className="w-4 h-4" />
+                      <span>Commit Changes</span>
+                   </button>
                 </div>
               </form>
            </div>

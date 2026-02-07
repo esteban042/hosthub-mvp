@@ -1,3 +1,4 @@
+
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData';
@@ -8,6 +9,19 @@ const SUPABASE_ANON_KEY = 'sb_publishable_lYCWq0C3KkMvjnGYjL-VJg_WewYCS_q';
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+// --- IMPORTANT CONFIGURATION FOR BACKEND API URL ---
+// This variable defines the base URL for your Node.js backend server (now a Firebase Cloud Function).
+//
+// For LOCAL DEVELOPMENT:
+// It defaults to 'http://localhost:3001'. You can override this by setting
+// REACT_APP_BACKEND_BASE_URL in a .env file (e.g., REACT_APP_BACKEND_BASE_URL=http://localhost:3001).
+//
+// For DEPLOYMENT (e.g., AI Studio frontend):
+// You MUST set an environment variable named `REACT_APP_BACKEND_BASE_URL`
+// in your frontend hosting platform's settings. This variable should contain
+// the FULL, PUBLIC HTTPS URL of your deployed Firebase Cloud Function.
+const BACKEND_BASE_URL = process.env.REACT_APP_BACKEND_BASE_URL || 'http://localhost:3001';
 
 // Helper to map DB snake_case to Frontend camelCase
 const mapHost = (h: any): Host => ({
@@ -49,6 +63,7 @@ const mapApartment = (a: any): Apartment => ({
 const mapBooking = (b: any): Booking => ({
   id: b.id,
   apartmentId: b.apartment_id,
+  guestName: b.guest_name, // Mapped guest_name from DB
   guestEmail: b.guest_email,
   guestPhone: b.guest_phone,
   numGuests: b.num_guests,
@@ -123,6 +138,7 @@ export const hostHubApi = {
     const payload = {
       id: data.id || `book-${Date.now()}`,
       apartment_id: data.apartmentId,
+      guest_name: data.guestName, // Added guest_name to payload
       guest_email: data.guestEmail,
       guest_phone: data.guestPhone,
       num_guests: data.numGuests,
@@ -181,7 +197,8 @@ export const hostHubApi = {
         amenities: a.amenities,
         photos: a.photos,
         is_active: a.isActive,
-        map_embed_url: a.mapEmbedUrl
+        // Fix: Use camelCase 'mapEmbedUrl' from the Apartment type for the payload
+        map_embed_url: a.mapEmbedUrl 
       };
       return supabase.from('apartments').upsert({ id: a.id, ...payload });
     });
@@ -193,6 +210,7 @@ export const hostHubApi = {
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
     const promises = updatedList.map(b => {
       const payload = {
+        guest_name: b.guestName, // Added guest_name to update payload
         status: b.status,
         is_deposit_paid: b.isDepositPaid,
         total_price: b.totalPrice
@@ -258,6 +276,7 @@ export const hostHubApi = {
       amenities: a.amenities,
       photos: a.photos,
       is_active: a.isActive,
+      // Fix: Use camelCase 'mapEmbedUrl' from the Apartment type for the payload
       map_embed_url: a.mapEmbedUrl
     }));
     const { error: aptErr } = await supabase.from('apartments').upsert(aptPayloads);
@@ -267,6 +286,7 @@ export const hostHubApi = {
     const bookingPayloads = MOCK_BOOKINGS.map(b => ({
       id: b.id,
       apartment_id: b.apartmentId,
+      guest_name: b.guestName, // Added guest_name to seed payload
       guest_email: b.guestEmail,
       guest_phone: b.guestPhone,
       num_guests: b.numGuests || 1,
@@ -282,5 +302,52 @@ export const hostHubApi = {
     if (bookErr) throw new Error(`Booking Seeding Failed: ${bookErr.message}`);
 
     console.log("Seeding Complete!");
+  },
+
+  async sendEmail(
+    toEmail: string, 
+    subject: string, 
+    templateName: string, 
+    booking: Booking, 
+    apartment: Apartment, 
+    host: Host
+  ): Promise<void> {
+    console.log("hostHubApi.sendEmail: Preparing to send email via API endpoint.");
+    try {
+      // Use the configured BACKEND_BASE_URL
+      const response = await fetch(`${BACKEND_BASE_URL}/api/v1/send-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          toEmail,
+          subject,
+          templateName,
+          booking,
+          apartment,
+          host,
+        }),
+      });
+
+      if (!response.ok) {
+        // Attempt to parse JSON error, but fallback to text if not JSON
+        const errorText = await response.text();
+        let errorData = { message: `Unknown error: ${response.statusText}` };
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          // If response is not JSON, use raw text
+          errorData.message = errorText; 
+        }
+
+        console.error('hostHubApi.sendEmail: API call failed with status', response.status, errorData);
+        throw new Error(`Email API error: ${errorData.message || response.statusText}`);
+      }
+      console.log('hostHubApi.sendEmail: Email API call successful.');
+
+    } catch (error) {
+      console.error('hostHubApi.sendEmail: Frontend failed to call email API:', error);
+    }
   }
 };

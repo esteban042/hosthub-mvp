@@ -1,3 +1,6 @@
+
+import { Type } from "@google/genai";
+
 export enum BookingStatus {
   REQUESTED = 'requested',
   CONFIRMED = 'confirmed',
@@ -84,6 +87,7 @@ export interface Apartment {
 export interface Booking {
   id: string;
   apartmentId: string;
+  guestName?: string; // Added guestName field
   guestEmail: string;
   guestPhone?: string;
   numGuests?: number;

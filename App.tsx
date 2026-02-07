@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
+import { UserRole, Host, Apartment, Booking, BlockedDate, User, BookingStatus } from './types';
 import { hostHubApi, fetchAndParseIcal } from './services/api';
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
@@ -116,12 +117,38 @@ const App: React.FC = () => {
   };
 
   const handleNewBooking = async (newBooking: Booking) => {
+    console.log("handleNewBooking: Attempting to create booking...", newBooking);
     try {
-      await hostHubApi.createBooking(newBooking);
+      const createdBooking = await hostHubApi.createBooking(newBooking);
+      console.log("handleNewBooking: Booking created successfully.", createdBooking);
       const data = await hostHubApi.getLandingData(currentHost?.slug);
       setBookings(data.bookings);
+
+      // Send initial booking request email
+      console.log("handleNewBooking: Checking conditions for sending email.");
+      if (currentHost && newBooking.apartmentId) {
+        console.log("handleNewBooking: currentHost and apartmentId are present.");
+        const bookedApartment = apartments.find(apt => apt.id === newBooking.apartmentId);
+        if (bookedApartment) {
+          console.log("handleNewBooking: Found booked apartment, attempting to send email...");
+          await hostHubApi.sendEmail(
+            newBooking.guestEmail,
+            `Your Wanderlust Booking Request for ${bookedApartment.title} has been received!`,
+            'BookingRequestReceived',
+            newBooking,
+            bookedApartment,
+            currentHost
+          );
+          console.log("handleNewBooking: Email sending initiated from App.tsx.");
+        } else {
+          console.warn("handleNewBooking: Booked apartment not found for ID:", newBooking.apartmentId);
+        }
+      } else {
+        console.warn("handleNewBooking: Email not sent. Missing currentHost or newBooking.apartmentId.");
+      }
+
     } catch (e) {
-      console.error("Booking Creation Failed:", e);
+      console.error("handleNewBooking: Booking Creation Failed:", e);
     }
   };
 

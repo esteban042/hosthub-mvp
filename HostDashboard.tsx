@@ -4,6 +4,7 @@ import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from 
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
 import { BookingConfirmationTemplate, BookingConfirmationTemplate as BookingConfirmation, BookingCancellationTemplate } from '../components/EmailTemplates';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone } from 'lucide-react';
+import { hostHubApi } from '../services/api'; // Import hostHubApi to send emails
 
 interface HostDashboardProps {
   host: Host;
@@ -163,12 +164,37 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     };
   }, [myBookings, todayStr]);
 
-  const handleUpdateStatus = (booking: Booking, status: BookingStatus) => {
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-    if (status === BookingStatus.CONFIRMED) {
+    
+    // Find the apartment associated with the booking for email templates
+    const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+
+    if (!bookedApartment) {
+      console.error("Apartment not found for booking:", booking.id);
+      return;
+    }
+
+    if (status === BookingStatus.CONFIRMED || status === BookingStatus.PAID) {
       setPreviewBooking({ booking, type: 'confirmation' });
+      await hostHubApi.sendEmail(
+        booking.guestEmail,
+        `Your Wanderlust Booking for ${bookedApartment.title} has been Confirmed!`,
+        'BookingConfirmation',
+        booking,
+        bookedApartment,
+        host
+      );
     } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
       setPreviewBooking({ booking, type: 'cancellation' });
+      await hostHubApi.sendEmail(
+        booking.guestEmail,
+        `Update on your Wanderlust Booking Request for ${bookedApartment.title}`,
+        'BookingCancellation',
+        booking,
+        bookedApartment,
+        host
+      );
     }
   };
 

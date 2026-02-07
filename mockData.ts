@@ -1,3 +1,4 @@
+
 import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType } from './types';
 
 export const MOCK_HOSTS: Host[] = [
@@ -166,6 +167,7 @@ export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-1',
     apartmentId: 'apt-1',
+    guestName: 'John Doe', // Added guestName
     guestEmail: 'traveler@boutique.com',
     startDate: `${currentYear}-06-10`,
     endDate: `${currentYear}-06-15`,
@@ -176,6 +178,7 @@ export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-2',
     apartmentId: 'apt-3',
+    guestName: 'Alice Smith', // Added guestName
     guestEmail: 'city.mapper@design.jp',
     startDate: `${currentYear}-07-01`,
     endDate: `${currentYear}-07-05`,
@@ -186,6 +189,7 @@ export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-3',
     apartmentId: 'apt-4',
+    guestName: 'Maria Rossi', // Added guestName
     guestEmail: 'family.rossi@italy.it',
     startDate: `${currentYear}-08-12`,
     endDate: `${currentYear}-08-19`,
@@ -196,6 +200,7 @@ export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-4',
     apartmentId: 'apt-1',
+    guestName: 'Peter Jones', // Added guestName
     guestEmail: 'alpine.lover@example.com',
     startDate: `${currentYear}-01-10`,
     endDate: `${currentYear}-01-12`,
@@ -206,6 +211,7 @@ export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-5',
     apartmentId: 'apt-5',
+    guestName: 'Sarah Kim', // Added guestName
     guestEmail: 'beach.goer@example.com',
     startDate: `${currentYear}-09-01`,
     endDate: `${currentYear}-09-07`,

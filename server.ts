@@ -3,7 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
-import { SubscriptionType } from './types';
+import nodemailer from 'nodemailer'; // Import nodemailer
+import React from 'react'; // Import React for server-side rendering
+import ReactDOMServer from 'react-dom/server'; // Import ReactDOMServer
+import { BookingConfirmationTemplate, BookingCancellationTemplate, BookingRequestReceivedTemplate } from './components/EmailTemplates'; // Import email templates
+import { Booking, Apartment, Host } from './types'; // Import types for explicit casting
 
 dotenv.config();
 
@@ -62,6 +66,7 @@ const initDb = async () => {
       CREATE TABLE IF NOT EXISTS bookings (
         id TEXT PRIMARY KEY,
         apartment_id TEXT REFERENCES apartments(id) ON DELETE CASCADE,
+        guest_name TEXT, -- Added guest_name column
         guest_email TEXT,
         guest_phone TEXT,
         num_guests INT,
@@ -134,6 +139,74 @@ app.get('/api/v1/landing', tenantMiddleware, async (req: any, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch landing data' });
+  }
+});
+
+// Brevo (Sendinblue) SMTP Transporter
+const brevoTransporter = nodemailer.createTransport({
+  host: 'smtp-relay.brevo.com',
+  port: 587,
+  secure: false, // Use STARTTLS for port 587
+  auth: {
+    user: process.env.BREVO_SMTP_USER || 'a1c59900@smtp-brevo.com', // Use provided Brevo login
+    pass: process.env.BREVO_SMTP_PASS || 'xsmtpsib-163b72085fda760d32c317c17ba1c7f786441ab49a21149c686fa346059427b5-2gKzXXnfd62TsMjF', // Use provided Brevo SMTP key
+  },
+});
+
+app.post('/api/v1/send-email', async (req, res) => {
+  // Explicitly cast req.body to the expected types for better type safety
+  const { toEmail, subject, templateName, booking, apartment, host } = req.body as {
+    toEmail: string;
+    subject: string;
+    templateName: string;
+    booking: Booking;
+    apartment: Apartment;
+    host: Host;
+  };
+
+  console.log(`Received email request: Sending "${templateName}" to ${toEmail} for booking ${booking?.id}`);
+
+  let htmlContent = '';
+  try {
+    switch (templateName) {
+      case 'BookingRequestReceived':
+        // Rewriting JSX to React.createElement to avoid JSX parsing issues in .ts file
+        htmlContent = ReactDOMServer.renderToString(React.createElement(BookingRequestReceivedTemplate, { host: host, apartment: apartment, booking: booking }));
+        break;
+      case 'BookingConfirmation':
+        // Rewriting JSX to React.createElement to avoid JSX parsing issues in .ts file
+        htmlContent = ReactDOMServer.renderToString(React.createElement(BookingConfirmationTemplate, { host: host, apartment: apartment, booking: booking }));
+        break;
+      case 'BookingCancellation':
+        // Rewriting JSX to React.createElement to avoid JSX parsing issues in .ts file
+        htmlContent = ReactDOMServer.renderToString(React.createElement(BookingCancellationTemplate, { host: host, apartment: apartment, booking: booking }));
+        break;
+      default:
+        console.error('Invalid email template specified:', templateName);
+        return res.status(400).json({ error: 'Invalid email template specified.' });
+    }
+
+    if (!htmlContent) {
+      console.error('Generated HTML content is empty for template:', templateName);
+      return res.status(500).json({ error: 'Failed to generate email content.' });
+    }
+    console.log(`HTML Content Length for ${templateName}: ${htmlContent.length} characters`);
+
+
+    await brevoTransporter.sendMail({
+      from: `Wanderlust Stays <${brevoTransporter.options.auth.user}>`, // Sender email
+      to: toEmail,
+      subject: subject,
+      html: htmlContent,
+    });
+    console.log(`Email sent successfully to ${toEmail} for template: ${templateName}`);
+    res.status(200).json({ message: 'Email sent successfully.' });
+  } catch (error) {
+    console.error(`Failed to send email for template ${templateName} to ${toEmail}:`, error);
+    if (error.responseCode) {
+        console.error(`SMTP Error Code: ${error.responseCode}, Message: ${error.response}`);
+    }
+    res.status(500).json({ error: 'Failed to send email.', details: error.message });
   }
 });
 
