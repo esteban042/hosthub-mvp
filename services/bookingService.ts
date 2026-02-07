@@ -1,5 +1,5 @@
 
-import { Booking, BlockedDate, BookingStatus } from '../types';
+import { Booking, BlockedDate, BookingStatus } from '../types.js';
 
 /**
  * Checks if two date ranges overlap.

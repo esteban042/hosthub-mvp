@@ -1,7 +1,7 @@
 
-import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types';
+import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
-import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData';
+import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
 
 const SUPABASE_URL = 'https://dmldmpdflblwwoppbvkv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_lYCWq0C3KkMvjnGYjL-VJg_WewYCS_q';
@@ -142,7 +142,7 @@ export const hostHubApi = {
   },
 
   async updateHosts(updatedList: Host[]): Promise<Host[]> {
-    const promises = updatedList.map(h => {
+    const promises = updatedList.map((h: Host) => {
       const payload = {
         name: h.name,
         slug: h.slug,
@@ -168,7 +168,7 @@ export const hostHubApi = {
   },
 
   async updateApartments(updatedList: Apartment[]): Promise<Apartment[]> {
-    const promises = updatedList.map(a => {
+    const promises = updatedList.map((a: Apartment) => {
       const payload = {
         host_id: a.hostId,
         title: a.title,
@@ -193,7 +193,7 @@ export const hostHubApi = {
   },
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
-    const promises = updatedList.map(b => {
+    const promises = updatedList.map((b: Booking) => {
       const payload = {
         guest_name: b.guestName, 
         status: b.status,
@@ -221,7 +221,7 @@ export const hostHubApi = {
   },
 
   async seedDatabase(): Promise<void> {
-    const hostPayloads = MOCK_HOSTS.map(h => ({
+    const hostPayloads = MOCK_HOSTS.map((h: any) => ({
       id: h.id,
       slug: h.slug,
       name: h.name,
@@ -241,7 +241,7 @@ export const hostHubApi = {
     }));
     await supabase.from('hosts').upsert(hostPayloads);
 
-    const aptPayloads = MOCK_APARTMENTS.map(a => ({
+    const aptPayloads = MOCK_APARTMENTS.map((a: any) => ({
       id: a.id,
       host_id: a.hostId,
       title: a.title,
@@ -260,7 +260,7 @@ export const hostHubApi = {
     }));
     await supabase.from('apartments').upsert(aptPayloads);
 
-    const bookingPayloads = MOCK_BOOKINGS.map(b => ({
+    const bookingPayloads = MOCK_BOOKINGS.map((b: any) => ({
       id: b.id,
       apartment_id: b.apartmentId,
       guest_name: b.guestName, 

@@ -12,6 +12,7 @@ import { BookingConfirmationTemplate, BookingCancellationTemplate, BookingReques
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootPath = process.cwd();
+const clientPath = path.join(rootPath, 'dist');
 
 dotenv.config();
 
@@ -72,15 +73,15 @@ app.post('/api/v1/send-email', async (req, res) => {
   }
 });
 
-// Serve the static frontend files from the root directory
-app.use(express.static(rootPath) as any);
+// Serve the static frontend files from the 'dist' directory
+app.use(express.static(clientPath));
 
 // Fallback: Send index.html for any non-API routes (SPA support)
 app.get('*', (req, res) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
-  res.sendFile(path.join(rootPath, 'index.html'));
+  res.sendFile(path.join(clientPath, 'index.html'));
 });
 
 // Listen on 0.0.0.0 for Cloud Run compatibility
@@ -91,7 +92,7 @@ app.listen(port, '0.0.0.0', () => {
   Port: ${port}
   Health Check: http://0.0.0.0:${port}/health
   API Base: http://0.0.0.0:${port}/api/v1
-  Static Root: ${rootPath}
+  Static Root: ${clientPath}
   ---------------------------------
   `);
 });

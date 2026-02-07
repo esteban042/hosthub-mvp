@@ -37,8 +37,8 @@
         margin: 0;
         color: #e7e5e4;
       }
-      .font-serif { font-family: 'Playfair Display', serif; }
-      .font-dm { font-family: 'DM Sans', sans-serif; }
+      .font-serif { font-family: 'Playfair Display', 'serif'; }
+      .font-dm { font-family: 'DM Sans', 'sans-serif'; }
       
       /* Global No Italics */
       * { font-style: normal !important; }
@@ -53,28 +53,9 @@
         background-position: center;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://esm.sh/react@^19.2.4/",
-    "react": "https://esm.sh/react@^19.2.4",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.4/",
-    "pg": "https://esm.sh/pg@^8.12.0",
-    "cors": "https://esm.sh/cors@^2.8.5",
-    "express": "https://esm.sh/express@^4.19.2",
-    "lucide-react": "https://esm.sh/lucide-react@0.475.0",
-    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2.48.1",
-    "nodemailer": "https://esm.sh/nodemailer@^6.9.14",
-    "dotenv": "https://esm.sh/dotenv@^17.2.4",
-    "path": "https://esm.sh/path@^0.12.7",
-    "url": "https://esm.sh/url@^0.11.4"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
-</head>
+  </head>
   <body class="bg-stone-950 text-stone-200 antialiased">
     <div id="root"></div>
-  <script type="module" src="/index.tsx"></script>
-</body>
+    <script type="module" src="/index.tsx"></script>
+  </body>
 </html>

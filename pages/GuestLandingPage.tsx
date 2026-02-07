@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig } from '../types';
-import { isOverlapping } from '../services/bookingService'; 
+import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig, PremiumSection, PriceRule } from '../types.js';
+import { isOverlapping } from '../services/bookingService.js'; 
 import { 
   Bed, 
   Bath, 
@@ -106,7 +106,7 @@ export const HeroCalendar: React.FC<{
 
   const getPriceForDate = (dateStr: string) => {
     if (!apartment) return null;
-    const override = apartment.priceOverrides?.find(rule => dateStr >= rule.startDate && dateStr <= rule.endDate);
+    const override = apartment.priceOverrides?.find((rule: PriceRule) => dateStr >= rule.startDate && dateStr <= rule.endDate);
     return override ? override.price : (apartment.pricePerNight || 0);
   };
 
@@ -244,7 +244,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
       </div>
 
       <div className="space-y-32">
-        {config.sections.map((section, idx) => {
+        {config.sections.map((section: PremiumSection, idx: number) => {
           const isEven = idx % 2 === 0;
           const imageUrl = config.images[idx % config.images.length];
           const secondImageUrl = config.images[(idx + 1) % config.images.length];
@@ -285,7 +285,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
       {config.images.length > 3 && (
         <div className="pt-20">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
-            {config.images.slice(0, 4).map((img, i) => (
+            {config.images.slice(0, 4).map((img: string, i: number) => (
               <div key={i} className={`rounded-3xl overflow-hidden border border-stone-800 relative group h-full ${i % 2 === 0 ? 'mt-8' : 'mb-8'}`}>
                 <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={`Gallery ${i}`} />
               </div>

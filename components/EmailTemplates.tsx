@@ -1,6 +1,6 @@
 import React from 'react';
-import { Host, Apartment, Booking, BookingStatus } from '../types';
-import { formatDate } from '../pages/GuestLandingPage';
+import { Host, Apartment, Booking, BookingStatus } from '../types.js';
+import { formatDate } from '../pages/GuestLandingPage.js';
 
 const EMAIL_BG = '#1c1a19';
 const ACCENT = '#e97c62';

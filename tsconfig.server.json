@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "jsx": "react",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -13,14 +14,14 @@
   "include": [
     "server.ts",
     "types.ts",
-    "services/**/*.ts"
+    "services/**/*.ts",
+    "components/EmailTemplates.tsx"
   ],
   "exclude": [
     "node_modules",
     "dist",
     "index.tsx",
     "App.tsx",
-    "components/**/*.tsx",
     "pages/**/*.tsx",
     "mockData.ts"
   ]
