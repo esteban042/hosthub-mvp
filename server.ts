@@ -1,20 +1,18 @@
 import express from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
-import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 import { BookingConfirmationTemplate, BookingCancellationTemplate, BookingRequestReceivedTemplate } from './components/EmailTemplates.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
-
-dotenv.config();
 
 const app = express();
 // Cloud Run injects the PORT environment variable automatically
@@ -27,6 +25,15 @@ app.use(express.json() as any);
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
+
+// Helper function to get SMTP password
+function getSmtpPassword() {
+  const passwordPath = process.env.BREVO_SMTP_PASS;
+  if (passwordPath && fs.existsSync(passwordPath)) {
+    return fs.readFileSync(passwordPath, 'utf8').trim();
+  }
+  return process.env.BREVO_SMTP_PASS;
+}
 
 // API: Send Email
 app.post('/api/v1/send-email', async (req, res) => {
@@ -43,7 +50,10 @@ app.post('/api/v1/send-email', async (req, res) => {
       htmlContent = ReactDOMServer.renderToString(React.createElement(BookingRequestReceivedTemplate, { host, apartment, booking }));
     }
 
-    if (!process.env.BREVO_SMTP_USER || !process.env.BREVO_SMTP_PASS) {
+    const smtpPassword = getSmtpPassword();
+    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.BREVO_SMTP_USER;
+
+    if (!process.env.BREVO_SMTP_USER || !smtpPassword) {
       console.log('--- EMAIL SIMULATION ---');
       console.log('To:', toEmail);
       console.log('Subject:', subject);
@@ -55,12 +65,12 @@ app.post('/api/v1/send-email', async (req, res) => {
       port: 587,
       auth: {
         user: process.env.BREVO_SMTP_USER,
-        pass: process.env.BREVO_SMTP_PASS,
+        pass: smtpPassword,
       },
     });
 
     await transporter.sendMail({
-      from: `"HostHub Luxury Stays" <${process.env.BREVO_SMTP_USER}>`,
+      from: `"HostHub Luxury Stays" <${senderEmail}>`,
       to: toEmail,
       subject: subject,
       html: htmlContent,
