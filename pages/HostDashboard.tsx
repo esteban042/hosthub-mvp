@@ -143,7 +143,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all');
-  const [previewBooking, setPreviewBooking] = useState<{booking: Booking, type: 'confirmation' | 'cancellation'} | null>(null);
   const [copied, setCopied] = useState(false);
 
   const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
@@ -201,7 +200,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     if (!bookedApartment) return;
 
     if (status === BookingStatus.CONFIRMED || status === BookingStatus.PAID) {
-      setPreviewBooking({ booking, type: 'confirmation' });
       await hostHubApi.sendEmail(
         booking.guestEmail,
         `Your HostHub Booking for ${bookedApartment.title} has been Confirmed!`,
@@ -211,7 +209,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         host
       );
     } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
-      setPreviewBooking({ booking, type: 'cancellation' });
       await hostHubApi.sendEmail(
         booking.guestEmail,
         `Update on your HostHub Booking Request for ${bookedApartment.title}`,
@@ -563,27 +560,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         </div>
       )}
 
-      {previewBooking && (
-        <div className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
-          <div className="w-full max-w-2xl space-y-8 my-12">
-            <div className="flex items-center justify-between text-white">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 rounded-full bg-emerald-500 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
-                </div>
-                <h3 className="text-xl font-bold">Notification Dispatched</h3>
-              </div>
-              <button onClick={() => setPreviewBooking(null)} className="text-stone-500 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
-            </div>
-            {previewBooking.type === 'confirmation' ? (
-              <BookingConfirmationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
-            ) : (
-              <BookingCancellationTemplate host={host} booking={previewBooking.booking} apartment={apartments.find(a => a.id === previewBooking.booking.apartmentId)!} />
-            )}
-            <button onClick={() => setPreviewBooking(null)} className="w-full py-5 bg-stone-800 text-white font-bold rounded-2xl uppercase text-[10px] tracking-widest hover:bg-stone-700 transition-colors">Close Preview</button>
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 };

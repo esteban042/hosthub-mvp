@@ -138,9 +138,9 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   if (success) {
     return (
       <div className="pt-32 pb-24 max-w-2xl px-6 text-left font-dm animate-in zoom-in duration-500">
-        <h2 className="text-4xl font-serif font-bold text-white mb-4">Stay requested</h2>
-        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Your booking ID is {bookingId} and your selected country is {guestCountry}. {host.name} will review your request for "{apartment.title}" shortly.</p>
-        <button onClick={onBack} className="bg-coral-500 hover:bg-coral-600 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Back to listing</button>
+        <h2 className="text-4xl font-serif font-bold text-white mb-4">Booking confirmed</h2>
+        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Thank you {guestName}. Your booking is confirmed. Your booking ID is {bookingId}. We are more than happy to welcome you on the PLAtZHALTER at  "{apartment.title}". Please follow up on the deposit information.</p>
+        <button onClick={onBack} className="bg-transparent border-coral-500 text-coral-500 hover:bg-coral-600 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Back to listing</button>
       </div>
     );
   }

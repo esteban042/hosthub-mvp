@@ -101,6 +101,9 @@ export const HeroCalendar: React.FC<{
 }> = ({ onSelect, startDate, endDate, apartment, allBookings, allBlockedDates, airbnbBlockedDates }) => {
   const [month, setMonth] = useState(new Date());
   
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const offset = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
 
@@ -128,6 +131,10 @@ export const HeroCalendar: React.FC<{
   const isAirbnbBlocked = (dateStr: string) => airbnbBlockedDates.includes(dateStr);
 
   const handleDayClick = (dateStr: string) => {
+    const clickedDate = new Date(dateStr);
+    clickedDate.setUTCHours(0, 0, 0, 0);
+    if (clickedDate < today) return;
+
     const isDayUnavailable = isBooked(dateStr) || isBlockedManually(dateStr) || isAirbnbBlocked(dateStr);
     if (isDayUnavailable) return; 
 
@@ -142,11 +149,16 @@ export const HeroCalendar: React.FC<{
     }
   };
 
+
   const days = [];
   for (let i = 0; i < offset; i++) days.push(<div key={`e-${i}`} />);
   for (let d = 1; d <= daysInMonth(month); d++) {
     const dObj = new Date(month.getFullYear(), month.getMonth(), d);
     const dStr = dObj.toISOString().split('T')[0];
+
+    // Check if the current day is in the past.
+    const isPast = dObj < today;
+    
     const isSelected = dStr === startDate || dStr === endDate;
     const inRange = startDate && endDate && dStr >= startDate && dStr <= endDate;
     const price = getPriceForDate(dStr);
@@ -154,8 +166,11 @@ export const HeroCalendar: React.FC<{
     const isCurrentlyBooked = isBooked(dStr);
     const isCurrentlyBlockedManually = isBlockedManually(dStr);
     const isCurrentlyAirbnbBlocked = isAirbnbBlocked(dStr);
-    const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked;
 
+    // Add isPast to the check to make the day unavailable.
+    const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked || isPast;
+
+// ...
     let dayClass = 'text-stone-300 hover:bg-stone-800'; 
     
     if (isSelected) {

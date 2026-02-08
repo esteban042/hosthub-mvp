@@ -57,7 +57,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           
           <button 
             type="submit"
-            className="w-full bg-stone-100 hover:bg-white text-stone-950 font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl uppercase text-[10px] tracking-[0.2em] mt-4"
+            className="w-full bg-transparent border-white hover:bg-white text-black font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl uppercase text-[10px] tracking-[0.2em] mt-4"
           >
             Authenticate
           </button>
