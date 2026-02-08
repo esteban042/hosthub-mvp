@@ -1,4 +1,4 @@
-import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType } from './types.js';
+import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType } from './types';
 
 export const MOCK_HOSTS: Host[] = [
   {

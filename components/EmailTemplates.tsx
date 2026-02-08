@@ -1,6 +1,6 @@
 import React from 'react';
-import { Host, Apartment, Booking, BookingStatus } from '../types.js';
-import { formatDate } from '../pages/GuestLandingPage.js';
+import { Host, Apartment, Booking, BookingStatus } from '../types';
+import { formatDate } from '../pages/GuestLandingPage';
 
 const EMAIL_BG = '#1c1a19';
 const ACCENT = '#e97c62';
@@ -20,7 +20,7 @@ export const BookingConfirmationTemplate: React.FC<TemplateProps> = ({ host, apa
       <div className="flex justify-between items-start mb-10">
         <div>
           <h1 className="text-3xl font-serif font-bold text-white mb-2 tracking-tight">Booking Confirmed</h1>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Transaction ID: {booking.id.split('-').pop()}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Booking ID: {booking.id}</p>
         </div>
         <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
           <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -140,7 +140,7 @@ export const BookingRequestReceivedTemplate: React.FC<TemplateProps> = ({ host, 
       <div className="flex justify-between items-start mb-10">
         <div>
           <h1 className="text-3xl font-serif font-bold text-white mb-2 tracking-tight">Booking Request Received</h1>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Request ID: {booking.id.split('-').pop()}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400">Request ID: {booking.id}</p>
         </div>
         <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center border border-amber-500/20">
           <svg className="w-6 h-6 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

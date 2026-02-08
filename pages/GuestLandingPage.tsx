@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig, PremiumSection, PriceRule } from '../types.js';
-import { isOverlapping } from '../services/bookingService.js'; 
+import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig, PremiumSection, PriceRule } from '../types';
+import { isOverlapping } from '../services/bookingService'; 
 import { 
   Bed, 
   Bath, 

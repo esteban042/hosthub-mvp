@@ -89,6 +89,7 @@ export interface Booking {
   apartmentId: string;
   guestName?: string; // Added guestName field
   guestEmail: string;
+  guestCountry?: string;
   guestPhone?: string;
   numGuests?: number;
   startDate: string; 

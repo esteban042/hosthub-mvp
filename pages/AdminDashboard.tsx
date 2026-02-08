@@ -170,7 +170,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
         <button 
           onClick={() => { setEditingHost({ premiumConfig: { isEnabled: false, images: [], sections: [] } }); setShowHostModal(true); setActiveModalTab('basics'); }}
-          className="bg-white text-black px-10 py-5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all hover:bg-stone-200 flex items-center space-x-3 active:scale-95 shadow-2xl shadow-white/10"
+          className="bg-transparent text-white border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-coral flex items-center space-x-3 active:scale-95"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           <span>Onboard Host</span>
@@ -184,28 +184,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <CreditCard className="w-6 h-6" />
           </div>
           <h4 className="text-2xl font-black text-white leading-none">${stats.monthlySubscription.toLocaleString()}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Monthly SaaS Revenue</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Monthly Subscription Revenue</p>
         </div>
         <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
           <div className="w-12 h-12 bg-coral-500/10 rounded-2xl flex items-center justify-center text-coral-500 mb-6">
             <Percent className="w-6 h-6" />
           </div>
           <h4 className="text-2xl font-black text-white leading-none">${Math.round(stats.totalCommission).toLocaleString()}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Platform Commission</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Platform Commission</p>
         </div>
         <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
           <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-6">
             <Globe className="w-6 h-6" />
           </div>
           <h4 className="text-2xl font-black text-white leading-none">{stats.activeHosts}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Active Host Nodes</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Active Hosts</p>
         </div>
         <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
           <div className="w-12 h-12 bg-stone-100/10 rounded-2xl flex items-center justify-center text-stone-300 mb-6">
             <Layers className="w-6 h-6" />
           </div>
           <h4 className="text-2xl font-black text-white leading-none">{stats.totalAssets}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Global Asset Count</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Asset Onlline</p>
         </div>
       </div>
 
@@ -246,11 +246,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <div className="grid grid-cols-2 gap-4 py-6 border-y border-stone-800/40 mb-8">
                  <div>
-                   <p className="text-[9px] font-black uppercase text-stone-500 mb-1 tracking-widest">Managed Units</p>
+                   <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Managed Units</p>
                    <p className="text-xl font-black text-white">{hostApts.length}</p>
                  </div>
                  <div>
-                   <p className="text-[9px] font-black uppercase text-stone-500 mb-1 tracking-widest">Commission</p>
+                   <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Commission</p>
                    <p className="text-xl font-black text-white">{h.commissionRate}%</p>
                  </div>
               </div>
@@ -260,7 +260,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   onClick={() => { setEditingHost(h); setShowHostModal(true); setActiveModalTab('basics'); }}
                   className="flex-1 bg-stone-900 border border-stone-800 text-stone-400 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
-                  Configure Node
+                  Configure Host
                 </button>
                 <a 
                   href={activeUrl} 
@@ -283,7 +283,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             
             <div className="mb-12">
               <h3 className="text-3xl font-bold text-white mb-2">Host Entity Configuration</h3>
-              <p className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Update network privileges and landing data</p>
+              <p className="text-[10px] font-bold text-[rgb(214,213,213)] uppercase tracking-widest">Update network privileges and landing data</p>
             </div>
 
             <div className="flex bg-stone-950 border border-stone-800 p-2 rounded-2xl w-fit mb-12">
@@ -308,16 +308,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Host Name</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Host Name</label>
                       <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Subdomain Slug</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">Subdomain Slug</label>
                       <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="e.g. alpine-stays" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">SaaS Tier</label>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">SaaS Tier</label>
                         <select value={editingHost.subscriptionType} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
                           <option value={SubscriptionType.BASIC}>Basic Node</option>
                           <option value={SubscriptionType.PRO}>Pro Cluster</option>
@@ -325,26 +325,26 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </select>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Comm. Rate (%)</label>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Comm. Rate (%)</label>
                         <input type="number" required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Airbnb iCal Link</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Airbnb iCal Link</label>
                       <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
                     </div>
                   </div>
                   <div className="space-y-6">
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Host Bio (Public)</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Host Bio (Public)</label>
                       <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white h-[126px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Avatar Image URL</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Avatar Image URL</label>
                       <input type="url" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-stone-600 mb-3">Payment Instructions (Email)</label>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Payment Instructions (Email)</label>
                       <textarea value={editingHost.paymentInstructions || ''} onChange={e => setEditingHost({...editingHost, paymentInstructions: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-xs text-stone-400 h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none italic" placeholder="Instructions shown to guests after booking confirmation..." />
                     </div>
                   </div>
@@ -419,8 +419,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               )}
 
               <div className="flex space-x-4 pt-12 border-t border-stone-800/40">
-                <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-black py-6 rounded-2xl border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-all">Discard Changes</button>
-                <button type="submit" className="flex-1 bg-coral-500 hover:bg-coral-600 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">Authorize Host Config</button>
+                <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-black py-6 rounded-2xl border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white border-white transition-all">Discard Changes</button>
+                <button type="submit" className="flex-1 bg-transparent hover:bg-coral-500 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">Authorize Host Config</button>
               </div>
             </form>
           </div>

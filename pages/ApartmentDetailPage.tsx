@@ -12,7 +12,35 @@ interface ApartmentDetailPageProps {
   onNewBooking: (booking: Booking) => void;
 }
 
-const LABEL_COLOR = 'rgb(168, 162, 158)';
+const LABEL_COLOR = 'rgb(214,213,213)';
+
+// Function to generate a unique booking ID
+const generateBookingId = (hostName: string, existingBookings: Booking[]): string => {
+  const initials = hostName.split(' ').map(n => n[0]).join('').toUpperCase();
+  
+  // Find the highest existing booking number for this host
+  let maxNum = 0;
+  existingBookings.forEach(booking => {
+    if (booking.id.startsWith(initials)) {
+      try {
+        const numPart = parseInt(booking.id.substring(initials.length), 10);
+        if (!isNaN(numPart) && numPart > maxNum) {
+          maxNum = numPart;
+        }
+      } catch (e) {
+        console.error("Error parsing booking ID:", booking.id, e);
+      }
+    }
+  });
+
+  // Increment the number and format it
+  const newNum = maxNum + 1;
+  const paddedNum = newNum.toString().padStart(6, '0'); // YYxxxx1xx format suggests a variable length, so this might need adjustment
+
+  return `${initials}${paddedNum}`;
+};
+
+const countries = [ 'USA', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy', 'Australia', 'Japan', 'China', 'Brazil', 'India' ];
 
 const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   apartment,
@@ -26,12 +54,14 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState(''); 
+  const [guestCountry, setGuestCountry] = useState('');
   const [numGuests, setNumGuests] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [message, setMessage] = useState(''); 
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [bookingId, setBookingId] = useState('');
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const [isMapEnlarged, setIsMapEnlarged] = useState(false); 
 
@@ -75,11 +105,15 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     e.preventDefault();
     if (!email || !startDate || !endDate || !name) return;
     
+    const newBookingId = generateBookingId(host.name, bookings);
+    setBookingId(newBookingId);
+
     onNewBooking({
-      id: `book-${Date.now()}`,
+      id: newBookingId,
       apartmentId: apartment.id,
       guestName: name, 
       guestEmail: email,
+      guestCountry: guestCountry,
       guestPhone: phone, 
       numGuests: numGuests,
       startDate: startDate,
@@ -105,7 +139,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     return (
       <div className="pt-32 pb-24 max-w-2xl px-6 text-left font-dm animate-in zoom-in duration-500">
         <h2 className="text-4xl font-serif font-bold text-white mb-4">Stay requested</h2>
-        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>{host.name} will review your request for "{apartment.title}" shortly.</p>
+        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Your booking ID is {bookingId} and your selected country is {guestCountry}. {host.name} will review your request for "{apartment.title}" shortly.</p>
         <button onClick={onBack} className="bg-coral-500 hover:bg-coral-600 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Back to listing</button>
       </div>
     );
@@ -238,18 +272,16 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       <div className="bg-stone-900/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-800 shadow-2xl max-w-3xl mx-auto">
           <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-800/40">
              <div>
-                <span className="text-[10px] font-medium uppercase tracking-[0.2em] block mb-2" style={{ color: LABEL_COLOR }}>Estimated total</span>
+                <span className="text-[10px] font-medium text[rgb(214,213,213)] uppercase tracking-[0.2em] block mb-2" style={{ color: LABEL_COLOR }}>Estimated total</span>
                 <span className="text-5xl font-black text-white">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
              </div>
              <div className="text-right">
-                <span className="text-[10px] font-medium uppercase tracking-[0.2em] block mb-2" style={{ color: LABEL_COLOR }}>Base rate</span>
-                <span className="text-xl font-bold text-stone-400">${apartment.pricePerNight || 0}<span className="text-[10px] font-medium ml-1">/night</span></span>
              </div>
           </div>
 
           <form onSubmit={handleBooking} className="space-y-6">
              <div className="space-y-2">
-                <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Guest name</label>
+                <label className="block text-sm text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Guest name</label>
                 <input 
                   type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700" 
@@ -293,7 +325,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
              </div>
 
              <div className="space-y-2">
-                <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Number of guests</label>
+                <label className="block text-m text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Number of guests</label>
                 <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-800 rounded-2xl">
                     <button
                         type="button"
@@ -320,6 +352,17 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                    type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
+               </div>
+
+               <div className="space-y-2">
+                 <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Country</label>
+                 <select 
+                   required value={guestCountry} onChange={e => setGuestCountry(e.target.value)}
+                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                 >
+                   <option value="">Select a country</option>
+                   {countries.map(c => <option key={c} value={c}>{c}</option>)}
+                 </select>
                </div>
 
                <div className="space-y-2">

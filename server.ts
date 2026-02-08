@@ -1,32 +1,26 @@
-import express from 'express';
+import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { Pool } from 'pg';
 import nodemailer from 'nodemailer';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import path from 'path';
-import { fileURLToPath } from 'url';
 import fs from 'fs';
 import { BookingConfirmationTemplate, BookingCancellationTemplate, BookingRequestReceivedTemplate } from './components/EmailTemplates.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
 
 const app = express();
-// Cloud Run injects the PORT environment variable automatically
 const port = parseInt(process.env.PORT || '8080', 10);
 
-app.use(cors() as any);
-app.use(express.json() as any);
+app.use(cors());
+app.use(express.json());
 
-// Health check endpoint for Cloud Run/Kubernetes liveness probes
-app.get('/health', (req, res) => {
+app.get('/health', (req: Request, res: Response) => {
   res.status(200).send('OK');
 });
 
-// Helper function to get SMTP password
 function getSmtpPassword() {
   const passwordPath = process.env.BREVO_SMTP_PASS;
   if (passwordPath && fs.existsSync(passwordPath)) {
@@ -35,13 +29,11 @@ function getSmtpPassword() {
   return process.env.BREVO_SMTP_PASS;
 }
 
-// API: Send Email
-app.post('/api/v1/send-email', async (req, res) => {
+app.post('/api/v1/send-email', async (req: Request, res: Response) => {
   const { toEmail, subject, templateName, booking, apartment, host } = req.body;
 
   try {
     let htmlContent = '';
-    // Use React to render the email template to a string
     if (templateName === 'BookingConfirmation') {
       htmlContent = ReactDOMServer.renderToString(React.createElement(BookingConfirmationTemplate, { host, apartment, booking }));
     } else if (templateName === 'BookingCancellation') {
@@ -83,18 +75,15 @@ app.post('/api/v1/send-email', async (req, res) => {
   }
 });
 
-// Serve the static frontend files from the 'dist' directory
 app.use(express.static(clientPath));
 
-// Fallback: Send index.html for any non-API routes (SPA support)
-app.get('*', (req, res) => {
+app.get('*', (req: Request, res: Response) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
   res.sendFile(path.join(clientPath, 'index.html'));
 });
 
-// Listen on 0.0.0.0 for Cloud Run compatibility
 app.listen(port, '0.0.0.0', () => {
   console.log(`
   🚀 HostHub Unified Server active!

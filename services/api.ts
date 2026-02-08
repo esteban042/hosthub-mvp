@@ -2,6 +2,7 @@
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
+import { v4 as uuidv4 } from 'uuid';
 
 const SUPABASE_URL = 'https://dmldmpdflblwwoppbvkv.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_lYCWq0C3KkMvjnGYjL-VJg_WewYCS_q';
@@ -53,7 +54,7 @@ const mapBooking = (b: any): Booking => ({
   guestName: b.guest_name, 
   guestEmail: b.guest_email,
   guestPhone: b.guest_phone,
-  // Fixed: Map num_guests from DB to numGuests property
+  guestCountry: b.guest_country,
   numGuests: b.num_guests,
   startDate: b.start_date,
   endDate: b.end_date,
@@ -121,10 +122,11 @@ export const hostHubApi = {
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
     const payload = {
-      id: data.id || `book-${Date.now()}`,
+      id: data.id || uuidv4(),
       apartment_id: data.apartmentId,
       guest_name: data.guestName, 
       guest_email: data.guestEmail,
+      guest_country: data.guestCountry,
       guest_phone: data.guestPhone,
       num_guests: data.numGuests,
       start_date: data.startDate,
@@ -155,7 +157,6 @@ export const hostHubApi = {
         country: h.country,
         phone_number: h.phoneNumber,
         notes: h.notes,
-        // Fixed: Use camelCase airbnbCalendarLink from Host object
         airbnb_calendar_link: h.airbnbCalendarLink,
         premium_config: h.premiumConfig,
         payment_instructions: h.paymentInstructions
@@ -194,12 +195,15 @@ export const hostHubApi = {
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
     const promises = updatedList.map((b: Booking) => {
-      const payload = {
+      const payload: { [key: string]: any } = {
         guest_name: b.guestName, 
         status: b.status,
         is_deposit_paid: b.isDepositPaid,
-        total_price: b.totalPrice
+        total_price: b.totalPrice,
       };
+      if (b.guestCountry) {
+        payload.guest_country = b.guestCountry;
+      }
       return supabase.from('bookings').update(payload).eq('id', b.id);
     });
     
@@ -234,7 +238,6 @@ export const hostHubApi = {
       country: h.country,
       phone_number: h.phoneNumber,
       notes: h.notes,
-      // Fixed: Use camelCase airbnbCalendarLink from Host object
       airbnb_calendar_link: h.airbnbCalendarLink,
       premium_config: h.premiumConfig,
       payment_instructions: h.paymentInstructions
@@ -266,6 +269,7 @@ export const hostHubApi = {
       guest_name: b.guestName, 
       guest_email: b.guestEmail,
       guest_phone: b.guestPhone,
+      guest_country: b.guestCountry,
       num_guests: b.numGuests || 1,
       start_date: b.startDate,
       end_date: b.endDate,
@@ -273,7 +277,6 @@ export const hostHubApi = {
       total_price: b.totalPrice,
       is_deposit_paid: b.isDepositPaid,
       guest_message: b.guestMessage,
-      // Fixed: Use camelCase depositAmount from Booking object instead of snake_case deposit_amount
       deposit_amount: b.depositAmount || 0
     }));
     await supabase.from('bookings').upsert(bookingPayloads);
@@ -287,11 +290,6 @@ export const hostHubApi = {
     apartment: Apartment, 
     host: Host
   ): Promise<void> {
-    /**
-     * UNIFIED CLOUD ROUTING:
-     * By using a relative path, the browser will automatically send the request 
-     * to the exact same Cloud Run instance that served the index.html.
-     */
     const endpoint = `/api/v1/send-email`;
     console.log(`[HostHub Client] Triggering email dispatch via endpoint: ${endpoint}`);
     

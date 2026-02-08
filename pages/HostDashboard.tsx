@@ -307,7 +307,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
               {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
            </button>
         </div>
-        <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 px-8 py-3 rounded-full font-bold uppercase text-[10px] tracking-widest transition-all">Add Unit</button>
+        <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-transparent border border-white text-white hover:bg-coral-500/10 px-8 py-3 rounded-full font-bold uppercase text-[11px] tracking-widest transition-all">Add Unit</button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
@@ -346,7 +346,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
-            className={`px-8 py-4 rounded-lg text-sm font-bold transition-all capitalize ${activeTab === tab ? 'bg-stone-800 text-white shadow-lg' : 'text-stone-500 hover:text-white'}`}
+            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-stone-800 text-white shadow-lg' : 'text-stone-700 hover:text-white'}`}
           >
             {tab}
           </button>
@@ -366,10 +366,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value as any)}
-                    className={`px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+                    className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
                         statusFilter === filter.value
-                            ? 'bg-coral-500 text-white shadow-xl shadow-coral-500/20'
-                            : 'bg-stone-900/50 border border-stone-800 text-stone-500 hover:text-white'
+                            ? 'bg-[rgba(98,200,233,0.35)] text-white shadow-l shadow-coral-500/20'
+                            : 'bg-stone-900/50 border border-stone-800 text[rgb(214,213,213)] hover:text-white'
                     }`}
                 >
                     {filter.icon}
@@ -385,14 +385,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 {bks.map(b => (
                   <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
                     <div className="space-y-4 flex-1 text-left">
-                       <div className="flex items-center space-x-4">
-                          <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
-                          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-                            b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                            b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
-                            'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                          }`}>{b.status}</span>
-                       </div>
+                      <div className="flex items-center space-x-4">
+                        <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
+                        <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+                        b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                        b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
+                        'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                        }`}>{b.status}</span>
+                        <span className="text-xs text-stone-500 font-mono opacity-60">#{b.id.slice(-6)}</span>
+                    </div>
                        
                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
                           <div className="flex items-center space-x-2">
@@ -428,7 +429,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                             <button onClick={() => handleUpdateStatus(b, BookingStatus.CONFIRMED)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Confirm</button>
                         )}
                         {statusFilter !== 'past' && (
-                           <button onClick={() => handleUpdateStatus(b, BookingStatus.REJECTED)} className="bg-transparent border border-rose-700 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Reject</button>
+                           <button onClick={() => handleUpdateStatus(b, BookingStatus.REJECTED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Reject</button>
                         )}
                     </div>
                   </div>
@@ -495,22 +496,22 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     <div className="space-y-6">
                        <div>
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Unit Title</label>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Unit Title</label>
                           <input type="text" required value={editingApt.title || ''} onChange={e => setEditingApt({...editingApt, title: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
                        </div>
                        <div className="grid grid-cols-2 gap-4">
                           <div>
-                             <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">City</label>
+                             <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">City</label>
                              <input type="text" required value={editingApt.city || ''} onChange={e => setEditingApt({...editingApt, city: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
                           </div>
                           <div>
-                             <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Base Price</label>
+                             <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Base Price</label>
                              <input type="number" required value={editingApt.pricePerNight || 0} onChange={e => setEditingApt({...editingApt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
                           </div>
                        </div>
                     </div>
                     <div>
-                       <label className="block text-[10px] font-black uppercase tracking-widest text-stone-500 mb-3">Description</label>
+                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Description</label>
                        <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white h-[142px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                  </div>
@@ -554,7 +555,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                  </div>
                  
                  <div className="flex space-x-4 pt-6 border-t border-stone-800/60">
-                    <button type="button" onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white transition-all">Discard</button>
+                    <button type="button" onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-[rgb(214,213,213)] hover:text-white border-white transition-all">Discard</button>
                     <button type="submit" className="flex-1 bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest active:scale-95">Save Unit</button>
                  </div>
               </form>
