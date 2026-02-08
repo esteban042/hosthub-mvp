@@ -2,10 +2,8 @@
 // Removed `import { Type } from "@google/genai";` as it is not used in the application.
 
 export enum BookingStatus {
-  REQUESTED = 'requested',
   CONFIRMED = 'confirmed',
   PAID = 'paid',
-  REJECTED = 'rejected',
   CANCELED = 'canceled'
 }
 

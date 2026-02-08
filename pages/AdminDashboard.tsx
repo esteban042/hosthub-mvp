@@ -170,7 +170,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
         <button 
           onClick={() => { setEditingHost({ premiumConfig: { isEnabled: false, images: [], sections: [] } }); setShowHostModal(true); setActiveModalTab('basics'); }}
-          className="bg-transparent text-white outline-white border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-coral flex items-center space-x-3 active:scale-95"
+          className="bg-transparent text-white border border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-coral flex items-center space-x-3 active:scale-95"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           <span>Onboard Host</span>
@@ -215,7 +215,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           const hostApts = apartments.filter(a => a.hostId === h.id);
           const activeUrl = `${window.location.origin}/?host=${h.slug}`;
           const isCopied = copiedSlug === h.slug;
-          
+          const canceledBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && b.status === BookingStatus.CANCELED).length;
+
           return (
             <div key={h.id} className="bg-[#1c1a19] border border-stone-800 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
               <div className="flex justify-between items-start mb-6">
@@ -244,7 +245,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 py-6 border-y border-stone-800/40 mb-8">
+              <div className="grid grid-cols-3 gap-4 py-6 border-y border-stone-800/40 mb-8">
                  <div>
                    <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Managed Units</p>
                    <p className="text-xl font-black text-white">{hostApts.length}</p>
@@ -253,6 +254,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                    <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Commission</p>
                    <p className="text-xl font-black text-white">{h.commissionRate}%</p>
                  </div>
+                 <div>
+                  <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Canceled</p>
+                  <p className="text-xl font-black text-white">{canceledBookings}</p>
+                </div>
               </div>
 
               <div className="flex items-center space-x-3 mt-auto">

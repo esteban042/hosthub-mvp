@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
-import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, HeroCalendar, formatDate } from './GuestLandingPage';
+import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, HeroCalendar } from './GuestLandingPage';
+import { formatDate } from '../utils/dates';
+import { hostHubApi } from '../services/api';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
@@ -18,7 +20,6 @@ const LABEL_COLOR = 'rgb(214,213,213)';
 const generateBookingId = (hostName: string, existingBookings: Booking[]): string => {
   const initials = hostName.split(' ').map(n => n[0]).join('').toUpperCase();
   
-  // Find the highest existing booking number for this host
   let maxNum = 0;
   existingBookings.forEach(booking => {
     if (booking.id.startsWith(initials)) {
@@ -33,9 +34,8 @@ const generateBookingId = (hostName: string, existingBookings: Booking[]): strin
     }
   });
 
-  // Increment the number and format it
   const newNum = maxNum + 1;
-  const paddedNum = newNum.toString().padStart(6, '0'); // YYxxxx1xx format suggests a variable length, so this might need adjustment
+  const paddedNum = newNum.toString().padStart(6, '0');
 
   return `${initials}${paddedNum}`;
 };
@@ -101,14 +101,14 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     return total;
   }, [startDate, endDate, apartment]);
 
-  const handleBooking = (e: React.FormEvent) => {
+  const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !startDate || !endDate || !name) return;
     
     const newBookingId = generateBookingId(host.name, bookings);
     setBookingId(newBookingId);
 
-    onNewBooking({
+    const newBooking: Booking = {
       id: newBookingId,
       apartmentId: apartment.id,
       guestName: name, 
@@ -118,11 +118,23 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       numGuests: numGuests,
       startDate: startDate,
       endDate: endDate,
-      status: BookingStatus.REQUESTED,
+      status: BookingStatus.CONFIRMED,
       totalPrice: totalPrice, 
       isDepositPaid: false,
       guestMessage: message 
-    });
+    };
+    
+    // Send confirmation email immediately upon booking
+    await hostHubApi.sendEmail(
+      email,
+      `Your HostHub Booking for ${apartment.title} is Confirmed!`,
+      'BookingConfirmation',
+      newBooking,
+      apartment,
+      host
+    );
+
+    onNewBooking(newBooking);
     setSuccess(true);
   };
 
@@ -139,7 +151,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     return (
       <div className="pt-32 pb-24 max-w-2xl px-6 text-left font-dm animate-in zoom-in duration-500">
         <h2 className="text-4xl font-serif font-bold text-white mb-4">Booking confirmed</h2>
-        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Thank you {guestName}. Your booking is confirmed. Your booking ID is {bookingId}. We are more than happy to welcome you on the PLAtZHALTER at  "{apartment.title}". Please follow up on the deposit information.</p>
+        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Thank you {name}. Your booking is confirmed. Your booking ID is {bookingId}. We are more than happy to welcome you on the PLAtZHALTER at  "{apartment.title}". Please follow up on the deposit information.</p>
         <button onClick={onBack} className="bg-transparent border-coral-500 text-coral-500 hover:bg-coral-600 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Back to listing</button>
       </div>
     );

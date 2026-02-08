@@ -142,7 +142,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'apartments'>('bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
 
   const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
@@ -175,9 +175,9 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     const filtered = myBookings.filter(b => {
       const isPast = b.endDate < todayStr;
       if (statusFilter === 'past') return isPast;
-      if (isPast) return false; 
-      if (statusFilter === 'all') return true;
-      return b.status === statusFilter;
+      if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
+      if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
+      return !isPast && b.status === statusFilter;
     });
 
     const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
@@ -194,24 +194,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     return Array.from(groups.entries());
   }, [myBookings, apartments, statusFilter, todayStr]);
 
+
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
     const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
     if (!bookedApartment) return;
 
-    if (status === BookingStatus.CONFIRMED || status === BookingStatus.PAID) {
+    // Only send an email when a booking is CANCELED
+    if (status === BookingStatus.CANCELED) {
       await hostHubApi.sendEmail(
         booking.guestEmail,
-        `Your HostHub Booking for ${bookedApartment.title} has been Confirmed!`,
-        'BookingConfirmation',
-        booking,
-        bookedApartment,
-        host
-      );
-    } else if (status === BookingStatus.REJECTED || status === BookingStatus.CANCELED) {
-      await hostHubApi.sendEmail(
-        booking.guestEmail,
-        `Update on your HostHub Booking Request for ${bookedApartment.title}`,
+        `Update on your booking for ${bookedApartment.title}`,
         'BookingCancellation',
         booking,
         bookedApartment,
@@ -355,10 +348,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
            <div className="flex flex-wrap gap-3 mb-8 px-2">
             {[
                 { label: 'All Active', value: 'all', icon: null },
-                { label: 'Pending', value: BookingStatus.REQUESTED, icon: null },
                 { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
                 { label: 'Paid', value: BookingStatus.PAID, icon: null },
                 { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
+                { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
             ].map(filter => (
                 <button
                     key={filter.value}
@@ -385,10 +378,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                       <div className="flex items-center space-x-4">
                         <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
                         <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-                        b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                        b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
-                        'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                        }`}>{b.status}</span>
+                          b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                          b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
+                          'bg-rose-500/10 text-rose-400 border-rose-500/20' // For Canceled
+                          }`}>{b.status}</span>
                         <span className="text-xs text-stone-500 font-mono opacity-60">#{b.id.slice(-6)}</span>
                     </div>
                        
@@ -422,13 +415,19 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-4">
-                        {statusFilter !== 'past' && b.status === BookingStatus.REQUESTED && (
-                            <button onClick={() => handleUpdateStatus(b, BookingStatus.CONFIRMED)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Confirm</button>
-                        )}
-                        {statusFilter !== 'past' && (
-                           <button onClick={() => handleUpdateStatus(b, BookingStatus.REJECTED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Reject</button>
-                        )}
+                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings */}
+                      {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+                          <>
+                              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
+                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                          </>
+                      )}
+                    {/* Show only 'Cancel' for PAID bookings */}
+                    {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                   )}
                     </div>
+
                   </div>
                 ))}
              </div>

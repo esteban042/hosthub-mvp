@@ -64,18 +64,4 @@ export const checkAvailability = (
 /**
  * Checks for warnings (pending requests that overlap)
  */
-export const getPendingConflicts = (
-  apartmentId: string,
-  startDate: string,
-  endDate: string,
-  existingBookings: Booking[],
-  currentBookingId?: string
-): Booking[] => {
-  return existingBookings.filter(
-    (b) =>
-      b.apartmentId === apartmentId &&
-      b.id !== currentBookingId &&
-      b.status === BookingStatus.REQUESTED &&
-      isOverlapping(startDate, endDate, b.startDate, b.endDate)
-  );
-};
+

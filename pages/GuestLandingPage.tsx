@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig, PremiumSection, PriceRule } from '../types';
 import { isOverlapping } from '../services/bookingService'; 
+import { formatDate } from '../utils/dates';
 import { 
   Bed, 
   Bath, 
@@ -82,12 +83,6 @@ export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = 
   'Outdoor Shower': (c) => <ShowerHead className={c} strokeWidth={1.5} />,
   'BBQ Grill': (c) => <FlameKindling className={c} strokeWidth={1.5} />,
   'Default': (c) => <CircleHelp className={c} strokeWidth={1.5} />
-};
-
-export const formatDate = (dateStr: string) => {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' });
 };
 
 export const HeroCalendar: React.FC<{ 

@@ -6,7 +6,7 @@ import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import path from 'path';
 import fs from 'fs';
-import { BookingConfirmationTemplate, BookingCancellationTemplate, BookingRequestReceivedTemplate } from './components/EmailTemplates.js';
+import { BookingConfirmationTemplate, BookingCancellationTemplate } from './components/EmailTemplates.js';
 
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
@@ -38,8 +38,6 @@ app.post('/api/v1/send-email', async (req: Request, res: Response) => {
       htmlContent = ReactDOMServer.renderToString(React.createElement(BookingConfirmationTemplate, { host, apartment, booking }));
     } else if (templateName === 'BookingCancellation') {
       htmlContent = ReactDOMServer.renderToString(React.createElement(BookingCancellationTemplate, { host, apartment, booking }));
-    } else if (templateName === 'BookingRequestReceived') {
-      htmlContent = ReactDOMServer.renderToString(React.createElement(BookingRequestReceivedTemplate, { host, apartment, booking }));
     }
 
     const smtpPassword = getSmtpPassword();
