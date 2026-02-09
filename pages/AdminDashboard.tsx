@@ -20,7 +20,8 @@ import {
   Mail,
   Phone,
   Calendar,
-  Layers
+  Layers,
+  BarChart
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -42,8 +43,35 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 }) => {
   const [showHostModal, setShowHostModal] = useState(false);
   const [editingHost, setEditingHost] = useState<Partial<Host> | null>(null);
-  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content'>('basics');
+  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'statistics'>('basics');
+
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
+  const monthlyStats = useMemo(() => {
+    if (!editingHost || !editingHost.id) return [];
+
+    const hostBookings = bookings.filter(b => {
+      const apartment = apartments.find(a => a.id === b.apartmentId);
+      return apartment && apartment.hostId === editingHost.id && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID);
+    });
+
+    const statsByMonth: { [key: string]: { bookings: number; commission: number } } = {};
+
+    hostBookings.forEach(b => {
+      const month = new Date(b.startDate).toLocaleString('default', { month: 'long', year: 'numeric' });
+      if (!statsByMonth[month]) {
+        statsByMonth[month] = { bookings: 0, commission: 0 };
+      }
+      statsByMonth[month].bookings += 1;
+      statsByMonth[month].commission += b.totalPrice * ((editingHost.commissionRate || 0) / 100);
+    });
+
+    return Object.entries(statsByMonth).map(([month, data]) => ({
+      month,
+      ...data
+    })).sort((a, b) => new Date(b.month).getTime() - new Date(a.month).getTime());
+
+}, [editingHost, bookings, apartments]);
+
 
   const stats = useMemo(() => {
     const subRev = hosts.reduce((acc, h) => acc + (SUBSCRIPTION_PRICES[h.subscriptionType] || 0), 0);
@@ -317,10 +345,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <Layout className="w-4 h-4" />
                 <span>Premium Content</span>
               </button>
+              <button 
+  onClick={() => setActiveModalTab('statistics')} 
+  className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'statistics' ? 'bg-stone-800 text-white' : 'text-stone-600 hover:text-stone-400'}`}
+>
+  <BarChart className="w-4 h-4" />
+  <span>Statistics</span>
+</button>
+
             </div>
 
             <form onSubmit={handleSaveHost} className="space-y-12">
-              {activeModalTab === 'basics' ? (
+                            {activeModalTab === 'basics' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                   <div className="space-y-6">
                     <div>
@@ -365,7 +401,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                   </div>
                 </div>
-              ) : (
+              )}
+
+              {activeModalTab === 'content' && (
                 <div className="space-y-12">
                    <div className="flex items-center justify-between p-6 bg-stone-950 border border-stone-800 rounded-3xl">
                       <div className="flex items-center space-x-4">
@@ -434,9 +472,48 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               )}
 
+              {activeModalTab === 'statistics' && (
+                <div className="space-y-6 animate-in fade-in duration-500">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
+                        <BarChart className="w-4 h-4" />
+                        <span>Monthly Performance</span>
+                    </h4>
+                    <div className="overflow-hidden border border-stone-800 rounded-2xl">
+                        <table className="min-w-full divide-y divide-stone-800">
+                            <thead className="bg-stone-950">
+                                <tr>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-black text-stone-400 uppercase tracking-widest">
+                                        Month
+                                    </th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-black text-stone-400 uppercase tracking-widest">
+                                        Bookings
+                                    </th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-black text-stone-400 uppercase tracking-widest">
+                                        Commission
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-stone-800/50 bg-[#1c1a19]">
+                                {monthlyStats.length > 0 ? monthlyStats.map(stat => (
+                                    <tr key={stat.month}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{stat.month}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-300">{stat.bookings}</td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${stat.commission.toFixed(2)}</td>
+                                    </tr>
+                                )) : (
+                                    <tr>
+                                        <td colSpan={3} className="text-center py-10 text-sm text-stone-500">No booking data for this host.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+              )}
+
               <div className="flex space-x-4 pt-12 border-t border-stone-800/40">
-                <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-black py-6 rounded-2xl border border-stone-800 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white border-white transition-all">Discard Changes</button>
-                <button type="submit" className="flex-1 bg-transparent hover:bg-coral-500 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">Authorize Host Config</button>
+                <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-black py-6 rounded-2xl border border-coral-500/20 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white border-white transition-all">Discard Changes</button>
+                <button type="submit" className="flex-1 bg-transparent hover:bg-coral-500 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">SAVE</button>
               </div>
             </form>
           </div>

@@ -155,7 +155,11 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
 
-  const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
+  // const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
+  const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
+  
+  const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
+
   const todayStr = new Date().toISOString().split('T')[0];
 
   const shareableUrl = useMemo(() => {
@@ -202,15 +206,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
     const groups = new Map<string, Booking[]>();
     for (const booking of sorted) {
-        const apt = apartments.find(a => a.id === booking.apartmentId);
-        if (apt) {
+         const apt = myApartments.find(a => a.id === booking.apartmentId);
+      if (apt) {
             const aptTitle = apt.title;
             if (!groups.has(aptTitle)) groups.set(aptTitle, []);
             groups.get(aptTitle)?.push(booking);
         }
     }
     return Array.from(groups.entries());
-  }, [myBookings, apartments, statusFilter, todayStr]);
+  }, [myBookings, myApartments, statusFilter, todayStr]);
 
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
@@ -260,7 +264,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     e.preventDefault();
     if (!editingApt) return;
     if (editingApt.id) {
-      onUpdateApartments(apartments.map(a => a.id === editingApt.id ? { ...a, ...editingApt } as Apartment : a));
+      onUpdateApartments(myApartments.map(a => a.id === editingApt.id ? { ...a, ...editingApt } as Apartment : a));
     } else {
       const newApt: Apartment = {
         ...editingApt,
@@ -477,7 +481,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       {activeTab === 'calendar' && (
         <div className="space-y-20">
-           {apartments.map(apt => (
+           {myApartments.map(apt => (
              <div key={apt.id}>
                 <div className="lg:col-span-2 space-y-8 text-left">
                    <h3 className="text-3xl font-serif font-bold text-white tracking-tight">{apt.title}</h3>
@@ -500,7 +504,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       {activeTab === 'apartments' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-           {apartments.map(apt => (
+           {myApartments.map(apt => (
              <div key={apt.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
                 <img src={apt.photos[0]} className="aspect-video w-full object-cover" alt={apt.title} />
                 <div className="p-8 text-left">
