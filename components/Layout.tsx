@@ -57,7 +57,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <h1 className="text-2xl font-serif font-bold text-emerald-400">HostHub</h1>
           </div>
           
-          <nav className="hidden md:flex items-center space-x-1">
+          {/* <nav className="hidden md:flex items-center space-x-1">
              {(['guest', 'host', 'admin'] as UserRole[]).map((r) => (
                 <button
                   key={r}
@@ -71,15 +71,14 @@ export const Layout: React.FC<LayoutProps> = ({
                   {r}
                 </button>
               ))}
-          </nav>
+          </nav> */}
 
           <div className="flex items-center space-x-4">
             
             
             {user ? (
                <div className="flex items-center space-x-3">
-                 <img src={user.avatar} className="w-10 h-10 rounded-full border border-stone-800" alt="Avatar" />
-                 <button onClick={onLogout} className="text-stone-400 hover:text-white text-xs font-bold uppercase tracking-wider">Logout</button>
+                 <button onClick={onLogout} className="border border-stone-400 text-stone-400 hover:text-white text-xs font-bold uppercase tracking-wider">Logout</button>
                </div>
             ) : (
               <button 

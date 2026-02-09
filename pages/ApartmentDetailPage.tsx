@@ -41,6 +41,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const [isMapEnlarged, setIsMapEnlarged] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
 
   const aboutColRef = useRef<HTMLDivElement>(null);
   const [mapContainerHeight, setMapContainerHeight] = useState<number>(400);
@@ -80,7 +81,9 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !startDate || !endDate || !name) return;
+    if (!email || !startDate || !endDate || !name || isBooking) return;
+
+    setIsBooking(true);
 
     const bookingDetails: Partial<Booking> = {
       apartmentId: apartment.id,
@@ -114,6 +117,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
     } catch (error) {
       console.error("Failed to create booking:", error);
+      setIsBooking(false);
       // Here you could set an error state and display a message to the user
     }
   };
@@ -368,10 +372,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
              </div>
 
              <button
-               disabled={!name || !email || !startDate || !endDate}
+               disabled={!name || !email || !startDate || !endDate || isBooking}
                className="w-full bg-coral-500 hover:bg-coral-600 disabled:bg-stone-800 disabled:text-stone-600 disabled:cursor-not-allowed text-white font-black py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-coral-500/30 active:scale-[0.98]"
              >
-               Book now
+               {isBooking ? 'Booking...' : 'Book now'}
              </button>
              <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6" style={{ color: LABEL_COLOR }}>Book with instant confirmation</p>
           </form>

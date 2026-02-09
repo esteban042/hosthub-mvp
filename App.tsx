@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
 import { hostHubApi, fetchAndParseIcal } from './services/api';
@@ -25,10 +26,18 @@ const App: React.FC = () => {
   const [loadingAirbnbIcal, setLoadingAirbnbIcal] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
+  const clearData = () => {
+    setCurrentHost(null);
+    setApartments([]);
+    setBookings([]);
+    setBlockedDates([]);
+    setError(null);
+  };
+
   // --- DATA FETCHING ---
   const fetchGuestData = async (slug?: string) => {
+    clearData();
     setLoading(true);
-    setError(null);
     try {
       const data = await hostHubApi.getLandingData(slug);
       setCurrentHost(data.host);
@@ -44,12 +53,12 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchHostData = async () => {
-    if (!user) return;
+  const fetchHostData = async (userId: string) => {
+    if (!userId) return;
+    clearData();
     setLoading(true);
-    setError(null);
     try {
-      const hostData = await hostHubApi.getHostDataByUserId(user.id);
+      const hostData = await hostHubApi.getHostDataByUserId(userId);
       if (hostData) {
         setCurrentHost(hostData.host);
         setApartments(hostData.apartments);
@@ -66,8 +75,8 @@ const App: React.FC = () => {
   };
 
   const fetchAdminData = async () => {
+    clearData();
     setLoading(true);
-    setError(null);
     try {
       const [allHosts, allApartments, allBookings] = await Promise.all([
         hostHubApi.getAllHosts(),
@@ -83,14 +92,6 @@ const App: React.FC = () => {
       setLoading(false);
     }
   };
-
-  const clearData = () => {
-    setCurrentHost(null);
-    setApartments([]);
-    setBookings([]);
-    setBlockedDates([]);
-    setError(null);
-  };
   
   // --- AUTH & SESSION MANAGEMENT ---
   useEffect(() => {
@@ -101,7 +102,7 @@ const App: React.FC = () => {
         if (authUser.role === UserRole.ADMIN) {
           fetchAdminData();
         } else if (authUser.role === UserRole.HOST) {
-          fetchHostData();
+          fetchHostData(authUser.id);
         }
       } else {
         const params = new URLSearchParams(window.location.search);
@@ -179,14 +180,14 @@ const App: React.FC = () => {
   const handleUpdateBookings = async (updatedBookings: Booking[]) => {
     await hostHubApi.updateBookings(updatedBookings);
     if (user?.role === UserRole.HOST) {
-        fetchHostData();
+        fetchHostData(user.id);
     }
   };
 
   const handleUpdateApartments = async (updatedApartments: Apartment[]) => {
     await hostHubApi.updateApartments(updatedApartments);
     if (user?.role === UserRole.HOST) {
-        fetchHostData();
+        fetchHostData(user.id);
     }
   };
 
