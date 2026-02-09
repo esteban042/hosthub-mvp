@@ -23,6 +23,8 @@ import {
   Layers,
   BarChart
 } from 'lucide-react';
+import { COUNTRIES } from '../utils/countries';
+
 
 interface AdminDashboardProps {
   hosts: Host[];
@@ -361,16 +363,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="space-y-6">
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Host Name</label>
-                      <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                      <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">Subdomain Slug</label>
-                      <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="e.g. alpine-stays" />
+                      <input type="text" required value={editingHost.slug || ''} onChange={e => setEditingHost({...editingHost, slug: e.target.value.toLowerCase().replace(/\s+/g, '-')})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="e.g. alpine-stays" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">SaaS Tier</label>
-                        <select value={editingHost.subscriptionType} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
+                        <select value={editingHost.subscriptionType} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none">
                           <option value={SubscriptionType.BASIC}>Basic Node</option>
                           <option value={SubscriptionType.PRO}>Pro Cluster</option>
                           <option value={SubscriptionType.ENTERPRISE}>Enterprise Grid</option>
@@ -378,26 +380,56 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
                       <div>
                         <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Comm. Rate (%)</label>
-                        <input type="number" required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                        <input type="number" required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
                       </div>
                     </div>
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Airbnb iCal Link</label>
-                      <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
-                    </div>
-                  </div>
-                  <div className="space-y-6">
-                    <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Host Bio (Public)</label>
-                      <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white h-[126px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
-                    </div>
-                    <div>
-                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Avatar Image URL</label>
-                      <input type="url" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                      <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Payment Instructions (Email)</label>
-                      <textarea value={editingHost.paymentInstructions || ''} onChange={e => setEditingHost({...editingHost, paymentInstructions: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-5 text-xs text-stone-400 h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none italic" placeholder="Instructions shown to guests after booking confirmation..." />
+                      <textarea value={editingHost.paymentInstructions || ''} onChange={e => setEditingHost({...editingHost, paymentInstructions: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-xs text-stone-400 h-[100px] resize-none focus:ring-1 focus:ring-coral-500 outline-none italic" placeholder="Instructions shown to guests after booking confirmation..." />
+                    </div>
+                   
+                  </div>
+                  <div className="space-y-6">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Business Name</label>
+                      <input type="text" value={editingHost.businessName || ''} onChange={e => setEditingHost({ ...editingHost, businessName: e.target.value })} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Email</label>
+                      <input type="email" value={editingHost.contactEmail || ''} onChange={e => setEditingHost({ ...editingHost, contactEmail: e.target.value })} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Phone Number</label>
+                      <input type="tel" value={editingHost.phoneNumber || ''} onChange={e => setEditingHost({ ...editingHost, phoneNumber: e.target.value })} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Address</label>
+                      <input type="text" value={editingHost.physicalAddress || ''} onChange={e => setEditingHost({ ...editingHost, physicalAddress: e.target.value })} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Country</label>
+                      <select
+                        value={editingHost.country || ''}
+                        onChange={e => setEditingHost({ ...editingHost, country: e.target.value })}
+                        className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none appearance-none"
+                      >
+                        <option value="">Select a country</option>
+                        {COUNTRIES.map(country => (
+                          <option key={country.code} value={country.name}>{country.name}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Avatar Image URL</label>
+                      <input type="url" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Host Bio (Public)</label>
+                      <textarea value={editingHost.bio || ''} onChange={e => setEditingHost({...editingHost, bio: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white h-[126px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                   </div>
                 </div>
@@ -432,6 +464,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                  <ImageIcon className="w-4 h-4" />
                                  <span>Gallery Assets</span>
                               </h4>
+                              <div className="flex items-center space-x-4">
+                                <img src={editingHost.landingPagePicture || 'https://via.placeholder.com/150'} className="w-24 h-24 rounded-2xl object-cover" />
+                                <div className='w-full'>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Image URL</label>
+                                    <input
+                                      type="text"
+                                      value={editingHost.landingPagePicture || ''}
+                                      onChange={e => setEditingHost({ ...editingHost, landingPagePicture: e.target.value })}
+                                      className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none"
+                                      placeholder="https://example.com/image.jpg"
+                                    />
+                                </div>
+                              </div>
                               <button type="button" onClick={addPremiumImage} className="text-[10px] font-black uppercase tracking-widest text-emerald-400">+ Add Image</button>
                            </div>
                            <div className="space-y-3">
@@ -513,7 +558,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
               <div className="flex space-x-4 pt-12 border-t border-stone-800/40">
                 <button type="button" onClick={() => { setShowHostModal(false); setEditingHost(null); }} className="flex-1 font-black py-6 rounded-2xl border border-coral-500/20 text-[10px] uppercase tracking-widest text-stone-500 hover:text-white border-white transition-all">Discard Changes</button>
-                <button type="submit" className="flex-1 bg-transparent hover:bg-coral-500 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">SAVE</button>
+                <button type="submit" className="flex-1 bg-transparent border border-coral-500 hover:bg-coral-500 text-white font-black py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-coral-500/20">SAVE</button>
               </div>
             </form>
           </div>

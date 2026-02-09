@@ -183,14 +183,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
   const stats = useMemo(() => {
     const currentYear = new Date().getFullYear();
-    const pending = myBookings.filter(b => b.status === BookingStatus.REQUESTED && b.endDate >= todayStr).length;
+    const activeUnits = myApartments.filter(a => a.isActive).length;
+
     const active = myBookings.filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && b.endDate >= todayStr).length;
     const pastCount = myBookings.filter(b => b.endDate < todayStr).length;
     const revenueYear = myBookings
         .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
         .reduce((sum, b) => sum + b.totalPrice, 0);
-    return { pending, active, past: pastCount, revenueYear };
-  }, [myBookings, todayStr]);
+        return { activeUnits, active, past: pastCount, revenueYear };
+        }, [myBookings, myApartments, todayStr]);
 
   // Fix: Ensure groupedAndSortedBookings is defined before the main return statement.
   const groupedAndSortedBookings = useMemo(() => {
@@ -340,11 +341,11 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
         <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
-            <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Pending("w-8 h-8")}</div>
-            <div>
-                <h4 className="text-2xl font-bold text-white leading-none">{stats.pending}</h4>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Pending Requests</p>
-            </div>
+        <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Building("w-8 h-8")}</div>
+        <div>
+              <h4 className="text-2xl font-bold text-white leading-none">{stats.activeUnits}</h4>
+              <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Active Units</p>
+             </div>
         </div>
         <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
             <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Bookings("w-8 h-8")}</div>
@@ -532,26 +533,26 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     <div className="space-y-6">
                        <div>
                           <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Unit Title</label>
-                          <input type="text" required value={editingApt.title || ''} onChange={e => setEditingApt({...editingApt, title: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
+                          <input type="text" required value={editingApt.title || ''} onChange={e => setEditingApt({...editingApt, title: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
                        </div>
                        <div className="grid grid-cols-2 gap-4">
                           <div>
                              <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">City</label>
-                             <input type="text" required value={editingApt.city || ''} onChange={e => setEditingApt({...editingApt, city: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
+                             <input type="text" required value={editingApt.city || ''} onChange={e => setEditingApt({...editingApt, city: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
                           </div>
                           <div>
                              <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Base Price</label>
-                             <input type="number" required value={editingApt.pricePerNight || 0} onChange={e => setEditingApt({...editingApt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white outline-none" />
+                             <input type="number" required value={editingApt.pricePerNight || 0} onChange={e => setEditingApt({...editingApt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
                           </div>
                        </div>
                     </div>
                     <div>
                        <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Description</label>
-                       <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-800 rounded-2xl p-4 text-sm text-white h-[142px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+                       <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white h-[142px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
                     </div>
                  </div>
 
-                 <div className="pt-10 border-t border-stone-800/60">
+                 <div className="pt-10 border-t border-stone-600/60">
                    <div className="flex items-center justify-between mb-8">
                       <div className="flex items-center space-x-3">
                          <Tag className="w-5 h-5 text-emerald-400" />
@@ -562,7 +563,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                    
                    <div className="space-y-4">
                       {editingApt.priceOverrides?.map((rule) => (
-                        <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-stone-950 p-6 rounded-[1.8rem] border border-stone-800 items-end animate-in slide-in-from-bottom-2">
+                        <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-stone-950 p-6 rounded-[1.8rem] border border-stone-600 items-end animate-in slide-in-from-bottom-2">
                            <div>
                               <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">From Date</label>
                               <DatePicker
@@ -581,15 +582,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                            </div>
                            <div>
                               <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">Nightly Price ($)</label>
-                              <input type="number" value={rule.price} onChange={e => updatePriceRule(rule.id, { price: parseInt(e.target.value) })} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none" />
+                              <input type="number" value={rule.price} onChange={e => updatePriceRule(rule.id, { price: parseInt(e.target.value) })} className="w-full bg-stone-900 border border-stone-600 rounded-xl p-3 text-xs text-white outline-none" />
                            </div>
-                           <button type="button" onClick={() => removePriceOverride(rule.id)} className="p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-600 hover:text-rose-500 transition-all flex items-center justify-center">
+                           <button type="button" onClick={() => removePriceOverride(rule.id)} className="p-3 bg-stone-900 border border-stone-600 rounded-xl text-stone-600 hover:text-rose-500 transition-all flex items-center justify-center">
                               <Trash2 className="w-5 h-5" />
                            </button>
                         </div>
                       ))}
                       {(!editingApt.priceOverrides || editingApt.priceOverrides.length === 0) && (
-                        <div className="py-12 border border-dashed border-stone-800 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
+                        <div className="py-12 border border-dashed border-stone-600 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
                            <Info className="w-6 h-6 mb-2 opacity-20" />
                            <span>No manual price overrides active for this unit.</span>
                         </div>

@@ -328,6 +328,8 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const [dates, setDates] = useState({ start: '', end: '' });
   const [numGuests, setNumGuests] = useState(1);
+  const hostApartments = useMemo(() => 
+    apartments.filter(apt => apt.hostId === host.id), [apartments, host.id]);
 
   return (
     <div className="min-h-screen">
@@ -414,11 +416,11 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
       <section className="max-w-7xl mx-auto px-6 py-32">
         <div className="mb-16">
           <h2 className="text-5xl font-serif font-bold text-white mb-2 tracking-tight">Featured stays</h2>
-          <p className="text-stone-500 text-lg font-medium">{apartments.length} properties available</p>
-        </div>
+          <p className="text-stone-500 text-lg font-medium">{hostApartments.length} properties available</p>
+          </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-          {apartments.map((apt, idx) => (
+          {hostApartments.map((apt, idx) => (
             <div 
               key={apt.id} 
               onClick={() => onSelectApartment(apt.id)}
