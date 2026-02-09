@@ -173,11 +173,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     apartmentId: 'apt-1',
     guestName: 'John Doe',
     guestEmail: 'traveler@boutique.com',
+    guestCountry: 'USA',
+    numGuests: 2,
     startDate: `${currentYear}-06-10`,
     endDate: `${currentYear}-06-15`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 1250,
-    isDepositPaid: true
+    notes: ''
   },
   {
     id: 'book-2',
@@ -185,11 +187,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     apartmentId: 'apt-3',
     guestName: 'Alice Smith',
     guestEmail: 'city.mapper@design.jp',
+    guestCountry: 'Japan',
+    numGuests: 1,
     startDate: `${currentYear}-07-01`,
     endDate: `${currentYear}-07-05`,
     status: BookingStatus.REQUESTED,
     totalPrice: 840,
-    isDepositPaid: false
+    notes: ''
   },
   {
     id: 'book-3',
@@ -197,11 +201,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     apartmentId: 'apt-4',
     guestName: 'Maria Rossi',
     guestEmail: 'family.rossi@italy.it',
+    guestCountry: 'Italy',
+    numGuests: 4,
     startDate: `${currentYear}-08-12`,
     endDate: `${currentYear}-08-19`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 3150,
-    isDepositPaid: true
+    notes: ''
   },
   {
     id: 'book-4',
@@ -209,11 +215,13 @@ export const MOCK_BOOKINGS: Booking[] = [
     apartmentId: 'apt-1',
     guestName: 'Peter Jones',
     guestEmail: 'alpine.lover@example.com',
+    guestCountry: 'UK',
+    numGuests: 2,
     startDate: `${currentYear}-01-10`,
     endDate: `${currentYear}-01-12`,
     status: BookingStatus.PAID,
     totalPrice: 500,
-    isDepositPaid: true
+    notes: ''
   },
   {
     id: 'book-5',
@@ -221,10 +229,12 @@ export const MOCK_BOOKINGS: Booking[] = [
     apartmentId: 'apt-5',
     guestName: 'Sarah Kim',
     guestEmail: 'beach.goer@example.com',
+    guestCountry: 'USA',
+    numGuests: 3,
     startDate: `${currentYear}-09-01`,
     endDate: `${currentYear}-09-07`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 3600,
-    isDepositPaid: true
+    notes: ''
   }
 ];

@@ -1,71 +1,52 @@
-
-// Removed `import { Type } from "@google/genai";` as it is not used in the application.
-
-export enum BookingStatus {
-  CONFIRMED = 'confirmed',
-  PAID = 'paid',
-  CANCELED = 'canceled',
-  REJECTED = 'rejected'
-
-}
-
 export enum UserRole {
-  ADMIN = 'admin',
+  GUEST = 'guest',
   HOST = 'host',
-  GUEST = 'guest'
+  ADMIN = 'admin',
 }
 
 export enum SubscriptionType {
   BASIC = 'basic',
   PRO = 'pro',
-  ENTERPRISE = 'enterprise'
+  ENTERPRISE = 'enterprise',
+}
+
+export enum BookingStatus {
+    CONFIRMED = 'confirmed',
+    PAID = 'paid',
+    CANCELLED = 'cancelled',
+    REQUESTED = 'requested',
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
+  avatar: string;
   role: UserRole;
-  avatar?: string;
-}
-
-export interface PremiumSection {
-  title: string;
-  content: string;
-}
-
-export interface PremiumConfig {
-  isEnabled: boolean;
-  images: string[];
-  sections: PremiumSection[];
 }
 
 export interface Host {
   id: string;
-  slug: string; 
+  slug: string;
   name: string;
   bio: string;
   avatar: string;
   subscriptionType: SubscriptionType;
-  commissionRate: number; // 3, 4, 5, or 6
-  contactEmail?: string;
-  physicalAddress?: string;
-  country?: string;
-  phoneNumber?: string;
-  notes?: string; 
-  airbnbCalendarLink?: string;
-  premiumConfig?: PremiumConfig;
-  paymentInstructions?: string; // New: To be included in confirmation emails
-  businessName?: string;
-  landingPagePicture?: string;
-}
-
-export interface PriceRule {
-  id: string;
-  startDate: string;
-  endDate: string;
-  price: number;
-  label?: string;
+  commissionRate: number;
+  contactEmail: string;
+  physicalAddress: string;
+  country: string;
+  phoneNumber: string;
+  notes: string | null;
+  airbnbCalendarLink: string | null;
+  paymentInstructions: string | null;
+  businessName: string | null;
+  landingPagePicture: string | null;
+  premiumConfig: {
+    images: string[];
+    sections: { title: string; content: string }[];
+    isEnabled: boolean;
+  } | null;
 }
 
 export interface Apartment {
@@ -73,39 +54,68 @@ export interface Apartment {
   hostId: string;
   title: string;
   description: string;
+  address: string;
   city: string;
-  address?: string;
   capacity: number;
   bedrooms: number;
   bathrooms: number;
-  pricePerNight: number; 
-  priceOverrides?: PriceRule[]; 
+  pricePerNight: number;
+  priceOverrides: { date: string; price: number }[];
   amenities: string[];
   photos: string[];
-  isActive: boolean; 
-  mapEmbedUrl?: string;
+  isActive: boolean;
+  mapEmbedUrl: string | null;
 }
 
 export interface Booking {
   id: string;
+  customBookingId?: string;
   apartmentId: string;
-  guestName?: string; // Added guestName field
+  guestName: string;
   guestEmail: string;
-  guestCountry?: string;
-  guestPhone?: string;
-  numGuests?: number;
-  startDate: string; 
-  endDate: string; 
-  status: BookingStatus;
+  guestCountry: string;
+  numGuests: number;
+  startDate: string;
+  endDate: string;
   totalPrice: number;
-  isDepositPaid: boolean; 
-  guestMessage?: string;
-  depositAmount?: number; // New: Calculated for confirmation
+  status: BookingStatus;
+  notes: string | null;
 }
 
 export interface BlockedDate {
   id: string;
-  apartmentId: string; 
-  date: string; 
-  reason?: string;
+  apartmentId: string;
+  date: string;
 }
+
+// Utility to convert snake_case to camelCase
+const toCamel = (s: string): string => {
+    return s.replace(/([-_][a-z])/ig, ($1) => {
+      return $1.toUpperCase()
+        .replace('-', '')
+        .replace('_', '');
+    });
+};
+
+const isObject = (o: any): o is Object => {
+    return o === Object(o) && !Array.isArray(o) && typeof o !== 'function';
+};
+
+export const keysToCamel = <T>(o: any): T => {
+    if (isObject(o)) {
+      const n: { [key: string]: any } = {};
+
+      Object.keys(o)
+        .forEach((k: string) => {
+          n[toCamel(k)] = keysToCamel((o as any)[k]);
+        });
+
+      return n as T;
+    } else if (Array.isArray(o)) {
+      return o.map((i) => {
+        return keysToCamel(i);
+      }) as unknown as T;
+    }
+
+    return o as T;
+};

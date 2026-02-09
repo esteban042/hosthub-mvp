@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User, BookingStatus } from './types';
-import { hostHubApi, fetchAndParseIcal, supabase } from './services/api';
+import { hostHubApi, fetchAndParseIcal } from './services/api';
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -9,6 +8,10 @@ import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
+
+const ADMIN_EMAIL = 'admin@hosthub.com';
+const ADMIN_PWD = 'admin123';
+const DEFAULT_HOST_PWD = 'password123';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -24,6 +27,7 @@ const App: React.FC = () => {
   const [selectedAptId, setSelectedAptId] = useState<string | null>(null);
   const [currentHostAirbnbBlockedDates, setCurrentHostAirbnbBlockedDates] = useState<string[]>([]);
   const [loadingAirbnbIcal, setLoadingAirbnbIcal] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
   const fetchData = async (slug?: string) => {
     setLoading(true);
@@ -64,31 +68,23 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Check for an existing session
-    const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        const user = session.user;
-        // You'll need to fetch the user's role from your database
-        // For now, let's assume a simple mapping or a default role
-        // This is a placeholder and should be replaced with actual logic
-        const role = user.email?.endsWith('@host.com') ? UserRole.HOST : UserRole.ADMIN;
-        setUser({ id: user.id, email: user.email!, name: user.email!, role: role, avatar: '' });
-        setCurrentRole(role);
-        if (role === UserRole.HOST) {
-          const hostSlug = user.email?.split('@')[0];
-          fetchData(hostSlug);
-        } else if (role === UserRole.ADMIN) {
-          fetchAdminData();
+    const params = new URLSearchParams(window.location.search);
+    const hostSlug = params.get('host');
+    const testHost = params.get('test_host');
+
+    const initialLoad = async () => {
+      await fetchData(hostSlug || undefined);
+
+      if (testHost) {
+        const allHosts = await hostHubApi.getAllHosts();
+        const matchingHost = allHosts.find(h => h.slug === testHost);
+        if (matchingHost) {
+          handleAuth(`${matchingHost.slug}@host.com`, DEFAULT_HOST_PWD);
         }
-      } else {
-        // Detect host from URL: ?host=slug
-        const params = new URLSearchParams(window.location.search);
-        const hostSlug = params.get('host');
-        fetchData(hostSlug || undefined);
       }
     };
-    checkSession();
+
+    initialLoad();
   }, []);
 
   useEffect(() => {
@@ -122,33 +118,26 @@ const App: React.FC = () => {
   };
 
   const handleAuth = async (email: string, pass: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password: pass,
-    });
-
-    if (error) {
-      alert(error.message);
+    if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
+      setUser({ id: 'admin-1', email, name: 'Admin', role: UserRole.ADMIN, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=200' });
+      setCurrentRole(UserRole.ADMIN);
+      setShowLogin(false);
+      await fetchAdminData();
       return;
     }
-
-    if (data.user) {
-      const user = data.user;
-      // This is a placeholder and should be replaced with actual logic
-      const role = user.email?.endsWith('@host.com') ? UserRole.HOST : UserRole.ADMIN;
-      setUser({ id: user.id, email: user.email!, name: user.email!, role: role, avatar: '' });
-      setCurrentRole(role);
-      if (role === UserRole.HOST) {
-        const hostSlug = user.email?.split('@')[0];
-        fetchData(hostSlug);
-      } else if (role === UserRole.ADMIN) {
-        fetchAdminData();
-      }
+    const matchingHost = hosts.find(h => email === `${h.slug}@host.com`);
+    if (matchingHost && pass === DEFAULT_HOST_PWD) {
+      setUser({ id: matchingHost.id, email, name: matchingHost.name, role: UserRole.HOST, avatar: matching.avatar });
+      setCurrentHost(matchingHost);
+      setCurrentRole(UserRole.HOST);
+      setShowLogin(false);
+      fetchData(matchingHost.slug);
+      return;
     }
+    alert('Invalid credentials.');
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const handleLogout = () => {
     setUser(null);
     setCurrentRole(UserRole.GUEST);
   };
@@ -195,39 +184,40 @@ const App: React.FC = () => {
   };
 
   const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
-  // This line instantly updates the UI with the change.
-  setBlockedDates(updatedBlocked);
-  // This line saves the change to the database in the background.
-  await hostHubApi.updateBlockedDates(updatedBlocked);
-};
-
-  // const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
-  //  await hostHubApi.updateBlockedDates(updatedBlocked);
-  //  const data = await hostHubApi.getLandingData(currentHost?.slug);
- //   setBlockedDates(data.blockedDates);
- // };
+    setBlockedDates(updatedBlocked);
+    await hostHubApi.updateBlockedDates(updatedBlocked);
+  };
 
   if (loading) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing HostHub Cluster...</p></div>;
 
-  if (!currentHost) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm"><div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10"><Database className="w-10 h-10 text-emerald-400" /></div><h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight">System Unprovisioned</h2><p className="text-stone-500 max-w-md mx-auto mb-12">No environment data found. Provision mock ecosystem to begin.</p>{error && <div className="mb-10 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-left max-w-lg mx-auto"><AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" /><p className="text-xs text-rose-400 font-medium">{error}</p></div>}<div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"><button disabled={seeding} onClick={handleSeed} className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-emerald-500/20 flex items-center space-x-3">{seeding ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}<span>Provision Mock Data</span></button><button onClick={() => setCurrentRole(UserRole.ADMIN)} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Access Admin Console</button></div></div>;
+  if (!currentHost && currentRole === UserRole.GUEST) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm"><div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10"><Database className="w-10 h-10 text-emerald-400" /></div><h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight">System Unprovisioned</h2><p className="text-stone-500 max-w-md mx-auto mb-12">No environment data found. Provision mock ecosystem to begin.</p>{error && <div className="mb-10 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-left max-w-lg mx-auto"><AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" /><p className="text-xs text-rose-400 font-medium">{error}</p></div>}<div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"><button disabled={seeding} onClick={handleSeed} className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-emerald-500/20 flex items-center space-x-3">{seeding ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}<span>Provision Mock Data</span></button><button onClick={() => setShowLogin(true)} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Access Admin Console</button></div></div>;
 
   const renderContent = () => {
-    if (currentRole === UserRole.GUEST) {
-      if (selectedAptId) {
+    if (showLogin) return <LoginPage onLogin={handleAuth} />;
+
+    if (user) {
+        switch (currentRole) {
+            case UserRole.ADMIN: return <AdminDashboard hosts={hosts} apartments={apartments} bookings={bookings} onUpdateHosts={handleUpdateHosts} />;
+            case UserRole.HOST: 
+                if(currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} onUpdateBookings={handleUpdateBookings} onUpdateBlockedDates={handleUpdateBlockedDates} onUpdateApartments={handleUpdateApartments} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
+                return null;
+            default: return null;
+        }
+    }
+
+    if (selectedAptId && currentHost) {
         const apt = apartments.find(a => a.id === selectedAptId);
         if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
-      }
-      return <GuestLandingPage host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id) => setSelectedAptId(id)} onNewBooking={handleNewBooking} />;
     }
-    if (!user) return <LoginPage onLogin={handleAuth} />;
-    switch (currentRole) {
-      case UserRole.ADMIN: return <AdminDashboard hosts={hosts} apartments={apartments} bookings={bookings} onUpdateHosts={handleUpdateHosts} />;
-      case UserRole.HOST: return <HostDashboard host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} onUpdateBookings={handleUpdateBookings} onUpdateBlockedDates={handleUpdateBlockedDates} onUpdateApartments={handleUpdateApartments} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
-      default: return null;
+
+    if(currentHost) {
+        return <GuestLandingPage host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id) => setSelectedAptId(id)} onNewBooking={handleNewBooking} />;
     }
+
+    return null;
   };
 
-  return <Layout role={currentRole} setRole={setCurrentRole} currentHost={currentHost} allHosts={hosts} onHostChange={handleHostChange} user={user} onLogout={handleLogout}>{renderContent()}</Layout>;
+  return <Layout role={currentRole} setRole={setCurrentRole} onSignIn={() => setShowLogin(true)} currentHost={currentHost} allHosts={hosts} onHostChange={handleHostChange} user={user} onLogout={handleLogout}>{renderContent()}</Layout>;
 };
 
 export default App;

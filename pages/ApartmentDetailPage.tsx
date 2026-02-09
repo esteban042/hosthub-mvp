@@ -267,7 +267,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <label className="block text-sm text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Guest name</label>
                 <input
                   type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
+                  className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
                 />
              </div>
 
@@ -276,10 +276,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                  className={`w-full bg-stone-950 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-coral-500' : 'border-stone-800'}`}
+                  className={`w-full bg-stone-950 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-coral-500' : 'border-stone-600'}`}
                 >
                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCalendarOpen ? 'bg-coral-500 text-white' : 'bg-stone-800 text-emerald-400'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCalendarOpen ? 'bg-coral-500 text-white' : 'bg-stone-600 text-emerald-400'}`}>
                          {CORE_ICONS.Calendar("w-4 h-4")}
                       </div>
                       <span className={startDate ? 'text-white' : 'text-stone-500'}>
@@ -341,7 +341,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Country</label>
                  <select
                    required value={guestCountry} onChange={e => setGuestCountry(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  >
                    <option value="">Select a country</option>
                    {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -352,7 +352,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact phone (optional)</label>
                  <input
                    type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
                </div>
              </div>
@@ -362,7 +362,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <textarea
                     value={message}
                     onChange={e => setMessage(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700 h-[100px] resize-y"
+                    className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700 h-[100px] resize-y"
                     placeholder="Any special requests or questions?"
                 ></textarea>
              </div>
@@ -373,7 +373,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
              >
                Book now
              </button>
-             <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6" style={{ color: LABEL_COLOR }}>Approval usually within 24 hours</p>
+             <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6" style={{ color: LABEL_COLOR }}>Book with instant confirmation</p>
           </form>
        </div>
 
