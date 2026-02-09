@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import { Pool } from 'pg';
 import nodemailer from 'nodemailer';
 import React from 'react';
@@ -16,6 +17,7 @@ const port = parseInt(process.env.PORT || '8081', 10);
 
 app.use(cors());
 app.use(express.json());
+app.use(helmet());
 
 // Enforce HTTPS in production
 app.use((req, res, next) => {
