@@ -17,6 +17,14 @@ const port = parseInt(process.env.PORT || '8081', 10);
 app.use(cors());
 app.use(express.json());
 
+// Enforce HTTPS in production
+app.use((req, res, next) => {
+  if (req.headers['x-forwarded-proto'] !== 'https' && process.env.NODE_ENV === 'production') {
+    return res.redirect(['https://', req.get('Host'), req.url].join(''));
+  }
+  next();
+});
+
 app.get('/health', (req: Request, res: Response) => {
   res.status(200).send('OK');
 });
