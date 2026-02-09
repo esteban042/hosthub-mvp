@@ -1,4 +1,3 @@
-
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -31,6 +30,16 @@ app.use(
         'connect-src': ["'self'", 'https://dmldmpdflblwwoppbvkv.supabase.co'],
         'img-src': ["'self'", 'data:', 'https://images.unsplash.com'],
       },
+    },
+    frameguard: {
+      action: 'deny',
+    },
+    referrerPolicy: {
+      policy: 'strict-origin-when-cross-origin',
+    },
+    strictTransportSecurity: {
+      maxAge: 31536000,
+      includeSubDomains: true,
     },
   })
 );
