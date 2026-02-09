@@ -6,7 +6,13 @@ import { v4 as uuidv4 } from 'uuid';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  global: {
+    headers: {
+      'Cache-Control': 'no-cache',
+    },
+  },
+});
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -90,6 +96,35 @@ export const hostHubApi = {
     return { host, apartments, bookings, blockedDates };
   },
 
+  async getHostDataByUserId(userId: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] } | null> {
+    const { data: hostData, error: hostError } = await supabase.from('hosts').select('*').eq('user_id', userId).single();
+
+    if (hostError) {
+        console.error("Error fetching host by user ID:", hostError);
+        if (hostError.code === 'PGRST116') { // PostgREST error for "exact one row not found"
+            throw new Error('Host profile not found for the logged-in user.');
+        }
+        throw new Error("Database query for host failed.");
+    }
+    if (!hostData) return null;
+
+    const host = keysToCamel<Host>(hostData);
+
+    const { data: aptsData, error: aptsError } = await supabase.from('apartments').select('*').eq('host_id', host.id);
+    if (aptsError) throw aptsError;
+    const apartments = keysToCamel<Apartment[]>(aptsData || []);
+    const apartmentIds = apartments.map(a => a.id);
+
+    const { data: bookingsData, error: bookingsError } = await supabase.from('bookings').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
+    if (bookingsError) throw bookingsError;
+    const bookings = keysToCamel<Booking[]>(bookingsData || []);
+
+    const { data: blockedData, error: blockedError } = await supabase.from('blocked_dates').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
+    if (blockedError) throw blockedError;
+    const blockedDates = keysToCamel<BlockedDate[]>(blockedData || []);
+
+    return { host, apartments, bookings, blockedDates };
+},
 
   async getAllHosts(): Promise<Host[]> {
     const { data, error } = await supabase.from('hosts').select('*');
