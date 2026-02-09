@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import { body, validationResult } from 'express-validator';
 import { Pool } from 'pg';
 import nodemailer from 'nodemailer';
 import React from 'react';
@@ -49,48 +50,57 @@ function getSmtpPassword() {
   return process.env.BREVO_SMTP_PASS;
 }
 
-app.post('/api/v1/send-email', async (req: Request, res: Response) => {
-  const { toEmail, subject, templateName, booking, apartment, host } = req.body;
-
-  try {
-    let htmlContent = '';
-    if (templateName === 'BookingConfirmation') {
-      htmlContent = ReactDOMServer.renderToString(React.createElement(BookingConfirmationTemplate, { host, apartment, booking }));
-    } else if (templateName === 'BookingCancellation') {
-      htmlContent = ReactDOMServer.renderToString(React.createElement(BookingCancellationTemplate, { host, apartment, booking }));
+app.post('/api/v1/send-email', 
+  body('toEmail').isEmail().normalizeEmail(),
+  body('subject').not().isEmpty().trim().escape(),
+  body('templateName').isIn(['BookingConfirmation', 'BookingCancellation']),
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    const smtpPassword = getSmtpPassword();
-    const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.BREVO_SMTP_USER;
+    const { toEmail, subject, templateName, booking, apartment, host } = req.body;
 
-    if (!process.env.BREVO_SMTP_USER || !smtpPassword) {
-      console.log('--- EMAIL SIMULATION ---');
-      console.log('To:', toEmail);
-      console.log('Subject:', subject);
-      return res.status(200).json({ message: 'Email simulated successfully (missing SMTP credentials)' });
+    try {
+      let htmlContent = '';
+      if (templateName === 'BookingConfirmation') {
+        htmlContent = ReactDOMServer.renderToString(React.createElement(BookingConfirmationTemplate, { host, apartment, booking }));
+      } else if (templateName === 'BookingCancellation') {
+        htmlContent = ReactDOMServer.renderToString(React.createElement(BookingCancellationTemplate, { host, apartment, booking }));
+      }
+
+      const smtpPassword = getSmtpPassword();
+      const senderEmail = process.env.BREVO_SENDER_EMAIL || process.env.BREVO_SMTP_USER;
+
+      if (!process.env.BREVO_SMTP_USER || !smtpPassword) {
+        console.log('--- EMAIL SIMULATION ---');
+        console.log('To:', toEmail);
+        console.log('Subject:', subject);
+        return res.status(200).json({ message: 'Email simulated successfully (missing SMTP credentials)' });
+      }
+
+      const transporter = nodemailer.createTransport({
+        host: 'smtp-relay.brevo.com',
+        port: 587,
+        auth: {
+          user: process.env.BREVO_SMTP_USER,
+          pass: smtpPassword,
+        },
+      });
+
+      await transporter.sendMail({
+        from: `"HostHub Luxury Stays" <${senderEmail}>`,
+        to: toEmail,
+        subject: subject,
+        html: htmlContent,
+      });
+
+      res.status(200).json({ message: 'Email sent successfully via SMTP' });
+    } catch (error: any) {
+      console.error('Email error:', error);
+      res.status(500).json({ error: error.message });
     }
-
-    const transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 587,
-      auth: {
-        user: process.env.BREVO_SMTP_USER,
-        pass: smtpPassword,
-      },
-    });
-
-    await transporter.sendMail({
-      from: `"HostHub Luxury Stays" <${senderEmail}>`,
-      to: toEmail,
-      subject: subject,
-      html: htmlContent,
-    });
-
-    res.status(200).json({ message: 'Email sent successfully via SMTP' });
-  } catch (error: any) {
-    console.error('Email error:', error);
-    res.status(500).json({ error: error.message });
-  }
 });
 
 app.use(express.static(clientPath));
