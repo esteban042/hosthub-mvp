@@ -56,6 +56,8 @@ export interface Host {
   airbnbCalendarLink?: string;
   premiumConfig?: PremiumConfig;
   paymentInstructions?: string; // New: To be included in confirmation emails
+  businessName?: string;
+  landingPagePicture?: string;
 }
 
 export interface PriceRule {
