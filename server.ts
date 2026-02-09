@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { body, validationResult } from 'express-validator';
+import { body, validationResult, query, param } from 'express-validator';
 import { Pool } from 'pg';
 import nodemailer from 'nodemailer';
 import React from 'react';
@@ -19,7 +19,17 @@ const port = parseInt(process.env.PORT || '8081', 10);
 
 app.use(cors());
 app.use(express.json());
-app.use(helmet());
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        'script-src': [''self'', ''unsafe-inline''],
+        'connect-src': [''self'', 'https://dmldmpdflblwwoppbvkv.supabase.co'],
+      },
+    },
+  })
+);
 
 // Enforce HTTPS in production
 app.use((req, res, next) => {
@@ -50,15 +60,77 @@ function getSmtpPassword() {
   return process.env.BREVO_SMTP_PASS;
 }
 
+// Validation middleware for API endpoints
+const validate = (req: Request, res: Response, next: any) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  next();
+};
+
+//prettier-ignore
+app.post('/api/v1/apartments', 
+  body('name').not().isEmpty().trim().escape(),
+  body('description').not().isEmpty().trim().escape(),
+  body('price').isFloat({ gt: 0 }),
+  body('location').not().isEmpty().trim().escape(),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
+app.get('/api/v1/apartments/:id', 
+  param('id').isInt(),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
+app.post('/api/v1/bookings', 
+  body('apartmentId').isInt(),
+  body('startDate').isISO8601(),
+  body('endDate').isISO8601(),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
+app.get('/api/v1/bookings/:id', 
+  param('id').isInt(),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
+app.post('/api/v1/users', 
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 8 }),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
+app.post('/api/v1/login', 
+  body('email').isEmail().normalizeEmail(),
+  body('password').not().isEmpty(),
+  validate,
+  async (req: Request, res: Response) => {
+    res.status(501).send('Not Implemented');
+});
+
+//prettier-ignore
 app.post('/api/v1/send-email', 
   body('toEmail').isEmail().normalizeEmail(),
   body('subject').not().isEmpty().trim().escape(),
   body('templateName').isIn(['BookingConfirmation', 'BookingCancellation']),
+  validate,
   async (req: Request, res: Response) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
 
     const { toEmail, subject, templateName, booking, apartment, host } = req.body;
 
@@ -104,6 +176,7 @@ app.post('/api/v1/send-email',
 });
 
 app.use(express.static(clientPath));
+
 
 app.get('*', (req: Request, res: Response) => {
   if (req.path.startsWith('/api')) {
