@@ -4,7 +4,9 @@
 export enum BookingStatus {
   CONFIRMED = 'confirmed',
   PAID = 'paid',
-  CANCELED = 'canceled'
+  CANCELED = 'canceled',
+  REJECTED = 'rejected'
+
 }
 
 export enum UserRole {

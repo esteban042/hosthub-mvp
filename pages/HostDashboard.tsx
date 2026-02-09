@@ -231,14 +231,30 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     }
   };
 
+  // const toggleManualBlock = (aptId: string, date: string) => {
+   // const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
+  //  if (existingIdx >= 0) {
+  //    onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
+  //  } else {
+    //  onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date }]);
+    //}
+  //};
   const toggleManualBlock = (aptId: string, date: string) => {
-    const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
-    if (existingIdx >= 0) {
-      onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
-    } else {
-      onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date }]);
-    }
-  };
+  // The 'date' from the calendar is the correct 'YYYY-MM-DD' string.
+  // We find the date using a direct comparison, which is the same logic
+  // that correctly highlights the cell in red.
+  const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
+
+  if (existingIdx >= 0) {
+    // Found it: remove the date from the array.
+    onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
+  } else {
+    // Didn't find it: add the new date.
+    onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date: date }]);
+  }
+};
+
+
 
   const handleSaveApartment = (e: React.FormEvent) => {
     e.preventDefault();

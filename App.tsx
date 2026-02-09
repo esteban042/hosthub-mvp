@@ -149,10 +149,17 @@ const App: React.FC = () => {
   };
 
   const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
-    await hostHubApi.updateBlockedDates(updatedBlocked);
-    const data = await hostHubApi.getLandingData(currentHost?.slug);
-    setBlockedDates(data.blockedDates);
-  };
+  // This line instantly updates the UI with the change.
+  setBlockedDates(updatedBlocked);
+  // This line saves the change to the database in the background.
+  await hostHubApi.updateBlockedDates(updatedBlocked);
+};
+
+  // const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
+  //  await hostHubApi.updateBlockedDates(updatedBlocked);
+  //  const data = await hostHubApi.getLandingData(currentHost?.slug);
+ //   setBlockedDates(data.blockedDates);
+ // };
 
   if (loading) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing HostHub Cluster...</p></div>;
 
