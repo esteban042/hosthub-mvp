@@ -48,6 +48,25 @@ const App: React.FC = () => {
     }
   };
 
+  const fetchAdminData = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [allHosts, allApartments, allBookings] = await Promise.all([
+        hostHubApi.getAllHosts(),
+        hostHubApi.getAllApartments(),
+        hostHubApi.getAllBookings(),
+      ]);
+      setHosts(allHosts);
+      setApartments(allApartments);
+      setBookings(allBookings);
+    } catch (err: any) {
+      setError(err.message || "Failed to fetch admin data.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     // Detect host from URL: ?host=slug
     const params = new URLSearchParams(window.location.search);
@@ -85,10 +104,11 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAuth = (email: string, pass: string) => {
+  const handleAuth = async (email: string, pass: string) => {
     if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
       setUser({ id: 'admin-1', email, name: 'Admin', role: UserRole.ADMIN, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=200' });
       setCurrentRole(UserRole.ADMIN);
+      await fetchAdminData();
       return;
     }
     const matchingHost = hosts.find(h => email === `${h.slug}@host.com`);
@@ -114,12 +134,12 @@ const App: React.FC = () => {
 
   const handleNewBooking = async (newBooking: Booking) => {
     try {
-      await hostHubApi.createBooking(newBooking);
+      const createdBooking = await hostHubApi.createBooking(newBooking);
       const data = await hostHubApi.getLandingData(currentHost?.slug);
       setBookings(data.bookings);
       const bookedApartment = apartments.find(apt => apt.id === newBooking.apartmentId);
       if (currentHost && bookedApartment) {
-        await hostHubApi.sendEmail(newBooking.guestEmail, `Request received for ${bookedApartment.title}`, 'BookingRequestReceived', newBooking, bookedApartment, currentHost);
+        await hostHubApi.sendEmail(newBooking.guestEmail, `Booking Confirmed: ${bookedApartment.title}`, 'BookingConfirmed', createdBooking, bookedApartment, currentHost);
       }
     } catch (e) {
       console.error(e);

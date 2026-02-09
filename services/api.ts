@@ -119,6 +119,16 @@ export const hostHubApi = {
     const { data } = await supabase.from('hosts').select('*');
     return (data || []).map(mapHost);
   },
+  
+  async getAllApartments(): Promise<Apartment[]> {
+    const { data } = await supabase.from('apartments').select('*');
+    return (data || []).map(mapApartment);
+  },
+
+  async getAllBookings(): Promise<Booking[]> {
+    const { data } = await supabase.from('bookings').select('*');
+    return (data || []).map(mapBooking);
+  },
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
     if (!data.apartmentId) throw new Error('Apartment ID is required to create a booking.');
@@ -176,7 +186,7 @@ export const hostHubApi = {
       num_guests: data.numGuests,
       start_date: data.startDate,
       end_date: data.endDate,
-      status: data.status || BookingStatus.REQUESTED,
+      status: data.status || BookingStatus.CONFIRMED,
       total_price: data.totalPrice,
       is_deposit_paid: data.isDepositPaid || false,
       guest_message: data.guestMessage,
