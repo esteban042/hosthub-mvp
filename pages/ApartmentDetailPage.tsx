@@ -309,7 +309,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
              <div className="space-y-2">
                 <label className="block text-m text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Number of guests</label>
-                <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-800 rounded-2xl">
+                <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-600 rounded-2xl">
                     <button
                         type="button"
                         onClick={() => setNumGuests(prev => Math.max(1, prev - 1))}
@@ -333,7 +333,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact email</label>
                  <input
                    type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
                </div>
 
