@@ -24,8 +24,10 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'script-src': [''self'', ''unsafe-inline''],
-        'connect-src': [''self'', 'https://dmldmpdflblwwoppbvkv.supabase.co'],
+        'script-src': ["'self'", "'unsafe-inline'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'connect-src': ["'self'", 'https://dmldmpdflblwwoppbvkv.supabase.co'],
+        'img-src': ["'self'", 'data:', 'https://images.unsplash.com'],
       },
     },
   })
