@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User, BookingStatus } from './types';
-import { hostHubApi, fetchAndParseIcal } from './services/api';
+import { hostHubApi, fetchAndParseIcal, supabase } from './services/api';
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -9,10 +9,6 @@ import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
-
-const ADMIN_EMAIL = 'admin@hosthub.com';
-const ADMIN_PWD = 'admin123';
-const DEFAULT_HOST_PWD = 'password123';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -68,10 +64,31 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Detect host from URL: ?host=slug
-    const params = new URLSearchParams(window.location.search);
-    const hostSlug = params.get('host');
-    fetchData(hostSlug || undefined);
+    // Check for an existing session
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        const user = session.user;
+        // You'll need to fetch the user's role from your database
+        // For now, let's assume a simple mapping or a default role
+        // This is a placeholder and should be replaced with actual logic
+        const role = user.email?.endsWith('@host.com') ? UserRole.HOST : UserRole.ADMIN;
+        setUser({ id: user.id, email: user.email!, name: user.email!, role: role, avatar: '' });
+        setCurrentRole(role);
+        if (role === UserRole.HOST) {
+          const hostSlug = user.email?.split('@')[0];
+          fetchData(hostSlug);
+        } else if (role === UserRole.ADMIN) {
+          fetchAdminData();
+        }
+      } else {
+        // Detect host from URL: ?host=slug
+        const params = new URLSearchParams(window.location.search);
+        const hostSlug = params.get('host');
+        fetchData(hostSlug || undefined);
+      }
+    };
+    checkSession();
   }, []);
 
   useEffect(() => {
@@ -105,24 +122,33 @@ const App: React.FC = () => {
   };
 
   const handleAuth = async (email: string, pass: string) => {
-    if (email === ADMIN_EMAIL && pass === ADMIN_PWD) {
-      setUser({ id: 'admin-1', email, name: 'Admin', role: UserRole.ADMIN, avatar: 'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?auto=format&fit=crop&q=80&w=200' });
-      setCurrentRole(UserRole.ADMIN);
-      await fetchAdminData();
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password: pass,
+    });
+
+    if (error) {
+      alert(error.message);
       return;
     }
-    const matchingHost = hosts.find(h => email === `${h.slug}@host.com`);
-    if (matchingHost && pass === DEFAULT_HOST_PWD) {
-      setUser({ id: matchingHost.id, email, name: matchingHost.name, role: UserRole.HOST, avatar: matchingHost.avatar });
-      setCurrentHost(matchingHost);
-      setCurrentRole(UserRole.HOST);
-      fetchData(matchingHost.slug);
-      return;
+
+    if (data.user) {
+      const user = data.user;
+      // This is a placeholder and should be replaced with actual logic
+      const role = user.email?.endsWith('@host.com') ? UserRole.HOST : UserRole.ADMIN;
+      setUser({ id: user.id, email: user.email!, name: user.email!, role: role, avatar: '' });
+      setCurrentRole(role);
+      if (role === UserRole.HOST) {
+        const hostSlug = user.email?.split('@')[0];
+        fetchData(hostSlug);
+      } else if (role === UserRole.ADMIN) {
+        fetchAdminData();
+      }
     }
-    alert('Invalid credentials.');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setCurrentRole(UserRole.GUEST);
   };
