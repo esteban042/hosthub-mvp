@@ -1,44 +1,22 @@
+
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
 import { AMENITY_ICONS, CORE_ICONS, AMENITY_GREEN, CARD_BG, HeroCalendar } from './GuestLandingPage';
 import { formatDate } from '../utils/dates';
 import { hostHubApi } from '../services/api';
+import { BookingConfirmationCard } from '../components/BookingConfirmationCard';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
   host: Host;
   bookings: Booking[];
   blockedDates: BlockedDate[];
-  airbnbCalendarDates: string[]; 
+  airbnbCalendarDates: string[];
   onBack: () => void;
   onNewBooking: (booking: Booking) => void;
 }
 
 const LABEL_COLOR = 'rgb(214,213,213)';
-
-// Function to generate a unique booking ID
-const generateBookingId = (hostName: string, existingBookings: Booking[]): string => {
-  const initials = hostName.split(' ').map(n => n[0]).join('').toUpperCase();
-  
-  let maxNum = 0;
-  existingBookings.forEach(booking => {
-    if (booking.id.startsWith(initials)) {
-      try {
-        const numPart = parseInt(booking.id.substring(initials.length), 10);
-        if (!isNaN(numPart) && numPart > maxNum) {
-          maxNum = numPart;
-        }
-      } catch (e) {
-        console.error("Error parsing booking ID:", booking.id, e);
-      }
-    }
-  });
-
-  const newNum = maxNum + 1;
-  const paddedNum = newNum.toString().padStart(6, '0');
-
-  return `${initials}${paddedNum}`;
-};
 
 const countries = [ 'USA', 'Canada', 'Mexico', 'United Kingdom', 'Germany', 'France', 'Spain', 'Italy', 'Australia', 'Japan', 'China', 'Brazil', 'India' ];
 
@@ -47,23 +25,22 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   host,
   bookings,
   blockedDates,
-  airbnbCalendarDates, 
+  airbnbCalendarDates,
   onBack,
   onNewBooking
 }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState(''); 
+  const [phone, setPhone] = useState('');
   const [guestCountry, setGuestCountry] = useState('');
   const [numGuests, setNumGuests] = useState(1);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [message, setMessage] = useState(''); 
+  const [message, setMessage] = useState('');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [bookingId, setBookingId] = useState('');
+  const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
-  const [isMapEnlarged, setIsMapEnlarged] = useState(false); 
+  const [isMapEnlarged, setIsMapEnlarged] = useState(false);
 
   const aboutColRef = useRef<HTMLDivElement>(null);
   const [mapContainerHeight, setMapContainerHeight] = useState<number>(400);
@@ -84,7 +61,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     updateMapHeight();
     window.addEventListener('resize', updateMapHeight);
     return () => window.removeEventListener('resize', updateMapHeight);
-  }, [apartment, aboutColRef]); 
+  }, [apartment, aboutColRef]);
 
   const totalPrice = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -104,39 +81,43 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !startDate || !endDate || !name) return;
-    
-    const newBookingId = generateBookingId(host.name, bookings);
-    setBookingId(newBookingId);
 
-    const newBooking: Booking = {
-      id: newBookingId,
+    const bookingDetails: Partial<Booking> = {
       apartmentId: apartment.id,
-      guestName: name, 
+      guestName: name,
       guestEmail: email,
       guestCountry: guestCountry,
-      guestPhone: phone, 
+      guestPhone: phone,
       numGuests: numGuests,
       startDate: startDate,
       endDate: endDate,
       status: BookingStatus.CONFIRMED,
-      totalPrice: totalPrice, 
+      totalPrice: totalPrice,
       isDepositPaid: false,
-      guestMessage: message 
+      guestMessage: message
     };
-    
-    // Send confirmation email immediately upon booking
-    await hostHubApi.sendEmail(
-      email,
-      `Your HostHub Booking for ${apartment.title} is Confirmed!`,
-      'BookingConfirmation',
-      newBooking,
-      apartment,
-      host
-    );
 
-    onNewBooking(newBooking);
-    setSuccess(true);
+    try {
+      const newConfirmedBooking = await hostHubApi.createBooking(bookingDetails);
+
+      await hostHubApi.sendEmail(
+        email,
+        `Your Booking for ${apartment.title} is Confirmed!`,
+        'BookingConfirmation',
+        newConfirmedBooking,
+        apartment,
+        host
+      );
+
+      onNewBooking(newConfirmedBooking);
+      setConfirmedBooking(newConfirmedBooking);
+
+    } catch (error) {
+      console.error("Failed to create booking:", error);
+      // Here you could set an error state and display a message to the user
+    }
   };
+
 
   const nextPhoto = () => setCurrentPhotoIdx((prev) => (prev + 1) % apartment.photos.length);
   const prevPhoto = () => setCurrentPhotoIdx((prev) => (prev - 1 + apartment.photos.length) % apartment.photos.length);
@@ -146,16 +127,6 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     const lower = str.toLowerCase();
     return lower.charAt(0).toUpperCase() + lower.slice(1);
   };
-
-  if (success) {
-    return (
-      <div className="pt-32 pb-24 max-w-2xl px-6 text-left font-dm animate-in zoom-in duration-500">
-        <h2 className="text-4xl font-serif font-bold text-white mb-4">Booking confirmed</h2>
-        <p className="text-lg mb-12" style={{ color: LABEL_COLOR }}>Thank you {name}. Your booking is confirmed. Your booking ID is {bookingId}. We are more than happy to welcome you on the PLAtZHALTER at  "{apartment.title}". Please follow up on the deposit information.</p>
-        <button onClick={onBack} className="bg-transparent border-coral-500 text-coral-500 hover:bg-coral-600 text-white px-10 py-4 rounded-xl font-bold uppercase tracking-widest text-xs transition-all">Back to listing</button>
-      </div>
-    );
-  }
 
   return (
     <div className="pt-24 md:pt-32 pb-24 w-full max-w-7xl mx-auto px-6 text-left animate-in fade-in duration-700 font-dm">
@@ -168,7 +139,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       <div className="relative w-full h-[60vh] rounded-3xl overflow-hidden mb-12 shadow-2xl border border-stone-800">
          <img src={apartment.photos[currentPhotoIdx]} className="w-full h-full object-cover transition-opacity duration-1000" alt={apartment.title} />
          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-transparent to-transparent" />
-         
+
          {apartment.photos.length > 1 && (
            <>
              <button onClick={prevPhoto} className="absolute left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-black/60 transition-all border border-white/5 z-10">
@@ -223,8 +194,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       {/* Main Content Grid: Description (2/3) and Map (1/3) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-16 mb-20 items-start">
         <div ref={aboutColRef} className="lg:col-span-2 space-y-12">
-          <div className="space-y-6"> 
-             <h3 className="text-3xl font-serif font-bold text-white tracking-tight">About this sanctuary</h3>
+          <div className="space-y-6">
+             <h3 className="text-3xl font-serif font-bold text-white tracking-tight">About this place</h3>
              <p className="text-xl leading-relaxed font-medium text-stone-400">
                {apartment.description}
              </p>
@@ -234,8 +205,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
              <h3 className="text-2xl font-serif font-bold text-white tracking-tight">Amenities</h3>
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {apartment.amenities.map(amenity => (
-                  <div 
-                    key={amenity} 
+                  <div
+                    key={amenity}
                     className="flex items-center space-x-5 p-4 rounded-2xl border border-stone-800 transition-all hover:bg-stone-800/20 active:scale-95 group"
                     style={{ backgroundColor: CARD_BG }}
                   >
@@ -253,8 +224,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
         <div className="lg:col-span-1">
           {apartment.mapEmbedUrl ? (
-              <div 
-                className="relative w-full overflow-hidden rounded-[2.5rem] border border-stone-800 shadow-xl cursor-pointer" 
+              <div
+                className="relative w-full overflow-hidden rounded-[2.5rem] border border-stone-800 shadow-xl cursor-pointer"
                 style={{ height: mapContainerHeight }}
                 onClick={() => setIsMapEnlarged(true)}
               >
@@ -294,16 +265,16 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
           <form onSubmit={handleBooking} className="space-y-6">
              <div className="space-y-2">
                 <label className="block text-sm text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Guest name</label>
-                <input 
+                <input
                   type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700" 
+                  className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
                 />
              </div>
-             
+
              <div className="space-y-2 relative">
                 <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Stay availability</label>
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
                   className={`w-full bg-stone-950 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-coral-500' : 'border-stone-800'}`}
                 >
@@ -316,21 +287,21 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                       </span>
                    </div>
                 </button>
-                
+
                 {isCalendarOpen && (
                   <div className="absolute top-full left-0 right-0 z-[100] mt-4">
-                    <HeroCalendar 
+                    <HeroCalendar
                       apartment={apartment}
-                      startDate={startDate} 
-                      endDate={endDate} 
+                      startDate={startDate}
+                      endDate={endDate}
                       onSelect={(s, e) => {
                         setStartDate(s);
                         setEndDate(e);
                         if (s && e) setIsCalendarOpen(false);
                       }}
-                      allBookings={bookings} 
-                      allBlockedDates={blockedDates} 
-                      airbnbBlockedDates={airbnbCalendarDates} 
+                      allBookings={bookings}
+                      allBlockedDates={blockedDates}
+                      airbnbBlockedDates={airbnbCalendarDates}
                     />
                   </div>
                 )}
@@ -360,7 +331,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                <div className="space-y-2">
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact email</label>
-                 <input 
+                 <input
                    type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
@@ -368,7 +339,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
                <div className="space-y-2">
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Country</label>
-                 <select 
+                 <select
                    required value={guestCountry} onChange={e => setGuestCountry(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  >
@@ -379,7 +350,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
                <div className="space-y-2">
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact phone (optional)</label>
-                 <input 
+                 <input
                    type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
@@ -396,8 +367,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 ></textarea>
              </div>
 
-             <button 
-               disabled={!name || !email || !startDate || !endDate} 
+             <button
+               disabled={!name || !email || !startDate || !endDate}
                className="w-full bg-coral-500 hover:bg-coral-600 disabled:bg-stone-800 disabled:text-stone-600 disabled:cursor-not-allowed text-white font-black py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-coral-500/30 active:scale-[0.98]"
              >
                Book now
@@ -407,17 +378,17 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
        </div>
 
       {isMapEnlarged && apartment.mapEmbedUrl && (
-        <div 
+        <div
           className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl flex items-center justify-center p-6 animate-in fade-in duration-300"
           onClick={() => setIsMapEnlarged(false)}
         >
-           <button 
-             onClick={() => setIsMapEnlarged(false)} 
+           <button
+             onClick={() => setIsMapEnlarged(false)}
              className="absolute top-8 right-8 text-stone-300 hover:text-white transition-colors z-[210]"
            >
              <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M6 18L18 6M6 6l12 12" /></svg>
            </button>
-           <div 
+           <div
              className="relative w-full h-full max-w-6xl max-h-[80vh] rounded-[3rem] overflow-hidden border border-stone-700 shadow-2xl"
              onClick={e => e.stopPropagation()}
            >
@@ -433,6 +404,18 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
               ></iframe>
            </div>
         </div>
+      )}
+
+      {confirmedBooking && (
+        <BookingConfirmationCard
+          booking={confirmedBooking}
+          apartment={apartment}
+          host={host}
+          onClose={() => {
+            setConfirmedBooking(null);
+            onBack();
+          }}
+        />
       )}
     </div>
   );

@@ -72,9 +72,7 @@ export const Layout: React.FC<LayoutProps> = ({
           </nav>
 
           <div className="flex items-center space-x-4">
-            <button className="hidden md:block bg-stone-900/40 backdrop-blur-md border border-stone-800 px-6 py-2.5 rounded-xl text-sm font-semibold text-stone-200 hover:bg-stone-800 transition-colors">
-              Explore
-            </button>
+            
             
             {user ? (
                <div className="flex items-center space-x-3">

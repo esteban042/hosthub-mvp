@@ -48,7 +48,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const stats = useMemo(() => {
     const subRev = hosts.reduce((acc, h) => acc + (SUBSCRIPTION_PRICES[h.subscriptionType] || 0), 0);
     const totalCommission = hosts.reduce((acc, h) => {
-      const hostApts = apartments.filter(a => a.hostId === h.id).map(a => a.id);
+      const hostApts = apartments.filter(a => a.hostId === h.id && a.isActive).map(a => a.id);
       const hostVolume = bookings
         .filter(b => hostApts.includes(b.apartmentId) && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID))
         .reduce((sum, b) => sum + b.totalPrice, 0);
@@ -58,7 +58,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       monthlySubscription: subRev, 
       totalCommission, 
       activeHosts: hosts.length, 
-      totalAssets: apartments.length 
+      totalAssets: apartments.filter(a => a.isActive).length
     };
   }, [hosts, apartments, bookings]);
 
@@ -170,7 +170,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
         <button 
           onClick={() => { setEditingHost({ premiumConfig: { isEnabled: false, images: [], sections: [] } }); setShowHostModal(true); setActiveModalTab('basics'); }}
-          className="bg-transparent text-white border border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-coral flex items-center space-x-3 active:scale-95"
+          className="bg-transparent text-white border border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-emerald-600 hover:text-emerald-600 flex items-center space-x-3 active:scale-95"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           <span>Onboard Host</span>
@@ -179,40 +179,51 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Admin Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
-          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400 mb-6">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+          <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400">
             <CreditCard className="w-6 h-6" />
           </div>
+          <div>
           <h4 className="text-2xl font-black text-white leading-none">${stats.monthlySubscription.toLocaleString()}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Monthly Subscription Revenue</p>
-        </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
-          <div className="w-12 h-12 bg-coral-500/10 rounded-2xl flex items-center justify-center text-coral-500 mb-6">
-            <Percent className="w-6 h-6" />
+          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] "> Subscription Revenue</p>
+
           </div>
-          <h4 className="text-2xl font-black text-white leading-none">${Math.round(stats.totalCommission).toLocaleString()}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Platform Commission</p>
+          </div>
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+          <div className="w-12 h-12 bg-coral-500/10 rounded-2xl flex items-center justify-center text-coral-500">
+            <Percent className="w-6 h-6" />
+          </div> 
+          <div>
+            <h4 className="text-2xl font-black text-white leading-none">${Math.round(stats.totalCommission).toLocaleString()}</h4>
+            <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Platform Commission</p>
+          </div>
         </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
-          <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400 mb-6">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+          <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400">
             <Globe className="w-6 h-6" />
           </div>
+          <div>
           <h4 className="text-2xl font-black text-white leading-none">{stats.activeHosts}</h4>
           <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Active Hosts</p>
-        </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl">
-          <div className="w-12 h-12 bg-stone-100/10 rounded-2xl flex items-center justify-center text-stone-300 mb-6">
+       
+          </div>
+         </div>
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+          <div className="w-12 h-12 bg-stone-100/10 rounded-2xl flex items-center justify-center text-stone-300">
             <Layers className="w-6 h-6" />
           </div>
+          <div>
           <h4 className="text-2xl font-black text-white leading-none">{stats.totalAssets}</h4>
           <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Asset Onlline</p>
-        </div>
+
+          </div>
+         </div>
       </div>
 
       {/* Hosts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {hosts.map(h => {
-          const hostApts = apartments.filter(a => a.hostId === h.id);
+          const hostApts = apartments.filter(a => a.hostId === h.id && a.isActive);
           const activeUrl = `${window.location.origin}/?host=${h.slug}`;
           const isCopied = copiedSlug === h.slug;
           const canceledBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && b.status === BookingStatus.CANCELED).length;

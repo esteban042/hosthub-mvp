@@ -5,6 +5,7 @@ import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, E
 import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 import { hostHubApi } from '../services/api';
+import DatePicker from '../components/DatePicker';
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
 
@@ -34,7 +35,9 @@ const AvailabilityCalendar: React.FC<{
 }> = ({ aptId, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  const startOffset = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  // const startOffset = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
+
 
   const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID));
   const isBlockedManually = (dateStr: string) => blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
@@ -50,12 +53,19 @@ const AvailabilityCalendar: React.FC<{
 
     for (let d = 1; d <= numDays; d++) {
       const dateObj = new Date(monthDate.getFullYear(), monthDate.getMonth(), d);
-      const dateStr = dateObj.toISOString().split('T')[0];
+      // const dateStr = dateObj.toISOString().split('T')[0];
+
+      const year = dateObj.getFullYear();
+      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
+      const day = dateObj.getDate().toString().padStart(2, '0');
+      const dateStr = `${year}-${month}-${day}`;
+
+
       const booked = isBooked(dateStr);
       const blockedManually = isBlockedManually(dateStr);
       const airbnbBlocked = isAirbnbBlocked(dateStr);
 
-      let dayClass = 'bg-stone-900 border-stone-800 text-stone-500 hover:text-white'; 
+      let dayClass = 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white'; 
       
       if (booked) { 
         dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
@@ -89,8 +99,8 @@ const AvailabilityCalendar: React.FC<{
            <h4 className="text-white font-serif text-lg font-bold">{monthName}</h4>
            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="w-5 h-5" /></button>
         </div>
-        <div className="grid grid-cols-7 gap-1.5 mb-2 text-[8px] font-black uppercase tracking-widest text-stone-700 text-center">
-          {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => <div key={d} className="capitalize">{d}</div>)}
+        <div className="grid grid-cols-7 gap-1.5 mb-2 text-[9px] font-black uppercase tracking-widest text-stone-400 text-center">
+          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => <div key={d} className="capitalize">{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1.5">
             {loadingIcal && (
@@ -157,6 +167,14 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     navigator.clipboard.writeText(shareableUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+  const handleToggleAmenity = (amenity: string) => {
+    if (!editingApt) return;
+    const currentAmenities = editingApt.amenities || [];
+    const newAmenities = currentAmenities.includes(amenity)
+        ? currentAmenities.filter(a => a !== amenity)
+        : [...currentAmenities, amenity];
+    setEditingApt({ ...editingApt, amenities: newAmenities });
   };
 
   const stats = useMemo(() => {
@@ -336,7 +354,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
-            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-stone-800 text-white shadow-lg' : 'text-stone-700 hover:text-white'}`}
+            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]  hover:text-white'}`}
           >
             {tab}
           </button>
@@ -358,8 +376,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     onClick={() => setStatusFilter(filter.value as any)}
                     className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
                         statusFilter === filter.value
-                            ? 'bg-[rgba(98,200,233,0.35)] text-white shadow-l shadow-coral-500/20'
-                            : 'bg-stone-900/50 border border-stone-800 text[rgb(214,213,213)] hover:text-white'
+                            ? 'bg-emerald-900 text-white shadow-l shadow-coral-500/20'
+                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)] hover:text-white'
                     }`}
                 >
                     {filter.icon}
@@ -382,7 +400,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                           b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
                           'bg-rose-500/10 text-rose-400 border-rose-500/20' // For Canceled
                           }`}>{b.status}</span>
-                        <span className="text-xs text-stone-500 font-mono opacity-60">#{b.id.slice(-6)}</span>
+                                      <span className="text-xs text-stone-500 font-mono opacity-60">#{b.customBookingId}</span>
+
                     </div>
                        
                        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
@@ -443,12 +462,12 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       {activeTab === 'calendar' && (
         <div className="space-y-20">
            {apartments.map(apt => (
-             <div key={apt.id} className="grid grid-cols-1 lg:grid-cols-5 gap-12">
-                <div className="lg:col-span-2 space-y-6 text-left">
+             <div key={apt.id}>
+                <div className="lg:col-span-2 space-y-8 text-left">
                    <h3 className="text-3xl font-serif font-bold text-white tracking-tight">{apt.title}</h3>
                    <p className="text-sm text-stone-500">Manage manual overrides and view occupancy for this unit.</p>
                 </div>
-                <div className="lg:col-span-3">
+                <div className="lg:col-span-3 text-white ">
                    <AvailabilityCalendar 
                       aptId={apt.id} 
                       bookings={bookings} 
@@ -473,7 +492,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                    <p className="text-[10px] font-bold tracking-widest mb-10 text-stone-600 uppercase">{apt.city}</p>
                    <div className="flex justify-between items-center pt-6 border-t border-stone-800/60">
                       <p className="text-xl font-bold text-coral-500">${apt.pricePerNight}<span className="text-[10px] text-stone-700 ml-2 font-bold">Base</span></p>
-                      <button onClick={() => { setEditingApt(apt); setShowAptModal(true); }} className="px-6 py-2 rounded-xl bg-stone-100 text-black text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
+                      <button onClick={() => { setEditingApt(apt); setShowAptModal(true); }} className="px-6 py-2 rounded-xl bg-transparent border border- text-stone-100 text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
                    </div>
                 </div>
              </div>
@@ -525,15 +544,23 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                       {editingApt.priceOverrides?.map((rule) => (
                         <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-stone-950 p-6 rounded-[1.8rem] border border-stone-800 items-end animate-in slide-in-from-bottom-2">
                            <div>
-                              <label className="block text-[9px] font-black uppercase text-stone-600 mb-2">From Date</label>
-                              <input type="date" value={rule.startDate} onChange={e => updatePriceRule(rule.id, { startDate: e.target.value })} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none" />
+                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">From Date</label>
+                              <DatePicker
+                              selectedDate={rule.startDate}
+                              onSelect={(date) => updatePriceRule(rule.id, { startDate: date })}
+                            />
+
                            </div>
                            <div>
-                              <label className="block text-[9px] font-black uppercase text-stone-600 mb-2">Until Date</label>
-                              <input type="date" value={rule.endDate} onChange={e => updatePriceRule(rule.id, { endDate: e.target.value })} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none" />
+                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">Until Date</label>
+                              <DatePicker
+                              selectedDate={rule.endDate}
+                              onSelect={(date) => updatePriceRule(rule.id, { endDate: date })}
+                            />
+
                            </div>
                            <div>
-                              <label className="block text-[9px] font-black uppercase text-stone-600 mb-2">Nightly Price ($)</label>
+                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">Nightly Price ($)</label>
                               <input type="number" value={rule.price} onChange={e => updatePriceRule(rule.id, { price: parseInt(e.target.value) })} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none" />
                            </div>
                            <button type="button" onClick={() => removePriceOverride(rule.id)} className="p-3 bg-stone-900 border border-stone-800 rounded-xl text-stone-600 hover:text-rose-500 transition-all flex items-center justify-center">
@@ -548,8 +575,37 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                         </div>
                       )}
                    </div>
+
+
+
                  </div>
-                 
+                 <div className="pt-10 border-t border-stone-800/60">
+    <div className="flex items-center space-x-3 mb-8">
+        <Tag className="w-5 h-5 text-emerald-400" />
+        <h4 className="text-xl font-bold text-white tracking-tight">Amenities</h4>
+    </div>
+    <div className="flex flex-wrap gap-4">
+        {ALL_AMENITIES.map(amenity => {
+            const isSelected = editingApt.amenities?.includes(amenity.label);
+            return (
+                <button
+                    type="button"
+                    key={amenity.label}
+                    onClick={() => handleToggleAmenity(amenity.label)}
+                    className={`flex items-center space-x-3 px-6 py-4 rounded-2xl border transition-all text-sm font-medium ${
+                        isSelected
+                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+                            : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
+                    }`}
+                >
+                    {amenity.icon}
+                    <span>{amenity.label}</span>
+                </button>
+            );
+        })}
+    </div>
+</div>
+
                  <div className="flex space-x-4 pt-6 border-t border-stone-800/60">
                     <button type="button" onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-[rgb(214,213,213)] hover:text-white border-white transition-all">Discard</button>
                     <button type="submit" className="flex-1 bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest active:scale-95">Save Unit</button>

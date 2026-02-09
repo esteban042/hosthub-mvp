@@ -33,7 +33,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 ml-1">Email address</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-200 ml-1">Email address</label>
             <input 
               type="email" 
               value={email} 
@@ -43,7 +43,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-500 ml-1">Secure Password</label>
+            <label className="block text-[10px] font-bold uppercase tracking-widest text-stone-200 ml-1">Secure Password</label>
             <input 
               type="password" 
               value={password} 
@@ -57,7 +57,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           
           <button 
             type="submit"
-            className="w-full bg-transparent borderline-white text-stone-500 hover:bg-white text-black font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl uppercase text-[10px] tracking-[0.2em] mt-4"
+            className="w-full bg-transparent border border-white text-white hover:bg-white hover:text-black font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl uppercase text-[10px] tracking-[0.2em] mt-4"
           >
             Authenticate
           </button>

@@ -41,7 +41,21 @@ interface GuestLandingPageProps {
   onSelectApartment: (id: string) => void;
 }
 
-export const ALL_AMENITIES = ['Wifi', 'Kitchen', 'Free Parking', 'Fireplace', 'Air Conditioning', 'Washer', 'Pool', 'TV', 'Coffee Maker', 'Beach Access', 'Outdoor Shower', 'BBQ Grill'];
+export const ALL_AMENITIES = [
+    { label: 'Wifi', icon: <Wifi className="w-5 h-5" /> },
+    { label: 'Kitchen', icon: <Utensils className="w-5 h-5" /> },
+    { label: 'Free Parking', icon: <ParkingCircle className="w-5 h-5" /> },
+    { label: 'Fireplace', icon: <Flame className="w-5 h-5" /> },
+    { label: 'Air Conditioning', icon: <Wind className="w-5 h-5" /> },
+    { label: 'Washer', icon: <WashingMachine className="w-5 h-5" /> },
+    { label: 'Pool', icon: <Waves className="w-5 h-5" /> },
+    { label: 'TV', icon: <Tv className="w-5 h-5" /> },
+    { label: 'Coffee Maker', icon: <Coffee className="w-5 h-5" /> },
+    { label: 'Beach Access', icon: <Umbrella className="w-5 h-5" /> },
+    { label: 'Outdoor Shower', icon: <ShowerHead className="w-5 h-5" /> },
+    { label: 'BBQ Grill', icon: <FlameKindling className="w-5 h-5" /> }
+];
+
 
 export const THEME_GRAY = 'rgb(168, 162, 158)';
 export const EMERALD_ACCENT = 'rgb(16 185 129 / 0.8)';
@@ -325,7 +339,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             <span className="text-coral-500 italic">Awaits</span>
           </h1>
           <p className="mt-8 text-xl md:text-2xl text-stone-400 max-w-3xl mx-auto font-medium leading-relaxed">
-            Discover handpicked luxury apartments and villas for your next unforgettable getaway. Where comfort meets elegance.
+            Discover handpicked apartments and villas for your next unforgettable getaway. Where comfort meets hospitality.
           </p>
 
           <div className="mt-16 w-full max-w-5xl mx-auto">

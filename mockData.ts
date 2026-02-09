@@ -15,6 +15,7 @@ export const MOCK_HOSTS: Host[] = [
     phoneNumber: '+41 79 123 45 67',
     notes: 'Premium host with strong performance in winter bookings.',
     airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/12345.ics?s=5a0d31b0e3e26f5d6f7b11d3',
+    paymentInstructions: 'To confirm your booking, please transfer a 50% deposit of the total amount to the following IBAN: CH93 0076 2011 6238 5295 7. Please include your Booking ID in the payment reference. The remaining balance is due upon arrival.',
     premiumConfig: {
       isEnabled: true,
       images: [
@@ -42,7 +43,8 @@ export const MOCK_HOSTS: Host[] = [
     country: 'Japan',
     phoneNumber: '+81 90 9876 5432',
     notes: 'Focus on high-tech amenities and modern design. Exploring expansion to Osaka.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/67890.ics?s=c8f2a1e7d9b4c0a5f1e6b3a2'
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/67890.ics?s=c8f2a1e7d9b4c0a5f1e6b3a2',
+    paymentInstructions: 'A deposit of 25% is required. Please use the following link to pay via Stripe: [link]. The balance can be paid in cash (JPY) or via credit card upon check-in.'
   },
   {
     id: 'host-3',
@@ -57,7 +59,8 @@ export const MOCK_HOSTS: Host[] = [
     country: 'Italy',
     phoneNumber: '+39 333 1122334',
     notes: 'Manages several high-end villas. Looking to add more properties in Umbria next year.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/11223.ics?s=a9b8c7d6e5f4a3b2c1d0e9f8'
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/11223.ics?s=a9b8c7d6e5f4a3b2c1d0e9f8',
+    paymentInstructions: 'Payment details will be sent in a separate email. We accept wire transfers and all major credit cards. A 30% deposit is required within 48 hours of booking confirmation.'
   },
   {
     id: 'host-4',
@@ -72,7 +75,8 @@ export const MOCK_HOSTS: Host[] = [
     country: 'USA',
     phoneNumber: '+1 305 555 1234',
     notes: 'Specializes in luxury beach houses. Considers offering additional services like private chef.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/44556.ics?s=f0e1d2c3b4a5f6e7d8c9b0a1'
+    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/44556.ics?s=f0e1d2c3b4a5f6e7d8c9b0a1',
+    paymentInstructions: 'To finalize your booking, a 50% deposit is required. You can pay via Zelle using the email address maya.singh@coastal.com or by credit card through the link we will send you. Please mention your Booking ID.'
   }
 ];
 
@@ -165,8 +169,9 @@ const currentYear = new Date().getFullYear();
 export const MOCK_BOOKINGS: Booking[] = [
   {
     id: 'book-1',
+    customBookingId: 'SM0000001',
     apartmentId: 'apt-1',
-    guestName: 'John Doe', // Added guestName
+    guestName: 'John Doe',
     guestEmail: 'traveler@boutique.com',
     startDate: `${currentYear}-06-10`,
     endDate: `${currentYear}-06-15`,
@@ -176,8 +181,9 @@ export const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: 'book-2',
+    customBookingId: 'JC0000001',
     apartmentId: 'apt-3',
-    guestName: 'Alice Smith', // Added guestName
+    guestName: 'Alice Smith',
     guestEmail: 'city.mapper@design.jp',
     startDate: `${currentYear}-07-01`,
     endDate: `${currentYear}-07-05`,
@@ -187,8 +193,9 @@ export const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: 'book-3',
+    customBookingId: 'ER0000001',
     apartmentId: 'apt-4',
-    guestName: 'Maria Rossi', // Added guestName
+    guestName: 'Maria Rossi',
     guestEmail: 'family.rossi@italy.it',
     startDate: `${currentYear}-08-12`,
     endDate: `${currentYear}-08-19`,
@@ -198,24 +205,26 @@ export const MOCK_BOOKINGS: Booking[] = [
   },
   {
     id: 'book-4',
+    customBookingId: 'SM0000002',
     apartmentId: 'apt-1',
-    guestName: 'Peter Jones', // Added guestName
+    guestName: 'Peter Jones',
     guestEmail: 'alpine.lover@example.com',
     startDate: `${currentYear}-01-10`,
     endDate: `${currentYear}-01-12`,
     status: BookingStatus.PAID,
-    totalPrice: 500, 
+    totalPrice: 500,
     isDepositPaid: true
   },
   {
     id: 'book-5',
+    customBookingId: 'MS0000001',
     apartmentId: 'apt-5',
-    guestName: 'Sarah Kim', // Added guestName
+    guestName: 'Sarah Kim',
     guestEmail: 'beach.goer@example.com',
     startDate: `${currentYear}-09-01`,
     endDate: `${currentYear}-09-07`,
     status: BookingStatus.CONFIRMED,
-    totalPrice: 3600, 
+    totalPrice: 3600,
     isDepositPaid: true
   }
 ];

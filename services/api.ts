@@ -1,4 +1,3 @@
-
 import { Apartment, Booking, BookingStatus, Host, BlockedDate } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
@@ -40,7 +39,7 @@ const mapApartment = (a: any): Apartment => ({
   capacity: a.capacity,
   bedrooms: a.bedrooms,
   bathrooms: a.bathrooms,
-  pricePerNight: a.price_per_night, 
+  pricePerNight: a.price_per_night,
   priceOverrides: a.price_overrides,
   amenities: a.amenities || [],
   photos: a.photos || [],
@@ -50,8 +49,9 @@ const mapApartment = (a: any): Apartment => ({
 
 const mapBooking = (b: any): Booking => ({
   id: b.id,
+  customBookingId: b.custom_booking_id,
   apartmentId: b.apartment_id,
-  guestName: b.guest_name, 
+  guestName: b.guest_name,
   guestEmail: b.guest_email,
   guestPhone: b.guest_phone,
   guestCountry: b.guest_country,
@@ -93,12 +93,12 @@ export const hostHubApi = {
     } else {
       hostQuery = hostQuery.limit(1);
     }
-    
+
     const { data: hostData, error: hostError } = await hostQuery.maybeSingle();
     const finalHostData = hostData || (await supabase.from('hosts').select('*').limit(1).maybeSingle()).data;
-    
+
     if (!finalHostData) throw new Error("Database is empty or connection failed.");
-    
+
     const host = mapHost(finalHostData);
     const { data: aptsData } = await supabase.from('apartments').select('*').eq('host_id', host.id);
     const apartments = (aptsData || []).map(mapApartment);
@@ -111,7 +111,7 @@ export const hostHubApi = {
       .select('*')
       .or(apartmentIds.length > 0 ? `apartment_id.eq.all,apartment_id.in.(${apartmentIds.join(',')})` : `apartment_id.eq.all`);
     const blockedDates = (blockedData || []).map(mapBlockedDate);
-    
+
     return { host, apartments, bookings, blockedDates };
   },
 
@@ -121,10 +121,55 @@ export const hostHubApi = {
   },
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
+    if (!data.apartmentId) throw new Error('Apartment ID is required to create a booking.');
+
+    // 1. Get the apartment and its host
+    const { data: aptData, error: aptError } = await supabase
+      .from('apartments')
+      .select(`
+        host_id,
+        hosts (*)
+      `)
+      .eq('id', data.apartmentId)
+      .single();
+
+    if (aptError || !aptData || !aptData.hosts) {
+      console.error('Error fetching apartment or host:', aptError);
+      throw new Error('Failed to find apartment or host for this booking.');
+    }
+    const host = mapHost(aptData.hosts);
+
+    // 2. Get all apartments for this host to count their bookings
+    const { data: hostApts, error: hostAptsError } = await supabase
+      .from('apartments')
+      .select('id')
+      .eq('host_id', host.id);
+
+    if (hostAptsError) throw hostAptsError;
+    const hostAptIds = hostApts.map(a => a.id);
+
+    // 3. Count existing bookings for this host
+    let bookingCount = 0;
+    if (hostAptIds.length > 0) {
+      const { count, error: countError } = await supabase
+        .from('bookings')
+        .select('id', { count: 'exact', head: true })
+        .in('apartment_id', hostAptIds);
+      if (countError) throw countError;
+      bookingCount = count || 0;
+    }
+    const newBookingNumber = bookingCount + 1;
+
+    // 4. Generate the custom ID
+    const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
+    const paddedCount = String(newBookingNumber).padStart(7, '0');
+    const customBookingId = `${hostInitials}${paddedCount}`;
+
     const payload = {
       id: data.id || uuidv4(),
+      custom_booking_id: customBookingId,
       apartment_id: data.apartmentId,
-      guest_name: data.guestName, 
+      guest_name: data.guestName,
       guest_email: data.guestEmail,
       guest_country: data.guestCountry,
       guest_phone: data.guestPhone,
@@ -137,11 +182,12 @@ export const hostHubApi = {
       guest_message: data.guestMessage,
       deposit_amount: data.depositAmount
     };
-    
+
     const { data: result, error } = await supabase.from('bookings').insert(payload).select().single();
     if (error) throw error;
     return mapBooking(result);
   },
+
 
   async updateHosts(updatedList: Host[]): Promise<Host[]> {
     const promises = updatedList.map((h: Host) => {
@@ -163,7 +209,7 @@ export const hostHubApi = {
       };
       return supabase.from('hosts').update(payload).eq('id', h.id);
     });
-    
+
     await Promise.all(promises);
     return this.getAllHosts();
   },
@@ -179,24 +225,24 @@ export const hostHubApi = {
         capacity: a.capacity,
         bedrooms: a.bedrooms,
         bathrooms: a.bathrooms,
-        price_per_night: a.pricePerNight, 
+        price_per_night: a.pricePerNight,
         price_overrides: a.priceOverrides,
         amenities: a.amenities,
         photos: a.photos,
         is_active: a.isActive,
-        map_embed_url: a.mapEmbedUrl 
+        map_embed_url: a.mapEmbedUrl
       };
       return supabase.from('apartments').upsert({ id: a.id, ...payload });
     });
-    
+
     await Promise.all(promises);
-    return updatedList; 
+    return updatedList;
   },
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
     const promises = updatedList.map((b: Booking) => {
       const payload: { [key: string]: any } = {
-        guest_name: b.guestName, 
+        guest_name: b.guestName,
         status: b.status,
         is_deposit_paid: b.isDepositPaid,
         total_price: b.totalPrice,
@@ -206,7 +252,7 @@ export const hostHubApi = {
       }
       return supabase.from('bookings').update(payload).eq('id', b.id);
     });
-    
+
     await Promise.all(promises);
     return updatedList;
   },
@@ -254,7 +300,7 @@ export const hostHubApi = {
       capacity: a.capacity,
       bedrooms: a.bedrooms,
       bathrooms: a.bathrooms,
-      price_per_night: a.pricePerNight, 
+      price_per_night: a.pricePerNight,
       price_overrides: a.priceOverrides,
       amenities: a.amenities,
       photos: a.photos,
@@ -265,8 +311,9 @@ export const hostHubApi = {
 
     const bookingPayloads = MOCK_BOOKINGS.map((b: any) => ({
       id: b.id,
+      custom_booking_id: b.customBookingId,
       apartment_id: b.apartmentId,
-      guest_name: b.guestName, 
+      guest_name: b.guestName,
       guest_email: b.guestEmail,
       guest_phone: b.guestPhone,
       guest_country: b.guestCountry,
@@ -283,16 +330,16 @@ export const hostHubApi = {
   },
 
   async sendEmail(
-    toEmail: string, 
-    subject: string, 
-    templateName: string, 
-    booking: Booking, 
-    apartment: Apartment, 
+    toEmail: string,
+    subject: string,
+    templateName: string,
+    booking: Booking,
+    apartment: Apartment,
     host: Host
   ): Promise<void> {
     const endpoint = `/api/v1/send-email`;
     console.log(`[HostHub Client] Triggering email dispatch via endpoint: ${endpoint}`);
-    
+
     try {
       const response = await fetch(endpoint, {
         method: 'POST',

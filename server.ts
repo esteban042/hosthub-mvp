@@ -12,7 +12,7 @@ const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
 
 const app = express();
-const port = parseInt(process.env.PORT || '8080', 10);
+const port = parseInt(process.env.PORT || '8081', 10);
 
 app.use(cors());
 app.use(express.json());
