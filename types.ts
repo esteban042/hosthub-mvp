@@ -13,7 +13,7 @@ export enum SubscriptionType {
 export enum BookingStatus {
     CONFIRMED = 'confirmed',
     PAID = 'paid',
-    CANCELLED = 'cancelled',
+    CANCELED = 'canceled',
     REQUESTED = 'requested',
 }
 

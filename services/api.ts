@@ -102,72 +102,6 @@ export const hostHubApi = {
     return { host, apartments, bookings, blockedDates };
   },
 
-  // async getLandingData(
-  //   identifier?: { slug?: string; email?: string },
-  //   isGuest: boolean = false
-  // ): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
-  //   const hostSelect = isGuest
-  //     ? 'id, slug, name, bio, avatar, business_name, landing_page_picture, premium_config, country, payment_instructions' // Public fields
-  //     : '*'; // All fields for authenticated users
-
-  //   let hostQuery = supabase.from('hosts').select(hostSelect);
-  //   if (identifier?.slug) {
-  //     hostQuery = hostQuery.eq('slug', identifier.slug);
-  //   } else if (identifier?.email) {
-  //     hostQuery = hostQuery.eq('contact_email', identifier.email);
-  //   } else {
-  //     hostQuery = hostQuery.limit(1);
-  //   }
-
-  //   const { data: hostData, error: hostError } = await hostQuery.maybeSingle();
-  //   if (hostError) {
-  //     console.error("Error fetching host:", hostError);
-  //     throw new Error("Database query for host failed.");
-  //   }
-  //   if (!hostData && (identifier?.slug || identifier?.email)) {
-  //       throw new Error(`Host not found.`);
-  //   }
-  //   if (!hostData) {
-  //       throw new Error("No hosts found in the database.");
-  //   }
-
-  //   let host = keysToCamel<Host>(hostData);
-  //   if (isGuest) {
-  //       host = { ...host, commissionRate: 0, subscriptionType: SubscriptionType.BASIC, contactEmail: '', physicalAddress: '', phoneNumber: '', notes: null, airbnbCalendarLink: null };
-  //   }
-
-  //   const { data: aptsData, error: aptsError } = await supabase.from('apartments').select('*').eq('host_id', host.id);
-  //   if (aptsError) throw aptsError;
-  //   const apartments = keysToCamel<Apartment[]>(aptsData || []);
-  //   const apartmentIds = apartments.map(a => a.id);
-
-  //   const bookingSelect = isGuest ? 'apartment_id, start_date, end_date' : '*';
-  //   const { data: bookingsData, error: bookingsError } = await supabase.from('bookings').select(bookingSelect).in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
-  //   if (bookingsError) throw bookingsError;
-  //   let bookings = keysToCamel<Booking[]>(bookingsData || []);
-
-  //   if (isGuest) {
-  //     bookings = bookings.map(b => ({
-  //       ...b,
-  //       id: uuidv4(),
-  //       customBookingId: '',
-  //       guestName: '',
-  //       guestEmail: '',
-  //       guestCountry: '',
-  //       numGuests: 0,
-  //       status: BookingStatus.CONFIRMED, // Needed for calendar display
-  //       totalPrice: 0,
-  //       notes: null,
-  //     }));
-  //   }
-
-  //   const { data: blockedData, error: blockedError } = await supabase.from('blocked_dates').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
-  //   if (blockedError) throw blockedError;
-  //   const blockedDates = keysToCamel<BlockedDate[]>(blockedData || []);
-
-  //   return { host, apartments, bookings, blockedDates };
-  // },
-
   async getHostDataByUserId(userId: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] } | null> {
     const { data: hostData, error: hostError } = await supabase.from('hosts').select('*').eq('user_id', userId).single();
 
@@ -227,8 +161,7 @@ export const hostHubApi = {
 
     const { data: aptData, error: aptError } = await supabase
       .from('apartments')
-      .select(`hosts (*)`)
-      .eq('id', data.apartmentId)
+      .select(`hosts (*)`).eq('id', data.apartmentId)
       .single();
 
     if (aptError || !aptData || !aptData.hosts) {
@@ -256,8 +189,7 @@ export const hostHubApi = {
       start_date: data.startDate,
       end_date: data.endDate,
       status: data.status,
-      total_price: data.totalPrice,
-      notes: data.notes
+      total_price: data.totalPrice
     };
 
     const { data: result, error } = await supabase.from('bookings').insert(payload).select().single();
@@ -280,7 +212,6 @@ export const hostHubApi = {
         country: h.country,
         phone_number: h.phoneNumber,
         landing_page_picture: h.landingPagePicture,
-        notes: h.notes,
         airbnb_calendar_link: h.airbnbCalendarLink,
         premium_config: h.premiumConfig,
         payment_instructions: h.paymentInstructions
@@ -328,13 +259,28 @@ export const hostHubApi = {
             end_date: b.endDate,
             total_price: b.totalPrice,
             status: b.status,
-            notes: b.notes
         };
-        return supabase.from('bookings').update(payload).eq('id', b.id);
+        // Use .select() to get the updated row back. This is crucial.
+        return supabase.from('bookings').update(payload).eq('id', b.id).select();
     });
 
-    await Promise.all(promises);
-    return updatedList;
+    const results = await Promise.all(promises);
+
+    const successfullyUpdatedBookings: Booking[] = [];
+    for (const result of results) {
+        // A failed update can either have an error or return no data.
+        if (result.error || !result.data || result.data.length === 0) {
+            console.error("Supabase update error or no rows updated:", result.error);
+            // Throw an error that the frontend can catch.
+            // This will trigger the `catch` block in `handleUpdateStatus`.
+            throw new Error('Database update failed. A security policy may have prevented the change.');
+        }
+        // If successful, convert the snake_case result from DB to camelCase and add to our list.
+        successfullyUpdatedBookings.push(...keysToCamel<Booking[]>(result.data));
+    }
+
+    // Return the array of bookings that were confirmed to be updated in the DB.
+    return successfullyUpdatedBookings;
   },
 
   async updateBlockedDates(updatedList: BlockedDate[]): Promise<BlockedDate[]> {

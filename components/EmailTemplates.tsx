@@ -23,7 +23,7 @@ export const BookingConfirmationTemplate: React.FC<TemplateProps> = ({ host, apa
         <div className="flex justify-between items-start mb-10">
           <div>
             <h1 className="text-3xl font-serif font-bold text-white mb-2 tracking-tight">Booking Confirmed</h1>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Booking ID: {booking.id}</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-emerald-400">Booking ID: {booking.customBookingId}</p>
           </div>
           <div className="w-12 h-12 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
             <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -97,7 +97,6 @@ export const BookingCancellationTemplate: React.FC<TemplateProps> = ({ host, apa
         <div className="flex justify-between items-start mb-10">
           <div>
             <h1 className="text-3xl font-serif font-bold text-white mb-2 tracking-tight">Stay Cancelled</h1>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-rose-500">Status: Unsuccessful</p>
           </div>
           <div className="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center border border-rose-500/20">
             <svg className="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>

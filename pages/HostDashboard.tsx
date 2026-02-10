@@ -161,11 +161,67 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const addPhotoUrl = () => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    setEditingApt({ ...editingApt, photos: [...currentPhotos, ''] });
+  };
+
+  const updatePhotoUrl = (index: number, url: string) => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    const newPhotos = [...currentPhotos];
+    newPhotos[index] = url;
+    setEditingApt({ ...editingApt, photos: newPhotos });
+  };
+
+  const removePhotoUrl = (index: number) => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    setEditingApt({ ...editingApt, photos: currentPhotos.filter((_, i) => i !== index) });
+  };
+
 
   const shareableUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}/?host=${host.slug}`;
   }, [host.slug]);
+
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+    const originalStatus = booking.status;
+    const updatedBooking = { ...booking, status };
+
+    // Optimistically update the UI for immediate feedback.
+    onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
+
+    try {
+      // Attempt to persist the change to the database.
+      await hostHubApi.updateBookings([updatedBooking]);
+
+      // If the database update is successful and the booking is being canceled, send an email.
+      if (status === BookingStatus.CANCELED) {
+        const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+        if (bookedApartment) {
+          await hostHubApi.sendEmail(
+            booking.guestEmail,
+            `Update on your booking for ${bookedApartment.title}`,
+            'BookingCancellation',
+            updatedBooking, // Correctly passing the object with the 'canceled' status
+            bookedApartment,
+            host
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update booking status. The UI has been reverted.", error);
+      
+      // If any API call fails, revert the optimistic UI update to maintain data consistency.
+      onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
+      
+      // Optionally, you could add a user-facing error message here.
+    }
+  };
+
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareableUrl);
@@ -218,65 +274,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   }, [myBookings, myApartments, statusFilter, todayStr]);
 
 
-  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
-    const originalStatus = booking.status;
-    // Optimistically update the UI for immediate feedback
-    onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-
-    try {
-      const updatedBooking = { ...booking, status };
-      // Persist the change to the database
-      await hostHubApi.updateBookings([updatedBooking]);
-
-      // If the status update is for cancellation, send an email
-      if (status === BookingStatus.CANCELED) {
-        const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
-        if (bookedApartment) {
-          await hostHubApi.sendEmail(
-            booking.guestEmail,
-            `Update on your booking for ${bookedApartment.title}`,
-            'BookingCancellation',
-            booking,
-            bookedApartment,
-            host
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Failed to update booking status:", error);
-      // If the API call fails, revert the optimistic UI update
-      onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
-      // Optionally, display a user-facing error message here
-    }
-  };
-
-
-  // const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
-  //   onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-  //   const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
-  //   if (!bookedApartment) return;
-
-  //   // Only send an email when a booking is CANCELED
-  //   if (status === BookingStatus.CANCELED) {
-  //     await hostHubApi.sendEmail(
-  //       booking.guestEmail,
-  //       `Update on your booking for ${bookedApartment.title}`,
-  //       'BookingCancellation',
-  //       booking,
-  //       bookedApartment,
-  //       host
-  //     );
-  //   }
-  // };
-
-  // const toggleManualBlock = (aptId: string, date: string) => {
-   // const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
-  //  if (existingIdx >= 0) {
-  //    onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
-  //  } else {
-    //  onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date }]);
-    //}
-  //};
   const toggleManualBlock = (aptId: string, date: string) => {
   // The 'date' from the calendar is the correct 'YYYY-MM-DD' string.
   // We find the date using a direct comparison, which is the same logic
@@ -629,10 +626,44 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                         </div>
                       )}
                    </div>
-
-
-
                  </div>
+                 <div className="pt-10 border-t border-stone-800/60">
+    <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+            {/* Using an existing icon for consistency */}
+            <Tag className="w-5 h-5 text-emerald-400" />
+            <h4 className="text-xl font-bold text-white tracking-tight">Unit Photos</h4>
+        </div>
+        <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all">+ Add Photo URL</button>
+    </div>
+    <div className="space-y-4">
+        {editingApt.photos?.map((photo, index) => (
+            <div key={index} className="flex items-center space-x-4 bg-stone-950 p-4 rounded-2xl border border-stone-600 animate-in slide-in-from-bottom-2">
+                <input
+                    type="text"
+                    value={photo}
+                    onChange={e => updatePhotoUrl(index, e.target.value)}
+                    placeholder="https://example.com/image.png"
+                    className="flex-grow bg-stone-900 border border-stone-600 rounded-xl p-3 text-xs text-white outline-none focus:ring-1 focus:ring-coral-500"
+                />
+                <button
+                    type="button"
+                    onClick={() => removePhotoUrl(index)}
+                    className="p-3 bg-stone-900 border border-stone-600 rounded-xl text-stone-600 hover:text-rose-500 transition-all"
+                >
+                    <Trash2 className="w-5 h-5" />
+                </button>
+            </div>
+        ))}
+        {(!editingApt.photos || editingApt.photos.length === 0) && (
+            <div className="py-12 border border-dashed border-stone-600 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
+                <Info className="w-6 h-6 mb-2 opacity-20" />
+                <span>No photos added for this unit. Add at least one photo URL.</span>
+            </div>
+        )}
+    </div>
+</div>
+
                  <div className="pt-10 border-t border-stone-800/60">
     <div className="flex items-center space-x-3 mb-8">
         <Tag className="w-5 h-5 text-emerald-400" />
