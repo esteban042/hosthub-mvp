@@ -35,30 +35,30 @@ const BookingListItem: React.FC<{
       <div className="space-y-4 flex-1 text-left">
         <div className="flex items-center space-x-4">
           <h4 className="text-2xl font-serif text-white">{b.guestName || 'Guest'}</h4>
-          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+          <span className={`px-4 py-1.5 text-[9px] uppercase tracking-widest font-black border ${
             b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
             b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
             'bg-rose-500/10 text-rose-400 border-rose-500/20'
             }`}>{b.status}</span>
-          <span className="text-xs text-stone-500 font-mono opacity-60">#{b.customBookingId}</span>
+            <CalendarDays className="w-4 h-4" />
+            <span className="text-l">{formatBookingRange(b.startDate, b.endDate)}</span>
+            <Users className="w-4 h-4" />
+            <span className="text-m">{b.numGuests || 1} Guests</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
         <div className="flex items-center space-x-2">
-    <Tag className="w-4 h-4" /> 
-    <span className="text-sm">{apartmentTitle}</span>
-</div>
+          <span className="text-l">{apartmentTitle}</span>
+        </div>
           <div className="flex items-center space-x-2">
-            <CalendarDays className="w-4 h-4" />
-            <span className="text-sm">{formatBookingRange(b.startDate, b.endDate)}</span>
-          </div>
-          <div className="flex items-center space-x-2">
+            <span className="text-s font-mono opacity-60">#{b.customBookingId}</span>
+            </div>
+          {/* <div className="flex items-center space-x-2">
              <Users className="w-4 h-4" />
              <span className="text-sm">{b.numGuests || 1} Guests</span>
-          </div>
+          </div> */}
           <div className="flex items-center space-x-2">
-             <DollarSign className="w-4 h-4" />
-             <span className="text-sm">${b.totalPrice.toLocaleString()} Total</span>
+             <span className="text-ml">${b.totalPrice.toLocaleString()} Total</span>
           </div>
         </div>
 
@@ -224,6 +224,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
+const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
+
 
   // const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
@@ -631,97 +633,68 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
            ))}
         </div>
       )}
-      
-      {/* {activeTab === 'current-bookings' && (
-    <div className="space-y-8">
-        <div>
-            <h3 className="text-2xl font-bold text-white mb-4">Currently in Unit</h3>
-            {guestsCurrentlyIn.length > 0 ? (
-                <ul className="divide-y divide-stone-800">
-                    {guestsCurrentlyIn.map(b => (
-                        <li key={b.id} className="py-4">
-                            <p className="text-white">{b.guestName}</p>
-                            <p className="text-sm text-stone-400">
-                                {apartments.find(a => a.id === b.apartmentId)?.title} | {new Date(b.startDate).toLocaleDateString()} - {new Date(b.endDate).toLocaleDateString()}
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-            ) : <p className="text-stone-500">No guests currently in units.</p>}
-        </div>
-        <div>
-            <h3 className="text-2xl font-bold text-white mb-4">Check-ins Today</h3>
-            {checkInsToday.length > 0 ? (
-                <ul className="divide-y divide-stone-800">
-                    {checkInsToday.map(b => (
-                        <li key={b.id} className="py-4">
-                            <p className="text-white">{b.guestName}</p>
-                            <p className="text-sm text-stone-400">
-                                {apartments.find(a => a.id === b.apartmentId)?.title} | Arriving today
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-            ) : <p className="text-stone-500">No check-ins scheduled for today.</p>}
-        </div>
-        <div>
-            <h3 className="text-2xl font-bold text-white mb-4">Check-outs Today</h3>
-            {checkOutsToday.length > 0 ? (
-                <ul className="divide-y divide-stone-800">
-                    {checkOutsToday.map(b => (
-                        <li key={b.id} className="py-4">
-                            <p className="text-white">{b.guestName}</p>
-                            <p className="text-sm text-stone-400">
-                                {apartments.find(a => a.id === b.apartmentId)?.title} | Departing today
-                            </p>
-                        </li>
-                    ))}
-                </ul>
-            ) : <p className="text-stone-500">No check-outs scheduled for today.</p>}
-        </div>
-    </div>
-)} */}
-
+  
 {activeTab === 'current-bookings' && (
-    <div className="space-y-12">
-        <div>
-            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
-            <div className="space-y-6 mt-4">
-                {guestsCurrentlyIn.length > 0 ? (
-                    guestsCurrentlyIn.map(b => <BookingListItem key={b.id} booking={b} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />)
-                ) : (
-                    <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                        <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
-                    </div>
-                )}
-            </div>
+    <div>
+        <div className="flex items-center space-x-2 mb-8">
+            <button onClick={() => setCurrentTabFilter('current')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'current' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Current Stays</button>
+            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'check-in' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Check-ins Today</button>
+            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'check-out' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Check-outs Today</button>
         </div>
 
-        <div>
-            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-ins Today</h3>
-            <div className="space-y-6 mt-4">
-                {checkInsToday.length > 0 ? (
-                    checkInsToday.map(b => <BookingListItem key={b.id} booking={b} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />)
-                ) : (
-                    <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                        <p className="text-stone-600 font-medium italic">No check-ins scheduled for today.</p>
-                    </div>
-                )}
+        {currentTabFilter === 'current' && (
+            <div>
+                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
+                <div className="space-y-6 mt-4">
+                    {guestsCurrentlyIn.length > 0 ? (
+                        guestsCurrentlyIn.map(b => {
+                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
+                        })
+                    ) : (
+                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                            <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        )}
 
-        <div>
-            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-outs Today</h3>
-            <div className="space-y-6 mt-4">
-                {checkOutsToday.length > 0 ? (
-                    checkOutsToday.map(b => <BookingListItem key={b.id} booking={b} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />)
-                ) : (
-                    <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                        <p className="text-stone-600 font-medium italic">No check-outs scheduled for today.</p>
-                    </div>
-                )}
+        {currentTabFilter === 'check-in' && (
+            <div>
+                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-ins Today</h3>
+                <div className="space-y-6 mt-4">
+                    {checkInsToday.length > 0 ? (
+                        checkInsToday.map(b => {
+                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
+                        })
+                    ) : (
+                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                            <p className="text-stone-600 font-medium italic">No check-ins scheduled for today.</p>
+                        </div>
+                    )}
+                </div>
             </div>
-        </div>
+        )}
+
+        {currentTabFilter === 'check-out' && (
+            <div>
+                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-outs Today</h3>
+                <div className="space-y-6 mt-4">
+                    {checkOutsToday.length > 0 ? (
+                        checkOutsToday.map(b => {
+                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
+                        })
+                    ) : (
+                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                            <p className="text-stone-600 font-medium italic">No check-outs scheduled for today.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
     </div>
 )}
 
