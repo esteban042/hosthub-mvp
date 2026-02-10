@@ -486,12 +486,12 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
         </div>
       </div>
 
-      <div className="flex bg-[#141211] border border-stone-400 p-2 rounded-xl w-fit mb-12">
+      <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
         {['bookings', 'calendar', 'apartments', 'current-bookings'].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
-            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]  hover:text-white'}`}
+            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
           >
             {tab}
           </button>
@@ -511,10 +511,10 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
                 <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value as any)}
-                    className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+                    className={`px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
                         statusFilter === filter.value
-                            ? 'bg-emerald-900 text-white shadow-l shadow-coral-500/20'
-                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)] hover:text-white'
+                            ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
+                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
                     }`}
                 >
                     {filter.icon}
@@ -533,7 +533,7 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
                       <div className="flex items-center space-x-4">
                         <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
                         <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-                          b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                          b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' : 
                           b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
                           'bg-rose-500/10 text-rose-400 border-rose-500/20' // For Canceled
                           }`}>{b.status}</span>
@@ -575,12 +575,12 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
                       {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                           <>
                               <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
-                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                           </>
                       )}
                     {/* Show only 'Cancel' for PAID bookings */}
                     {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                    )}
                     </div>
 
@@ -621,10 +621,10 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
   
 {activeTab === 'current-bookings' && (
     <div>
-        <div className="flex items-center space-x-2 rounded-xl">
-            <button onClick={() => setCurrentTabFilter('current')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'current' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  hover:bg-emerald-900/10'}`}>Current Stays</button>
-            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'check-in' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  hover:bg-emerald-900/10'}`}>Check-ins Today</button>
-            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  text-white hover:bg-emerald-900/10'}`}>Check-outs Today</button>
+        <div className="flex items-center space-x-2 rounded-xl px-6 py-3 ">
+            <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'current' ? 'bg-emerald-900/70  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Current Stays</button>
+            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Check-ins Today</button>
+            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Check-outs Today</button>
         </div>
 
         {currentTabFilter === 'current' && (

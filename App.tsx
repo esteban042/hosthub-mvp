@@ -147,11 +147,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleAuth = async (email: string, pass: string) => {
+  const handleAuth = async (email: string, pass: string): Promise<string | null> => {
     const { error } = await signInWithEmail(email, pass);
     if (error) {
-      alert(`Login Failed: ${error.message}`);
+      return error.message;
     }
+    return null;
   };
 
   const handleLogout = () => {
