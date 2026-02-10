@@ -247,6 +247,7 @@ export const hostHubApi = {
     await Promise.all(promises);
     return updatedList;
   },
+  
 
   async updateBookings(updatedList: Booking[]): Promise<Booking[]> {
     const promises = updatedList.map((b: Booking) => {
