@@ -78,7 +78,8 @@ export const Layout: React.FC<LayoutProps> = ({
             
             {user ? (
                <div className="flex items-center space-x-3">
-                 <button onClick={onLogout} className="border border-stone-400 text-stone-400 hover:text-white text-xs font-bold uppercase tracking-wider">Logout</button>
+                 <button onClick={onLogout} 
+                className="bg-transparent border border-emerald-400 hover:bg-emerald-400 hover:text-white text-emerald-400 px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-emerald-400/20">Logout</button>
                </div>
             ) : (
               <button 

@@ -39,13 +39,15 @@ const App: React.FC = () => {
     clearData();
     setLoading(true);
     try {
-      const data = await hostHubApi.getLandingData(slug);
-      setCurrentHost(data.host);
-      setApartments(data.apartments);
-      setBookings(data.bookings);
-      setBlockedDates(data.blockedDates);
-      const allHosts = await hostHubApi.getAllHosts();
-      setHosts(allHosts);
+      const { host, apartments, bookings, blockedDates } = await hostHubApi.getLandingData({ slug }, true);
+
+
+
+      setCurrentHost(host);
+      setApartments(apartments);
+      setBookings(bookings);
+      setBlockedDates(blockedDates);
+      // Removed the leaky call to getAllHosts
     } catch (err: any) {
       setError(err.message || "Connection failed.");
     } finally {

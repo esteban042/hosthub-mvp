@@ -39,7 +39,7 @@ const AvailabilityCalendar: React.FC<{
   const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
 
 
-  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID));
+  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID));
   const isBlockedManually = (dateStr: string) => blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
   const isAirbnbBlocked = (dateStr: string) => airbnbCalendarDates.includes(dateStr);
 
@@ -70,11 +70,11 @@ const AvailabilityCalendar: React.FC<{
       if (booked) { 
         dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
         const bookingForDay = bookings.find(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate);
-        if (bookingForDay?.status === BookingStatus.REQUESTED) {
-            dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
-        } else if (bookingForDay?.status === BookingStatus.PAID) {
-            dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
-        }
+        // if (bookingForDay?.status === BookingStatus.REQUESTED) {
+        //     dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
+        // } else if (bookingForDay?.status === BookingStatus.PAID) {
+        //     dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
+        // }
       } else if (blockedManually) { 
         dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; 
       } else if (airbnbBlocked) {
@@ -152,7 +152,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'apartments'>('bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
 
   // const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
@@ -219,22 +219,55 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+    const originalStatus = booking.status;
+    // Optimistically update the UI for immediate feedback
     onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-    const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
-    if (!bookedApartment) return;
 
-    // Only send an email when a booking is CANCELED
-    if (status === BookingStatus.CANCELED) {
-      await hostHubApi.sendEmail(
-        booking.guestEmail,
-        `Update on your booking for ${bookedApartment.title}`,
-        'BookingCancellation',
-        booking,
-        bookedApartment,
-        host
-      );
+    try {
+      const updatedBooking = { ...booking, status };
+      // Persist the change to the database
+      await hostHubApi.updateBookings([updatedBooking]);
+
+      // If the status update is for cancellation, send an email
+      if (status === BookingStatus.CANCELED) {
+        const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+        if (bookedApartment) {
+          await hostHubApi.sendEmail(
+            booking.guestEmail,
+            `Update on your booking for ${bookedApartment.title}`,
+            'BookingCancellation',
+            booking,
+            bookedApartment,
+            host
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update booking status:", error);
+      // If the API call fails, revert the optimistic UI update
+      onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
+      // Optionally, display a user-facing error message here
     }
   };
+
+
+  // const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+  //   onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
+  //   const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+  //   if (!bookedApartment) return;
+
+  //   // Only send an email when a booking is CANCELED
+  //   if (status === BookingStatus.CANCELED) {
+  //     await hostHubApi.sendEmail(
+  //       booking.guestEmail,
+  //       `Update on your booking for ${bookedApartment.title}`,
+  //       'BookingCancellation',
+  //       booking,
+  //       bookedApartment,
+  //       host
+  //     );
+  //   }
+  // };
 
   // const toggleManualBlock = (aptId: string, date: string) => {
    // const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
