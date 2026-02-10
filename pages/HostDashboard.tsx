@@ -79,21 +79,6 @@ const BookingListItem: React.FC<{
   );
 };
 
-
-      {/* <div className="flex items-center space-x-4">
-        {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
-          <>
-            <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
-            <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
-          </>
-        )}
-        {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-          <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
-        )}
-      </div> */}
-
-
-
 // Sub-component for managing manual availability overrides
 const AvailabilityCalendar: React.FC<{ 
   aptId: string, 
@@ -636,10 +621,10 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
   
 {activeTab === 'current-bookings' && (
     <div>
-        <div className="flex items-center space-x-2 mb-8">
-            <button onClick={() => setCurrentTabFilter('current')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'current' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Current Stays</button>
-            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'check-in' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Check-ins Today</button>
-            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-4 py-2 text-sm font-bold ${currentTabFilter === 'check-out' ? 'bg-white text-black' : 'bg-transparent border border-white text-white hover:bg-white/10'}`}>Check-outs Today</button>
+        <div className="flex items-center space-x-2 rounded-xl">
+            <button onClick={() => setCurrentTabFilter('current')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'current' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  hover:bg-emerald-900/10'}`}>Current Stays</button>
+            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'check-in' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  hover:bg-emerald-900/10'}`}>Check-ins Today</button>
+            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-4 py-2 text-sm mb-8 gap-3 font-black uppercase rounded-xl  ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border border-stone-600  text-white hover:bg-emerald-900/10'}`}>Check-outs Today</button>
         </div>
 
         {currentTabFilter === 'current' && (
