@@ -209,7 +209,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Admin Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-600 shadow-xl flex items-center space-x-5">
           <div className="w-12 h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center text-emerald-400">
             <CreditCard className="w-6 h-6" />
           </div>
@@ -219,7 +219,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
           </div>
           </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-600 shadow-xl flex items-center space-x-5">
           <div className="w-12 h-12 bg-coral-500/10 rounded-2xl flex items-center justify-center text-coral-500">
             <Percent className="w-6 h-6" />
           </div> 
@@ -228,7 +228,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-[rgb(214,213,213)] ">Platform Commission</p>
           </div>
         </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-600 shadow-xl flex items-center space-x-5">
           <div className="w-12 h-12 bg-blue-500/10 rounded-2xl flex items-center justify-center text-blue-400">
             <Globe className="w-6 h-6" />
           </div>
@@ -238,7 +238,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
        
           </div>
          </div>
-        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-800 shadow-xl flex items-center space-x-5">
+        <div className="bg-[#1c1a19] p-8 rounded-[2rem] border border-stone-600 shadow-xl flex items-center space-x-5">
           <div className="w-12 h-12 bg-stone-100/10 rounded-2xl flex items-center justify-center text-stone-300">
             <Layers className="w-6 h-6" />
           </div>
@@ -256,10 +256,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           const hostApts = apartments.filter(a => a.hostId === h.id && a.isActive);
           const activeUrl = `${window.location.origin}/?host=${h.slug}`;
           const isCopied = copiedSlug === h.slug;
+          const totalBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && (b.status === BookingStatus.PAID || b.status === BookingStatus.CONFIRMED)).length;
+
           const canceledBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && b.status === BookingStatus.CANCELED).length;
 
           return (
-            <div key={h.id} className="bg-[#1c1a19] border border-stone-800 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
+            <div key={h.id} className="bg-[#1c1a19] border border-stone-600 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
               <div className="flex justify-between items-start mb-6">
                  <div className="w-16 h-16 rounded-2xl overflow-hidden border border-stone-800">
                     <img src={h.avatar} className="w-full h-full object-cover" alt={h.name} />
@@ -286,7 +288,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4 py-6 border-y border-stone-800/40 mb-8">
+              <div className="grid grid-cols-4 gap-4 py-6 border-y border-stone-800/40 mb-8">
                  <div>
                    <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Managed Units</p>
                    <p className="text-xl font-black text-white">{hostApts.length}</p>
@@ -296,15 +298,20 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                    <p className="text-xl font-black text-white">{h.commissionRate}%</p>
                  </div>
                  <div>
+                  <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Total</p>
+                  <p className="text-xl font-black text-white">{totalBookings}</p>
+                </div>
+                 <div>
                   <p className="text-[9px] font-black uppercase text-[rgb(214,213,213)]  mb-1 tracking-widest">Canceled</p>
                   <p className="text-xl font-black text-white">{canceledBookings}</p>
                 </div>
+
               </div>
 
               <div className="flex items-center space-x-3 mt-auto">
                 <button 
                   onClick={() => { setEditingHost(h); setShowHostModal(true); setActiveModalTab('basics'); }}
-                  className="flex-1 bg-stone-900 border border-stone-800 text-stone-400 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+                  className="flex-1 bg-stone-900 border border-stone-600 text-stone-400 hover:text-white py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
                   Configure Host
                 </button>
@@ -386,6 +393,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Airbnb iCal Link</label>
                       <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Landingpage Picture</label>
+                      <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, landingPagePicture: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
                     </div>
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Payment Instructions (Email)</label>

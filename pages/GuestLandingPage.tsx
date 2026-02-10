@@ -61,7 +61,7 @@ export const THEME_GRAY = 'rgb(168, 162, 158)';
 export const EMERALD_ACCENT = 'rgb(16 185 129 / 0.8)';
 export const AMENITY_GREEN = 'hsl(153 31% 55%)';
 export const CARD_BG = 'hsl(0 0% 13%)';
-export const CARD_BORDER = 'hsl(30 5% 20%)';
+export const CARD_BORDER = 'hsl(30 5% 60%)';
 
 export const UNIT_TITLE_STYLE: React.CSSProperties = {
   letterSpacing: '-0.02em',
