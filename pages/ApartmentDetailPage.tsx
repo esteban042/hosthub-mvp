@@ -41,6 +41,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const [isMapEnlarged, setIsMapEnlarged] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
 
   const aboutColRef = useRef<HTMLDivElement>(null);
   const [mapContainerHeight, setMapContainerHeight] = useState<number>(400);
@@ -80,7 +81,9 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !startDate || !endDate || !name) return;
+    if (!email || !startDate || !endDate || !name || isBooking) return;
+
+    setIsBooking(true);
 
     const bookingDetails: Partial<Booking> = {
       apartmentId: apartment.id,
@@ -114,6 +117,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
     } catch (error) {
       console.error("Failed to create booking:", error);
+      setIsBooking(false);
       // Here you could set an error state and display a message to the user
     }
   };
@@ -267,7 +271,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <label className="block text-sm text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Guest name</label>
                 <input
                   type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
-                  className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
+                  className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
                 />
              </div>
 
@@ -276,10 +280,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                  className={`w-full bg-stone-950 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-coral-500' : 'border-stone-800'}`}
+                  className={`w-full bg-stone-950 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-coral-500' : 'border-stone-600'}`}
                 >
                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCalendarOpen ? 'bg-coral-500 text-white' : 'bg-stone-800 text-emerald-400'}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCalendarOpen ? 'bg-coral-500 text-white' : 'bg-stone-600 text-emerald-400'}`}>
                          {CORE_ICONS.Calendar("w-4 h-4")}
                       </div>
                       <span className={startDate ? 'text-white' : 'text-stone-500'}>
@@ -309,7 +313,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
 
              <div className="space-y-2">
                 <label className="block text-m text[rgb(214,213,213)] font-medium ml-1" style={{ color: LABEL_COLOR }}>Number of guests</label>
-                <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-800 rounded-2xl">
+                <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-600 rounded-2xl">
                     <button
                         type="button"
                         onClick={() => setNumGuests(prev => Math.max(1, prev - 1))}
@@ -333,7 +337,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact email</label>
                  <input
                    type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
                </div>
 
@@ -341,7 +345,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Country</label>
                  <select
                    required value={guestCountry} onChange={e => setGuestCountry(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  >
                    <option value="">Select a country</option>
                    {countries.map(c => <option key={c} value={c}>{c}</option>)}
@@ -352,7 +356,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                  <label className="block text-sm font-medium ml-1" style={{ color: LABEL_COLOR }}>Contact phone (optional)</label>
                  <input
                    type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
-                   className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
+                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
                </div>
              </div>
@@ -362,18 +366,18 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <textarea
                     value={message}
                     onChange={e => setMessage(e.target.value)}
-                    className="w-full bg-stone-950 border border-stone-800 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700 h-[100px] resize-y"
+                    className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700 h-[100px] resize-y"
                     placeholder="Any special requests or questions?"
                 ></textarea>
              </div>
 
              <button
-               disabled={!name || !email || !startDate || !endDate}
+               disabled={!name || !email || !startDate || !endDate || isBooking}
                className="w-full bg-coral-500 hover:bg-coral-600 disabled:bg-stone-800 disabled:text-stone-600 disabled:cursor-not-allowed text-white font-black py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-coral-500/30 active:scale-[0.98]"
              >
-               Book now
+               {isBooking ? 'Booking...' : 'Book now'}
              </button>
-             <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6" style={{ color: LABEL_COLOR }}>Approval usually within 24 hours</p>
+             <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6" style={{ color: LABEL_COLOR }}>Book with instant confirmation</p>
           </form>
        </div>
 

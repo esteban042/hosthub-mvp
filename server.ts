@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -28,7 +29,9 @@ app.use(
         'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
         'font-src': ["'self'", 'https://fonts.gstatic.com'],
         'connect-src': ["'self'", 'https://dmldmpdflblwwoppbvkv.supabase.co'],
-        'img-src': ["'self'", 'data:', 'https://images.unsplash.com'],
+        'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://api.dicebear.com'],
+        'frame-src': ["'self'", "https://*.supabase.co", "https://www.google.com/"],
+
       },
     },
     frameguard: {

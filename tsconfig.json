@@ -23,7 +23,9 @@
     "types.ts",
     "components/**/*.tsx",
     "pages/**/*.tsx",
-    "services/**/*.ts"
+    "services/**/*.ts",
+    "App.tsx",
+    "index.tsx"
   ],
   "exclude": [
     "node_modules",

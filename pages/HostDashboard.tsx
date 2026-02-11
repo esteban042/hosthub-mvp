@@ -13,16 +13,197 @@ const formatBookingRange = (start: string, end: string) => {
   if (!start || !end) return start || '...';
   const s = new Date(start);
   const e = new Date(end);
-  const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
+  const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
   const diffTime = Math.abs(e.getTime() - s.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return (
     <span>
-      {startStr} — {endStr} <span className="text-[13px] ml-1 opacity-60">({diffDays} night{diffDays !== 1 ? 's' : ''})</span>
+      {startStr} — {endStr} <span className=" ml-1 opacity-90">({diffDays} night{diffDays !== 1 ? 's' : ''})</span>
     </span>
   );
 };
+
+const BookingListItem: React.FC<{
+  booking: Booking;
+  apartmentTitle: string;
+  statusFilter: string;
+  onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+}> = ({ booking: b, apartmentTitle, statusFilter, onUpdateStatus: handleUpdateStatus }) => {
+  return (
+    <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
+      <div className="space-y-4 flex-1 text-left">
+        <div className="flex items-center space-x-4">
+          <h4 className="text-2xl font-serif text-white">{b.guestName || 'Guest'}</h4>
+          <span className={`px-4 py-1.5 text-[9px] uppercase tracking-widest font-black border ${
+            b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
+            b.status === BookingStatus.CONFIRMED ? 'text-blue-400 border-blue-500/40' :
+            'bg-rose-500/10 text-rose-400 border-rose-500/20'
+            }`}>{b.status}</span>
+            <CalendarDays className="w-4 h-4" />
+            <span className="text-l">{formatBookingRange(b.startDate, b.endDate)}</span>
+            <Users className="w-4 h-4" />
+            <span className="text-m">{b.numGuests || 1} Guests</span>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
+        <div className="flex items-center space-x-2">
+          <span className="text-l">{apartmentTitle}</span>
+        </div>
+          <div className="flex items-center space-x-2">
+            <span className="text-s font-mono opacity-60">#{b.customBookingId}</span>
+            </div>
+          {/* <div className="flex items-center space-x-2">
+             <Users className="w-4 h-4" />
+             <span className="text-sm">{b.numGuests || 1} Guests</span>
+          </div> */}
+          <div className="flex items-center space-x-2">
+             <span className="text-ml">${b.totalPrice.toLocaleString()} Total</span>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium text-xs" style={{ color: LABEL_COLOR }}>
+          <div className="flex items-center space-x-2">
+             <Mail className="w-3.5 h-3.5" />
+             <span>{b.guestEmail}</span>
+          </div>
+          {b.guestPhone && (
+            <div className="flex items-center space-x-2">
+               <Phone className="w-3.5 h-3.5" />
+               <span>{b.guestPhone}</span>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BookingCard: React.FC<{
+  booking: Booking;
+  apartmentTitle: string;
+  onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+  statusFilter: string;
+  showButtons?: boolean;
+}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter, showButtons = true }) => { // CORRECTED LINE
+  return (
+    <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
+      <div className="p-6 flex-grow">
+        <div className="flex items-start justify-between mb-6">
+          <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
+          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+            b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
+            b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+            'bg-rose-500/10 text-rose-400 border-rose-500/20'
+            }`}>{b.status}</span>
+        </div>
+
+        <div className="space-y-3 text-sm" style={{ color: LABEL_COLOR }}>
+          <div className="flex items-center space-x-3">
+            <CalendarDays className="w-4 h-4 flex-shrink-0" />
+            <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Users className="w-4 h-4 flex-shrink-0" />
+            <span>{b.numGuests || 1} Guests</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <DollarSign className="w-4 h-4 flex-shrink-0" />
+            <span>${b.totalPrice.toLocaleString()} Total</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Mail className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{b.guestEmail}</span>
+          </div>
+          {b.guestPhone && (
+            <div className="flex items-center space-x-3">
+              <Phone className="w-4 h-4 flex-shrink-0" />
+              <span>{b.guestPhone}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      {showButtons && (
+        <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
+          {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+            <>
+              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
+              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+            </>
+          )}
+          {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+            <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+// const BookingCard: React.FC<{
+//   booking: Booking;
+//   apartmentTitle: string;
+//   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+//   statusFilter: string;
+// }> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter }) => {
+//   return (
+//     <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
+//       <div className="p-6 flex-grow">
+//         <div className="flex items-start justify-between mb-6">
+//           <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
+//           <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+//             b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
+//             b.status === BookingStatus.CONFIRMED ? 'stext-blue-400 border-blue-500/60' :
+//             'bg-rose-500/10 text-rose-400 border-rose-500/20'
+//             }`}>{b.status}</span>
+//         </div>
+
+//         {/* Details section, with Apartment Title removed for redundancy */}
+//         <div className="space-y-3 text-m" text>
+//           <div className="flex items-center space-x-3">
+//             <CalendarDays className="w-4 h-4 flex-shrink-0" />
+//             <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <Users className="w-4 h-4 flex-shrink-0" />
+//             <span>{b.numGuests || 1} Guests</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <DollarSign className="w-4 h-4 flex-shrink-0" />
+//             <span>${b.totalPrice.toLocaleString()} Total</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <Mail className="w-4 h-4 flex-shrink-0" />
+//             <span className="truncate">{b.guestEmail}</span>
+//           </div>
+//           {b.guestPhone && (
+//             <div className="flex items-center space-x-3">
+//               <Phone className="w-4 h-4 flex-shrink-0" />
+//               <span>{b.guestPhone}</span>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
+//         {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+//           <>
+//             <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
+//             <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+//           </>
+//         )}
+//         {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+//           <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+
+
 
 // Sub-component for managing manual availability overrides
 const AvailabilityCalendar: React.FC<{ 
@@ -39,7 +220,7 @@ const AvailabilityCalendar: React.FC<{
   const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
 
 
-  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID));
+  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID));
   const isBlockedManually = (dateStr: string) => blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
   const isAirbnbBlocked = (dateStr: string) => airbnbCalendarDates.includes(dateStr);
 
@@ -70,11 +251,11 @@ const AvailabilityCalendar: React.FC<{
       if (booked) { 
         dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
         const bookingForDay = bookings.find(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate);
-        if (bookingForDay?.status === BookingStatus.REQUESTED) {
-            dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
-        } else if (bookingForDay?.status === BookingStatus.PAID) {
-            dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
-        }
+        // if (bookingForDay?.status === BookingStatus.REQUESTED) {
+        //     dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
+        // } else if (bookingForDay?.status === BookingStatus.PAID) {
+        //     dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
+        // }
       } else if (blockedManually) { 
         dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; 
       } else if (airbnbBlocked) {
@@ -149,11 +330,13 @@ interface HostDashboardProps {
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
   host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
-  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'apartments'>('bookings');
+  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'past' | BookingStatus.REQUESTED | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
+const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
+
 
   // const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
@@ -161,11 +344,96 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
 
   const todayStr = new Date().toISOString().split('T')[0];
+  const addPhotoUrl = () => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    setEditingApt({ ...editingApt, photos: [...currentPhotos, ''] });
+  };
+
+  const updatePhotoUrl = (index: number, url: string) => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    const newPhotos = [...currentPhotos];
+    newPhotos[index] = url;
+    setEditingApt({ ...editingApt, photos: newPhotos });
+  };
+
+  const removePhotoUrl = (index: number) => {
+    if (!editingApt) return;
+    const currentPhotos = editingApt.photos || [];
+    setEditingApt({ ...editingApt, photos: currentPhotos.filter((_, i) => i !== index) });
+  };
+
 
   const shareableUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}/?host=${host.slug}`;
   }, [host.slug]);
+  const { guestsCurrentlyIn, checkInsToday, checkOutsToday } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const hostAptIds = apartments.filter(a => a.hostId === host.id).map(a => a.id);
+    const relevantBookings = bookings.filter(b => hostAptIds.includes(b.apartmentId));
+
+    const guestsCurrentlyIn = relevantBookings.filter(b => {
+        const startDate = new Date(b.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        const endDate = new Date(b.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        return startDate <= today && endDate >= today;
+    });
+
+    const checkInsToday = relevantBookings.filter(b => {
+        const startDate = new Date(b.startDate);
+        startDate.setHours(0, 0, 0, 0);
+        return startDate.getTime() === today.getTime();
+    });
+
+    const checkOutsToday = relevantBookings.filter(b => {
+        const endDate = new Date(b.endDate);
+        endDate.setHours(0, 0, 0, 0);
+        return endDate.getTime() === today.getTime();
+    });
+
+    return { guestsCurrentlyIn, checkInsToday, checkOutsToday };
+}, [bookings, apartments, host.id]);
+
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+    const originalStatus = booking.status;
+    const updatedBooking = { ...booking, status };
+
+    // Optimistically update the UI for immediate feedback.
+    onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
+
+    try {
+      // Attempt to persist the change to the database.
+      await hostHubApi.updateBookings([updatedBooking]);
+
+      // If the database update is successful and the booking is being canceled, send an email.
+      if (status === BookingStatus.CANCELED) {
+        const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
+        if (bookedApartment) {
+          await hostHubApi.sendEmail(
+            booking.guestEmail,
+            `Update on your booking for ${bookedApartment.title}`,
+            'BookingCancellation',
+            updatedBooking, // Correctly passing the object with the 'canceled' status
+            bookedApartment,
+            host
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Failed to update booking status. The UI has been reverted.", error);
+      
+      // If any API call fails, revert the optimistic UI update to maintain data consistency.
+      onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
+      
+      // Optionally, you could add a user-facing error message here.
+    }
+  };
+
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareableUrl);
@@ -194,9 +462,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         }, [myBookings, myApartments, todayStr]);
 
   // Fix: Ensure groupedAndSortedBookings is defined before the main return statement.
-  const groupedAndSortedBookings = useMemo(() => {
+const groupedAndSortedBookings = useMemo(() => {
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
     const filtered = myBookings.filter(b => {
       const isPast = b.endDate < todayStr;
+
+      if (statusFilter === 'upcoming-30d') {
+        const startDate = new Date(b.startDate);
+        return (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && startDate >= new Date(todayStr) && startDate <= thirtyDaysFromNow;
+      }
       if (statusFilter === 'past') return isPast;
       if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
       if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
@@ -218,32 +494,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   }, [myBookings, myApartments, statusFilter, todayStr]);
 
 
-  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
-    onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status } : b));
-    const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
-    if (!bookedApartment) return;
-
-    // Only send an email when a booking is CANCELED
-    if (status === BookingStatus.CANCELED) {
-      await hostHubApi.sendEmail(
-        booking.guestEmail,
-        `Update on your booking for ${bookedApartment.title}`,
-        'BookingCancellation',
-        booking,
-        bookedApartment,
-        host
-      );
-    }
-  };
-
-  // const toggleManualBlock = (aptId: string, date: string) => {
-   // const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
-  //  if (existingIdx >= 0) {
-  //    onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
-  //  } else {
-    //  onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date }]);
-    //}
-  //};
   const toggleManualBlock = (aptId: string, date: string) => {
   // The 'date' from the calendar is the correct 'YYYY-MM-DD' string.
   // We find the date using a direct comparison, which is the same logic
@@ -288,6 +538,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     setShowAptModal(false);
     setEditingApt(null);
   };
+
 
   const addPriceOverride = () => {
     const current = editingApt?.priceOverrides || [];
@@ -370,12 +621,12 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         </div>
       </div>
 
-      <div className="flex bg-[#141211] border border-stone-800/60 p-2 rounded-xl w-fit mb-12">
-        {['bookings', 'calendar', 'apartments'].map(tab => (
+      <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
+        {['current-bookings', 'bookings', 'calendar', 'apartments'].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
-            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]  hover:text-white'}`}
+            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
           >
             {tab}
           </button>
@@ -383,6 +634,58 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       </div>
 
       {activeTab === 'bookings' && (
+  <div>
+    <div className="flex flex-wrap gap-3 mb-12 px-2">
+      {[
+          { label: 'All Active', value: 'all', icon: null },
+          { label: 'Upcoming (30d)', value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
+          { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
+          { label: 'Paid', value: BookingStatus.PAID, icon: null },
+          { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
+          { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
+      ].map(filter => (
+          <button
+              key={filter.value}
+              onClick={() => setStatusFilter(filter.value as any)}
+              className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+                  statusFilter === filter.value
+                      ? 'bg-emerald-900/50 text-white shadow-l border border-stone-600'
+                      : 'bg-stone-900/50 border border-stone-800 text-[rgb(214,213,213)]'
+              }`}
+          >
+              {filter.icon}
+              {filter.label}
+          </button>
+      ))}
+    </div>
+
+    {groupedAndSortedBookings.length > 0 ? (
+      groupedAndSortedBookings.map(([title, bks]) => (
+        <div key={title} className="mb-12">
+          <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {bks.map(b => (
+              <BookingCard 
+                key={b.id} 
+                booking={b} 
+                apartmentTitle={title} 
+                onUpdateStatus={handleUpdateStatus}
+                statusFilter={statusFilter}
+              />
+            ))}
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+         <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
+      </div>
+    )}
+  </div>
+)}
+
+
+      {/* {activeTab === 'bookings' && (
         <div className="space-y-12">
            <div className="flex flex-wrap gap-3 mb-8 px-2">
             {[
@@ -395,10 +698,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                 <button
                     key={filter.value}
                     onClick={() => setStatusFilter(filter.value as any)}
-                    className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+                    className={`px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
                         statusFilter === filter.value
-                            ? 'bg-emerald-900 text-white shadow-l shadow-coral-500/20'
-                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)] hover:text-white'
+                            ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
+                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
                     }`}
                 >
                     {filter.icon}
@@ -417,7 +720,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                       <div className="flex items-center space-x-4">
                         <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
                         <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-                          b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                          b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' : 
                           b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
                           'bg-rose-500/10 text-rose-400 border-rose-500/20' // For Canceled
                           }`}>{b.status}</span>
@@ -455,16 +758,16 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                     </div>
 
                     <div className="flex items-center space-x-4">
-                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings */}
+                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings *
                       {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                           <>
                               <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
-                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                           </>
                       )}
-                    {/* Show only 'Cancel' for PAID bookings */}
+                    {/* Show only 'Cancel' for PAID bookings *
                     {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-[rgb(178,45,77)] text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                    )}
                     </div>
 
@@ -478,7 +781,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       {activeTab === 'calendar' && (
         <div className="space-y-20">
@@ -502,6 +805,81 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
            ))}
         </div>
       )}
+  
+{activeTab === 'current-bookings' && (
+    <div>
+        <div className="flex items-center px-1 space-x-2">
+    <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-emerald-900/70 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Current Stays</button>
+    <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-ins Today</button>
+    <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-outs Today</button>
+</div>
+
+
+        {currentTabFilter === 'current' && (
+    <div>
+        <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
+            {guestsCurrentlyIn.length > 0 ? (
+                guestsCurrentlyIn.map(b => {
+                    const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                    return (
+                        <BookingCard
+                            key={b.id}
+                            booking={b}
+                            apartmentTitle={aptTitle}
+                            onUpdateStatus={handleUpdateStatus}
+                            statusFilter={'all'}
+                            showButtons={false} // Hiding the buttons
+                        />
+                    );
+                })
+            ) : (
+                <div className="col-span-full py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                    <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
+                </div>
+            )}
+        </div>
+    </div>
+)}
+
+        {currentTabFilter === 'check-in' && (
+            <div>
+                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-ins Today</h3>
+                <div className="space-y-6 mt-4">
+                    {checkInsToday.length > 0 ? (
+                        checkInsToday.map(b => {
+                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
+                        })
+                    ) : (
+                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                            <p className="text-stone-600 font-medium italic">No check-ins scheduled for today.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+
+        {currentTabFilter === 'check-out' && (
+            <div>
+                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-outs Today</h3>
+                <div className="space-y-6 mt-4">
+                    {checkOutsToday.length > 0 ? (
+                        checkOutsToday.map(b => {
+                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
+                        })
+                    ) : (
+                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                            <p className="text-stone-600 font-medium italic">No check-outs scheduled for today.</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        )}
+    </div>
+)}
+
 
       {activeTab === 'apartments' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -523,7 +901,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       {/* Unit Edit Modal */}
       {showAptModal && editingApt && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-start justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
            <div className="bg-[#1c1a19] border border-stone-800 w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-12 my-12 relative text-left font-dm">
               <button onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="absolute top-10 right-10 text-stone-600 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
               <h3 className="text-3xl font-bold text-white leading-none tracking-tight">Unit Configuration</h3>
@@ -596,10 +974,44 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
                         </div>
                       )}
                    </div>
-
-
-
                  </div>
+                 <div className="pt-10 border-t border-stone-800/60">
+    <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center space-x-3">
+            {/* Using an existing icon for consistency */}
+            <Tag className="w-5 h-5 text-emerald-400" />
+            <h4 className="text-xl font-bold text-white tracking-tight">Unit Photos</h4>
+        </div>
+        <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all">+ Add Photo URL</button>
+    </div>
+    <div className="space-y-4">
+        {editingApt.photos?.map((photo, index) => (
+            <div key={index} className="flex items-center space-x-4 bg-stone-950 p-4 rounded-2xl border border-stone-600 animate-in slide-in-from-bottom-2">
+                <input
+                    type="text"
+                    value={photo}
+                    onChange={e => updatePhotoUrl(index, e.target.value)}
+                    placeholder="https://example.com/image.png"
+                    className="flex-grow bg-stone-900 border border-stone-600 rounded-xl p-3 text-xs text-white outline-none focus:ring-1 focus:ring-coral-500"
+                />
+                <button
+                    type="button"
+                    onClick={() => removePhotoUrl(index)}
+                    className="p-3 bg-stone-900 border border-stone-600 rounded-xl text-stone-600 hover:text-rose-500 transition-all"
+                >
+                    <Trash2 className="w-5 h-5" />
+                </button>
+            </div>
+        ))}
+        {(!editingApt.photos || editingApt.photos.length === 0) && (
+            <div className="py-12 border border-dashed border-stone-600 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
+                <Info className="w-6 h-6 mb-2 opacity-20" />
+                <span>No photos added for this unit. Add at least one photo URL.</span>
+            </div>
+        )}
+    </div>
+</div>
+
                  <div className="pt-10 border-t border-stone-800/60">
     <div className="flex items-center space-x-3 mb-8">
         <Tag className="w-5 h-5 text-emerald-400" />

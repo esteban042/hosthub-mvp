@@ -1,5 +1,5 @@
 
 export const formatDate = (date: string) => {
     if (!date) return '';
-    return new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return new Date(date).toLocaleDateString('en-US', { day: 'numeric', month: 'numeric' });
 };
