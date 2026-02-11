@@ -30,7 +30,7 @@ import {
   FlameKindling,
   CircleHelp
 } from 'lucide-react';
-import { ALL_AMENITIES, THEME_GRAY, EMERALD_ACCENT, CARD_BORDER, UNIT_TITLE_STYLE, CORE_ICONS } from '../constants.tsx';
+import { ALL_AMENITIES, THEME_GRAY, EMERALD_ACCENT, CARD_BORDER, UNIT_TITLE_STYLE, CORE_ICONS, AMENITY_ICONS } from '../constants.tsx';
 
 interface GuestLandingPageProps {
   host: Host;
@@ -41,22 +41,6 @@ interface GuestLandingPageProps {
   onNewBooking: (booking: Booking) => void;
   onSelectApartment: (id: string) => void;
 }
-
-export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {
-  'Wifi': (c) => <Wifi className={c} strokeWidth={1.5} />,
-  'Kitchen': (c) => <Utensils className={c} strokeWidth={1.5} />,
-  'Free Parking': (c) => <ParkingCircle className={c} strokeWidth={1.5} />,
-  'Fireplace': (c) => <Flame className={c} strokeWidth={1.5} />,
-  'Air Conditioning': (c) => <Wind className={c} strokeWidth={1.5} />,
-  'Washer': (c) => <WashingMachine className={c} strokeWidth={1.5} />,
-  'Pool': (c) => <Waves className={c} strokeWidth={1.5} />,
-  'TV': (c) => <Tv className={c} strokeWidth={1.5} />,
-  'Coffee Maker': (c) => <Coffee className={c} strokeWidth={1.5} />,
-  'Beach Access': (c) => <Umbrella className={c} strokeWidth={1.5} />,
-  'Outdoor Shower': (c) => <ShowerHead className={c} strokeWidth={1.5} />,
-  'BBQ Grill': (c) => <FlameKindling className={c} strokeWidth={1.5} />,
-  'Default': (c) => <CircleHelp className={c} strokeWidth={1.5} />
-};
 
 export const HeroCalendar: React.FC<{ 
   onSelect: (start: string, end: string) => void,

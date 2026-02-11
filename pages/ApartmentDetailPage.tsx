@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
-import { AMENITY_ICONS, HeroCalendar } from './GuestLandingPage';
-import { CORE_ICONS, AMENITY_GREEN, CARD_BG } from '../constants';
+import { HeroCalendar } from './GuestLandingPage';
+import { CORE_ICONS, AMENITY_GREEN, CARD_BG, AMENITY_ICONS } from '../constants';
 import { formatDate } from '../utils/dates';
 import { hostHubApi } from '../services/api';
 import { BookingConfirmationCard } from '../components/BookingConfirmationCard';

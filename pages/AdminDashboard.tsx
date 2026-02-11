@@ -25,7 +25,6 @@ import {
 } from 'lucide-react';
 import { COUNTRIES } from '../utils/countries';
 
-
 interface AdminDashboardProps {
   hosts: Host[];
   apartments: Apartment[];

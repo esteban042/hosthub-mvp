@@ -1,4 +1,4 @@
-import { Home, Bath, Wind, ParkingCircle, Tv, Utensils, Wifi, Heater, Snowflake, Sun, Star, ShieldCheck, MapPin, Building, BookMarked, DollarSign, Calendar, Search, Users as Guests, Bed, Pin } from 'lucide-react';
+import { Home, Bath, Wind, ParkingCircle, Tv, Utensils, Wifi, Heater, Snowflake, Sun, Star, ShieldCheck, MapPin, Building, BookMarked, DollarSign, Calendar, Search, Users as Guests, Bed, Pin, Flame, WashingMachine, Waves, Coffee, Umbrella, ShowerHead, FlameKindling, CircleHelp } from 'lucide-react';
 
 export const THEME_GRAY = 'rgb(168, 162, 158)';
 export const EMERALD_ACCENT = 'rgb(52, 211, 153)';
@@ -32,4 +32,20 @@ export const CORE_ICONS = {
     Bed: (className: string) => <Bed className={className} />,
     Bath: (className: string) => <Bath className={className} />,
     Location: (className: string) => <Pin className={className} />
-}
+};
+
+export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {
+  'Wifi': (c) => <Wifi className={c} strokeWidth={1.5} />,
+  'Kitchen': (c) => <Utensils className={c} strokeWidth={1.5} />,
+  'Free Parking': (c) => <ParkingCircle className={c} strokeWidth={1.5} />,
+  'Fireplace': (c) => <Flame className={c} strokeWidth={1.5} />,
+  'Air Conditioning': (c) => <Wind className={c} strokeWidth={1.5} />,
+  'Washer': (c) => <WashingMachine className={c} strokeWidth={1.5} />,
+  'Pool': (c) => <Waves className={c} strokeWidth={1.5} />,
+  'TV': (c) => <Tv className={c} strokeWidth={1.5} />,
+  'Coffee Maker': (c) => <Coffee className={c} strokeWidth={1.5} />,
+  'Beach Access': (c) => <Umbrella className={c} strokeWidth={1.5} />,
+  'Outdoor Shower': (c) => <ShowerHead className={c} strokeWidth={1.5} />,
+  'BBQ Grill': (c) => <FlameKindling className={c} strokeWidth={1.5} />,
+  'Default': (c) => <CircleHelp className={c} strokeWidth={1.5} />
+};

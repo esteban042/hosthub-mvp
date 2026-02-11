@@ -13,15 +13,8 @@ import BookingCard from '../components/BookingCard';
 import formatBookingRange from '../components/utils';
 import { BookMarked, Building, BarChart2, Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 
-
-
-
-
 const LABEL_COLOR = 'rgb(168, 162, 158)';
 
-/**
- * Added missing HostDashboardProps interface definition.
- */
 interface HostDashboardProps {
   host: Host;
   apartments: Apartment[];
@@ -42,12 +35,9 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
   const [copied, setCopied] = useState(false);
-const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
+  const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
 
-
-  // const myBookings = useMemo(() => bookings.filter(b => apartments.some(a => a.id === b.apartmentId)), [bookings, apartments]);
   const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
-  
   const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -71,7 +61,6 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
     setEditingApt({ ...editingApt, photos: currentPhotos.filter((_, i) => i !== index) });
   };
 
-
   const shareableUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
     return `${window.location.origin}/?host=${host.slug}`;
@@ -82,7 +71,6 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
 
     const hostAptIds = apartments.filter(a => a.hostId === host.id).map(a => a.id);
     const relevantBookings = bookings.filter(b => hostAptIds.includes(b.apartmentId));
-
     const guestsCurrentlyIn = relevantBookings.filter(b => {
         const startDate = new Date(b.startDate);
         startDate.setHours(0, 0, 0, 0);
