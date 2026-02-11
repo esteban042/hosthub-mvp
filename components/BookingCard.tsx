@@ -1,8 +1,8 @@
 import React from 'react';
 import { Booking, BookingStatus } from '../types';
 import { CalendarDays, Users, DollarSign, Mail, Phone } from 'lucide-react';
-import { formatBookingRange } from './utils';
-import { CARD_BORDER } from '../pages/GuestLandingPage';
+import { formatBookingRange } from '../utils/formatBookingRange.tsx';
+import { CARD_BORDER } from '../constants.tsx';
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
 

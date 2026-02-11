@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
-import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from './GuestLandingPage';
+import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from '../constants.tsx';
 import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 import { hostHubApi } from '../services/api';
@@ -305,7 +305,7 @@ const groupedAndSortedBookings = useMemo(() => {
               <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Active Units</p>
              </div>
         </div>
-        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
+        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border border-stone-600 " style={{ borderColor: CARD_BORDER }}>
             <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Bookings("w-8 h-8")}</div>
             <div>
                 <h4 className="text-2xl font-bold text-white leading-none">{stats.active}</h4>
@@ -363,8 +363,8 @@ const groupedAndSortedBookings = useMemo(() => {
               onClick={() => setStatusFilter(filter.value as any)}
               className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
                   statusFilter === filter.value
-                      ? 'bg-emerald-900/50 text-white shadow-l border border-stone-600'
-                      : 'bg-stone-900/50 border border-stone-800 text-[rgb(214,213,213)]'
+                      ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
+                      : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
               }`}
           >
               {filter.icon}
@@ -424,9 +424,9 @@ const groupedAndSortedBookings = useMemo(() => {
 {activeTab === 'current-bookings' && (
     <div>
         <div className="flex items-center px-1 space-x-2">
-    <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-emerald-900/70 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Current Stays</button>
-    <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-ins Today</button>
-    <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-outs Today</button>
+    <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-emerald-900/70 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Current Stays</button>
+    <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-ins Today</button>
+    <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-outs Today</button>
 </div>
 
 

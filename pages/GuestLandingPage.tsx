@@ -30,6 +30,7 @@ import {
   FlameKindling,
   CircleHelp
 } from 'lucide-react';
+import { ALL_AMENITIES, THEME_GRAY, EMERALD_ACCENT, CARD_BORDER, UNIT_TITLE_STYLE, CORE_ICONS } from '../constants.tsx';
 
 interface GuestLandingPageProps {
   host: Host;
@@ -40,48 +41,6 @@ interface GuestLandingPageProps {
   onNewBooking: (booking: Booking) => void;
   onSelectApartment: (id: string) => void;
 }
-
-export const ALL_AMENITIES = [
-    { label: 'Wifi', icon: <Wifi className="w-5 h-5" /> },
-    { label: 'Kitchen', icon: <Utensils className="w-5 h-5" /> },
-    { label: 'Free Parking', icon: <ParkingCircle className="w-5 h-5" /> },
-    { label: 'Fireplace', icon: <Flame className="w-5 h-5" /> },
-    { label: 'Air Conditioning', icon: <Wind className="w-5 h-5" /> },
-    { label: 'Washer', icon: <WashingMachine className="w-5 h-5" /> },
-    { label: 'Pool', icon: <Waves className="w-5 h-5" /> },
-    { label: 'TV', icon: <Tv className="w-5 h-5" /> },
-    { label: 'Coffee Maker', icon: <Coffee className="w-5 h-5" /> },
-    { label: 'Beach Access', icon: <Umbrella className="w-5 h-5" /> },
-    { label: 'Outdoor Shower', icon: <ShowerHead className="w-5 h-5" /> },
-    { label: 'BBQ Grill', icon: <FlameKindling className="w-5 h-5" /> }
-];
-
-
-export const THEME_GRAY = 'rgb(168, 162, 158)';
-export const EMERALD_ACCENT = 'rgb(16 185 129 / 0.8)';
-export const AMENITY_GREEN = 'hsl(153 31% 55%)';
-export const CARD_BG = 'hsl(0 0% 13%)';
-export const CARD_BORDER = 'hsl(30 5% 55%)';
-
-export const UNIT_TITLE_STYLE: React.CSSProperties = {
-  letterSpacing: '-0.02em',
-};
-
-export const CORE_ICONS = {
-  Bed: (c: string) => <Bed className={c} strokeWidth={1.5} />,
-  Bath: (c: string) => <Bath className={c} strokeWidth={1.5} />,
-  Guests: (c: string) => <Users className={c} strokeWidth={1.5} />,
-  Location: (c: string) => <MapPin className={c} strokeWidth={1.5} />,
-  Calendar: (c: string) => <Calendar className={c} strokeWidth={1.5} />,
-  Search: (c: string) => <Search className={c} strokeWidth={2.5} />,
-  Building: (c: string) => <Building2 className={c} strokeWidth={1.5} />,
-  Pending: (c: string) => <Clock className={c} strokeWidth={1.5} />,
-  Bookings: (c: string) => <ClipboardList className={c} strokeWidth={1.5} />,
-  Dollar: (c: string) => <DollarSign className={c} strokeWidth={1.5} />,
-  Mail: (c: string) => <Mail className={c} strokeWidth={1.5} />,
-  Phone: (c: string) => <Phone className={c} strokeWidth={1.5} />,
-  Edit: (c: string) => <Edit3 className={c} strokeWidth={1.5} />
-};
 
 export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {
   'Wifi': (c) => <Wifi className={c} strokeWidth={1.5} />,
@@ -331,6 +290,21 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   const hostApartments = useMemo(() => 
     apartments.filter(apt => apt.hostId === host.id), [apartments, host.id]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.calendar-container') && !target.closest('.guests-container')) {
+        setIsDatesOpen(false);
+        setIsGuestsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen">
       <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient">
@@ -349,7 +323,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 
                 <div 
                   onClick={() => { setIsDatesOpen(!isDatesOpen); setIsGuestsOpen(false); }}
-                  className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full border-b md:border-b-0 md:border-r border-stone-800/50 group"
+                  className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full border-b md:border-b-0 md:border-r border-stone-800/50 group calendar-container"
                 >
                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-5 transition-colors ${isDatesOpen ? 'bg-coral-500 text-white' : 'bg-stone-800 text-emerald-400'}`}>
                       {CORE_ICONS.Calendar("w-5 h-5")}
@@ -379,7 +353,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
                 <div 
                   onClick={() => { setIsGuestsOpen(!isGuestsOpen); setIsDatesOpen(false); }}
-                  className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full"
+                  className="flex-1 flex items-center px-10 py-5 hover:bg-white/5 rounded-[1.8rem] transition-colors cursor-pointer text-left w-full guests-container"
                 >
                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mr-5 transition-colors ${isGuestsOpen ? 'bg-coral-500 text-white' : 'bg-stone-800 text-emerald-400'}`}>
                       {CORE_ICONS.Guests("w-5 h-5")}
