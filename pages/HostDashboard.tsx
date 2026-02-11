@@ -9,6 +9,70 @@ import DatePicker from '../components/DatePicker';
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
 
+const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Booking[] }> = ({ myApartments, myBookings }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const monthlyStats = useMemo(() => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+
+    return myApartments.map(apt => {
+      const bookingsInMonth = myBookings.filter(b => {
+        const bookingDate = new Date(b.startDate);
+        return b.apartmentId === apt.id &&
+               bookingDate.getFullYear() === year &&
+               bookingDate.getMonth() === month &&
+               (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID);
+      });
+
+      const totalRevenue = bookingsInMonth.reduce((sum, b) => sum + b.totalPrice, 0);
+
+      return {
+        aptId: apt.id,
+        aptTitle: apt.title,
+        bookingsCount: bookingsInMonth.length,
+        totalRevenue: totalRevenue,
+      };
+    });
+  }, [myApartments, myBookings, currentMonth]);
+
+  const goToPreviousMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-8">
+        <button onClick={goToPreviousMonth} className="text-stone-500 hover:text-white transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+        <h4 className="text-white font-serif text-lg font-bold">{currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}</h4>
+        <button onClick={goToNextMonth} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="w-5 h-5" /></button>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {monthlyStats.map(stat => (
+          <div key={stat.aptId} className="bg-stone-900 border border-stone-700 rounded-xl p-6">
+            <h5 className="text-lg font-bold text-white mb-4">{stat.aptTitle}</h5>
+            <div className="flex justify-between items-center">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Bookings</p>
+                <p className="text-2xl font-bold text-white">{stat.bookingsCount}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 text-right">Revenue</p>
+                <p className="text-2xl font-bold text-emerald-400 text-right">${stat.totalRevenue.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+
 const formatBookingRange = (start: string, end: string) => {
   if (!start || !end) return start || '...';
   const s = new Date(start);
@@ -330,7 +394,7 @@ interface HostDashboardProps {
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
   host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
-  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'>('current-bookings');
+  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
@@ -479,6 +543,8 @@ const groupedAndSortedBookings = useMemo(() => {
       return !isPast && b.status === statusFilter;
     });
 
+    
+
     const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const groups = new Map<string, Booking[]>();
@@ -622,7 +688,7 @@ const groupedAndSortedBookings = useMemo(() => {
       </div>
 
       <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
-        {['current-bookings', 'bookings', 'calendar', 'apartments'].map(tab => (
+        {['current-bookings', 'bookings', 'calendar', 'apartments', 'statistics'].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
@@ -683,105 +749,6 @@ const groupedAndSortedBookings = useMemo(() => {
     )}
   </div>
 )}
-
-
-      {/* {activeTab === 'bookings' && (
-        <div className="space-y-12">
-           <div className="flex flex-wrap gap-3 mb-8 px-2">
-            {[
-                { label: 'All Active', value: 'all', icon: null },
-                { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
-                { label: 'Paid', value: BookingStatus.PAID, icon: null },
-                { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
-                { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
-            ].map(filter => (
-                <button
-                    key={filter.value}
-                    onClick={() => setStatusFilter(filter.value as any)}
-                    className={`px-6 py-3 rounded-xl text-[12px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
-                        statusFilter === filter.value
-                            ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
-                            : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
-                    }`}
-                >
-                    {filter.icon}
-                    {filter.label}
-                </button>
-            ))}
-          </div>
-
-          {groupedAndSortedBookings.length > 0 ? (
-            groupedAndSortedBookings.map(([title, bks]) => (
-              <div key={title} className="space-y-6">
-                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">{title}</h3>
-                {bks.map(b => (
-                  <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
-                    <div className="space-y-4 flex-1 text-left">
-                      <div className="flex items-center space-x-4">
-                        <h4 className="text-2xl font-serif text-white">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
-                        <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-                          b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' : 
-                          b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 
-                          'bg-rose-500/10 text-rose-400 border-rose-500/20' // For Canceled
-                          }`}>{b.status}</span>
-                                      <span className="text-xs text-stone-500 font-mono opacity-60">#{b.customBookingId}</span>
-
-                    </div>
-                       
-                       <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
-                          <div className="flex items-center space-x-2">
-                            <CalendarDays className="w-4 h-4" />
-                            <span className="text-sm">{formatBookingRange(b.startDate, b.endDate)}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                             <Users className="w-4 h-4" />
-                             <span className="text-sm">{b.numGuests || 1} Guests</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                             <DollarSign className="w-4 h-4" />
-                             <span className="text-sm">${b.totalPrice.toLocaleString()} Total</span>
-                          </div>
-                       </div>
-
-                       <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium text-xs" style={{ color: LABEL_COLOR }}>
-                          <div className="flex items-center space-x-2">
-                             <Mail className="w-3.5 h-3.5" />
-                             <span>{b.guestEmail}</span>
-                          </div>
-                          {b.guestPhone && (
-                            <div className="flex items-center space-x-2">
-                               <Phone className="w-3.5 h-3.5" />
-                               <span>{b.guestPhone}</span>
-                            </div>
-                          )}
-                       </div>
-                    </div>
-
-                    <div className="flex items-center space-x-4">
-                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings *
-                      {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
-                          <>
-                              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
-                              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
-                          </>
-                      )}
-                    {/* Show only 'Cancel' for PAID bookings *
-                    {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
-                   )}
-                    </div>
-
-                  </div>
-                ))}
-             </div>
-           ))
-          ) : (
-            <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-               <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
-            </div>
-          )}
-        </div>
-      )} */}
 
       {activeTab === 'calendar' && (
         <div className="space-y-20">
@@ -898,6 +865,12 @@ const groupedAndSortedBookings = useMemo(() => {
            ))}
         </div>
       )}
+            {activeTab === 'statistics' && (
+        <div className="bg-[#1c1a19] border border-stone-800 rounded-2xl p-8">
+          <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
+        </div>
+      )}
+
 
       {/* Unit Edit Modal */}
       {showAptModal && editingApt && (
