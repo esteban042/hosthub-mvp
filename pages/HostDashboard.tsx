@@ -6,375 +6,18 @@ import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../com
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 import { hostHubApi } from '../services/api';
 import DatePicker from '../components/DatePicker';
+import StatisticsDashboard from '../components/StatisticsDashboard';
+import AvailabilityCalendar from '../components/AvailabilityCalendar';
+import BookingListItem from '../components/BookingListItem';
+import BookingCard from '../components/BookingCard';
+import formatBookingRange from '../components/utils';
+import { BookMarked, Building, BarChart2, Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 
-const LABEL_COLOR = 'rgb(168, 162, 158)';
-
-const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Booking[] }> = ({ myApartments, myBookings }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const monthlyStats = useMemo(() => {
-    const year = currentMonth.getFullYear();
-    const month = currentMonth.getMonth();
-
-    return myApartments.map(apt => {
-      const bookingsInMonth = myBookings.filter(b => {
-        const bookingDate = new Date(b.startDate);
-        return b.apartmentId === apt.id &&
-               bookingDate.getFullYear() === year &&
-               bookingDate.getMonth() === month &&
-               (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID);
-      });
-
-      const totalRevenue = bookingsInMonth.reduce((sum, b) => sum + b.totalPrice, 0);
-
-      return {
-        aptId: apt.id,
-        aptTitle: apt.title,
-        bookingsCount: bookingsInMonth.length,
-        totalRevenue: totalRevenue,
-      };
-    });
-  }, [myApartments, myBookings, currentMonth]);
-
-  const goToPreviousMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1));
-  };
-
-  const goToNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
-  };
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-8">
-        <button onClick={goToPreviousMonth} className="text-stone-500 hover:text-white transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-        <h4 className="text-white font-serif text-lg font-bold">{currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}</h4>
-        <button onClick={goToNextMonth} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="w-5 h-5" /></button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {monthlyStats.map(stat => (
-          <div key={stat.aptId} className="bg-stone-900 border border-stone-700 rounded-xl p-6">
-            <h5 className="text-lg font-bold text-white mb-4">{stat.aptTitle}</h5>
-            <div className="flex justify-between items-center">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500">Bookings</p>
-                <p className="text-2xl font-bold text-white">{stat.bookingsCount}</p>
-              </div>
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-stone-500 text-right">Revenue</p>
-                <p className="text-2xl font-bold text-emerald-400 text-right">${stat.totalRevenue.toLocaleString()}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
-
-const formatBookingRange = (start: string, end: string) => {
-  if (!start || !end) return start || '...';
-  const s = new Date(start);
-  const e = new Date(end);
-  const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
-  const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
-  const diffTime = Math.abs(e.getTime() - s.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return (
-    <span>
-      {startStr} — {endStr} <span className=" ml-1 opacity-90">({diffDays} night{diffDays !== 1 ? 's' : ''})</span>
-    </span>
-  );
-};
-
-const BookingListItem: React.FC<{
-  booking: Booking;
-  apartmentTitle: string;
-  statusFilter: string;
-  onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
-}> = ({ booking: b, apartmentTitle, statusFilter, onUpdateStatus: handleUpdateStatus }) => {
-  return (
-    <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
-      <div className="space-y-4 flex-1 text-left">
-        <div className="flex items-center space-x-4">
-          <h4 className="text-2xl font-serif text-white">{b.guestName || 'Guest'}</h4>
-          <span className={`px-4 py-1.5 text-[9px] uppercase tracking-widest font-black border ${
-            b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-            b.status === BookingStatus.CONFIRMED ? 'text-blue-400 border-blue-500/40' :
-            'bg-rose-500/10 text-rose-400 border-rose-500/20'
-            }`}>{b.status}</span>
-            <CalendarDays className="w-4 h-4" />
-            <span className="text-l">{formatBookingRange(b.startDate, b.endDate)}</span>
-            <Users className="w-4 h-4" />
-            <span className="text-m">{b.numGuests || 1} Guests</span>
-        </div>
-        
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
-        <div className="flex items-center space-x-2">
-          <span className="text-l">{apartmentTitle}</span>
-        </div>
-          <div className="flex items-center space-x-2">
-            <span className="text-s font-mono opacity-60">#{b.customBookingId}</span>
-            </div>
-          {/* <div className="flex items-center space-x-2">
-             <Users className="w-4 h-4" />
-             <span className="text-sm">{b.numGuests || 1} Guests</span>
-          </div> */}
-          <div className="flex items-center space-x-2">
-             <span className="text-ml">${b.totalPrice.toLocaleString()} Total</span>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium text-xs" style={{ color: LABEL_COLOR }}>
-          <div className="flex items-center space-x-2">
-             <Mail className="w-3.5 h-3.5" />
-             <span>{b.guestEmail}</span>
-          </div>
-          {b.guestPhone && (
-            <div className="flex items-center space-x-2">
-               <Phone className="w-3.5 h-3.5" />
-               <span>{b.guestPhone}</span>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const BookingCard: React.FC<{
-  booking: Booking;
-  apartmentTitle: string;
-  onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
-  statusFilter: string;
-  showButtons?: boolean;
-}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter, showButtons = true }) => { // CORRECTED LINE
-  return (
-    <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
-      <div className="p-6 flex-grow">
-        <div className="flex items-start justify-between mb-6">
-          <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
-          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-            b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
-            b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-            'bg-rose-500/10 text-rose-400 border-rose-500/20'
-            }`}>{b.status}</span>
-        </div>
-
-        <div className="space-y-3 text-sm" style={{ color: LABEL_COLOR }}>
-          <div className="flex items-center space-x-3">
-            <CalendarDays className="w-4 h-4 flex-shrink-0" />
-            <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Users className="w-4 h-4 flex-shrink-0" />
-            <span>{b.numGuests || 1} Guests</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <DollarSign className="w-4 h-4 flex-shrink-0" />
-            <span>${b.totalPrice.toLocaleString()} Total</span>
-          </div>
-          <div className="flex items-center space-x-3">
-            <Mail className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate">{b.guestEmail}</span>
-          </div>
-          {b.guestPhone && (
-            <div className="flex items-center space-x-3">
-              <Phone className="w-4 h-4 flex-shrink-0" />
-              <span>{b.guestPhone}</span>
-            </div>
-          )}
-        </div>
-      </div>
-      {showButtons && (
-        <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
-          {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
-            <>
-              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
-              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-            </>
-          )}
-          {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-            <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-          )}
-        </div>
-      )}
-    </div>
-  );
-};
-
-
-
-// const BookingCard: React.FC<{
-//   booking: Booking;
-//   apartmentTitle: string;
-//   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
-//   statusFilter: string;
-// }> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter }) => {
-//   return (
-//     <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
-//       <div className="p-6 flex-grow">
-//         <div className="flex items-start justify-between mb-6">
-//           <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
-//           <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
-//             b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
-//             b.status === BookingStatus.CONFIRMED ? 'stext-blue-400 border-blue-500/60' :
-//             'bg-rose-500/10 text-rose-400 border-rose-500/20'
-//             }`}>{b.status}</span>
-//         </div>
-
-//         {/* Details section, with Apartment Title removed for redundancy */}
-//         <div className="space-y-3 text-m" text>
-//           <div className="flex items-center space-x-3">
-//             <CalendarDays className="w-4 h-4 flex-shrink-0" />
-//             <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
-//           </div>
-//           <div className="flex items-center space-x-3">
-//             <Users className="w-4 h-4 flex-shrink-0" />
-//             <span>{b.numGuests || 1} Guests</span>
-//           </div>
-//           <div className="flex items-center space-x-3">
-//             <DollarSign className="w-4 h-4 flex-shrink-0" />
-//             <span>${b.totalPrice.toLocaleString()} Total</span>
-//           </div>
-//           <div className="flex items-center space-x-3">
-//             <Mail className="w-4 h-4 flex-shrink-0" />
-//             <span className="truncate">{b.guestEmail}</span>
-//           </div>
-//           {b.guestPhone && (
-//             <div className="flex items-center space-x-3">
-//               <Phone className="w-4 h-4 flex-shrink-0" />
-//               <span>{b.guestPhone}</span>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-
-//       <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
-//         {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
-//           <>
-//             <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
-//             <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-//           </>
-//         )}
-//         {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-//           <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-//         )}
-//       </div>
-//     </div>
-//   );
-// };
 
 
 
 
-// Sub-component for managing manual availability overrides
-const AvailabilityCalendar: React.FC<{ 
-  aptId: string, 
-  bookings: Booking[], 
-  blockedDates: BlockedDate[], 
-  airbnbCalendarDates: string[], 
-  loadingIcal: boolean, 
-  onToggle: (date: string) => void 
-}> = ({ aptId, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  // const startOffset = (date: Date) => new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
-
-
-  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID));
-  const isBlockedManually = (dateStr: string) => blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
-  const isAirbnbBlocked = (dateStr: string) => airbnbCalendarDates.includes(dateStr);
-
-  const renderMonth = (monthDate: Date) => {
-    const days = [];
-    const numDays = daysInMonth(monthDate);
-    const offset = startOffset(monthDate);
-    const monthName = monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-
-    for (let i = 0; i < offset; i++) days.push(<div key={`e-${i}`} />);
-
-    for (let d = 1; d <= numDays; d++) {
-      const dateObj = new Date(monthDate.getFullYear(), monthDate.getMonth(), d);
-      // const dateStr = dateObj.toISOString().split('T')[0];
-
-      const year = dateObj.getFullYear();
-      const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
-      const day = dateObj.getDate().toString().padStart(2, '0');
-      const dateStr = `${year}-${month}-${day}`;
-
-
-      const booked = isBooked(dateStr);
-      const blockedManually = isBlockedManually(dateStr);
-      const airbnbBlocked = isAirbnbBlocked(dateStr);
-
-      let dayClass = 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white'; 
-      
-      if (booked) { 
-        dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
-        const bookingForDay = bookings.find(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate);
-        // if (bookingForDay?.status === BookingStatus.REQUESTED) {
-        //     dayClass = 'bg-amber-500/20 border-amber-500/40 text-amber-500'; 
-        // } else if (bookingForDay?.status === BookingStatus.PAID) {
-        //     dayClass = 'bg-emerald-500/20 border-emerald-500/40 text-emerald-500'; 
-        // }
-      } else if (blockedManually) { 
-        dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; 
-      } else if (airbnbBlocked) {
-        dayClass = 'bg-yellow-500/20 border-yellow-500/40 text-yellow-500'; 
-      }
-
-      days.push(
-        <button
-          key={dateStr}
-          onClick={() => onToggle(dateStr)}
-          className={`h-12 flex flex-col items-center justify-center text-[10px] font-bold rounded-xl border transition-all ${dayClass}`}
-        >
-          {d}
-        </button>
-      );
-    }
-
-    return (
-      <div className="p-8 bg-[#1c1a19] rounded-[2rem] border" style={{ borderColor: CARD_BORDER }}>
-        <div className="flex items-center justify-between mb-8">
-           <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-           <h4 className="text-white font-serif text-lg font-bold">{monthName}</h4>
-           <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="w-5 h-5" /></button>
-        </div>
-        <div className="grid grid-cols-7 gap-1.5 mb-2 text-[9px] font-black uppercase tracking-widest text-stone-400 text-center">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => <div key={d} className="capitalize">{d}</div>)}
-        </div>
-        <div className="grid grid-cols-7 gap-1.5">
-            {loadingIcal && (
-                <div className="col-span-full h-24 flex items-center justify-center bg-stone-900/50 rounded-lg">
-                    <div className="w-8 h-8 border-2 border-stone-700 border-t-white rounded-full animate-spin"></div>
-                </div>
-            )}
-            {!loadingIcal && days}
-        </div>
-        <div className="mt-8 pt-6 border-t border-stone-800/60 flex flex-wrap gap-4 justify-center text-[10px] uppercase tracking-widest font-bold">
-            <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500/20 border border-blue-500/40"></span>
-                <span className="text-blue-500/70">HostHub Booked</span>
-            </div>
-            <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-rose-500/20 border border-rose-500/40"></span>
-                <span className="text-rose-500/70">Manual Block</span>
-            </div>
-            <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></span>
-                <span className="text-yellow-500/70">Airbnb Sync</span>
-            </div>
-        </div>
-      </div>
-    );
-  };
-
-  return renderMonth(currentMonth);
-};
+const LABEL_COLOR = 'rgb(168, 162, 158)';
 
 /**
  * Added missing HostDashboardProps interface definition.
@@ -537,7 +180,7 @@ const groupedAndSortedBookings = useMemo(() => {
         const startDate = new Date(b.startDate);
         return (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && startDate >= new Date(todayStr) && startDate <= thirtyDaysFromNow;
       }
-      if (statusFilter === 'past') return isPast;
+      if (statusFilter === 'past') return isPast && b.status !== BookingStatus.CANCELED;
       if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
       if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
       return !isPast && b.status === statusFilter;
@@ -574,8 +217,6 @@ const groupedAndSortedBookings = useMemo(() => {
     onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date: date }]);
   }
 };
-
-
 
   const handleSaveApartment = (e: React.FormEvent) => {
     e.preventDefault();
@@ -688,13 +329,20 @@ const groupedAndSortedBookings = useMemo(() => {
       </div>
 
       <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
-        {['current-bookings', 'bookings', 'calendar', 'apartments', 'statistics'].map(tab => (
+        {[
+          { id: 'current-bookings', label: 'Current', icon: <BookMarked className="w-4 h-4" /> },
+          { id: 'bookings', label: 'Bookings', icon: <BookMarked className="w-4 h-4" /> },
+          { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
+          { id: 'apartments', label: 'Units', icon: <Building className="w-4 h-4" /> },
+          { id: 'statistics', label: 'Statistics', icon: <BarChart2 className="w-4 h-4" /> }
+        ].map(tab => (
           <button 
-            key={tab} 
-            onClick={() => setActiveTab(tab as any)} 
-            className={`px-8 py-4 rounded-lg text-m text-white font-bold transition-all capitalize ${activeTab === tab ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
+            key={tab.id} 
+            onClick={() => setActiveTab(tab.id as any)} 
+            className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m text-white font-bold transition-all uppercase ${activeTab === tab.id ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
           >
-            {tab}
+            {tab.icon}
+            <span>{tab.label}</span>
           </button>
         ))}
       </div>
