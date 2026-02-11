@@ -43,6 +43,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   const [currentPhotoIdx, setCurrentPhotoIdx] = useState(0);
   const [isMapEnlarged, setIsMapEnlarged] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+
 
   const aboutColRef = useRef<HTMLDivElement>(null);
   const [mapContainerHeight, setMapContainerHeight] = useState<number>(400);
@@ -80,9 +82,24 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     return total;
   }, [startDate, endDate, apartment]);
 
+  const validateForm = () => {
+    const errors: { [key: string]: string } = {};
+    if (!/^[a-zA-Z\s]*$/.test(name)) {
+      errors.name = 'Name should only contain letters and spaces.';
+    }
+    if (!/^\S+@\S+\.\S+$/.test(email)) {
+      errors.email = 'Please enter a valid email address.';
+    }
+    if (phone && !/^(\+\d{1,3}[- ]?)?\d{10}$/.test(phone)) {
+      errors.phone = 'Please enter a valid phone number.';
+    }
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !startDate || !endDate || !name || isBooking) return;
+    if (!validateForm() || isBooking) return;
 
     setIsBooking(true);
 
@@ -274,6 +291,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                   type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
                   className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none placeholder:text-stone-700"
                 />
+                {formErrors.name && <p className="text-red-500 text-xs mt-1">{formErrors.name}</p>}
              </div>
 
              <div className="space-y-2 relative">
@@ -340,6 +358,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                    type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
+                 {formErrors.email && <p className="text-red-500 text-xs mt-1">{formErrors.email}</p>}
                </div>
 
                <div className="space-y-2">
@@ -359,6 +378,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                    type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
                    className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-coral-500 outline-none placeholder:text-stone-700"
                  />
+                 {formErrors.phone && <p className="text-red-500 text-xs mt-1">{formErrors.phone}</p>}
                </div>
              </div>
 

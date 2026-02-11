@@ -11,6 +11,7 @@ import ReactDOMServer from 'react-dom/server';
 import path from 'path';
 import fs from 'fs';
 import { BookingConfirmationTemplate, BookingCancellationTemplate } from './components/EmailTemplates.js';
+import crypto from 'crypto';
 
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
@@ -20,18 +21,23 @@ const port = parseInt(process.env.PORT || '8081', 10);
 
 app.use(cors());
 app.use(express.json());
-app.use(
+
+app.use((req, res, next) => {
+  res.locals.nonce = crypto.randomBytes(16).toString('hex');
+  next();
+});
+
+app.use((req, res, next) => {
   helmet({
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'script-src': ["'self'", "'unsafe-inline'", 'https://cdn.tailwindcss.com'],
-        'style-src': ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-        'font-src': ["'self'", 'https://fonts.gstatic.com'],
-        'connect-src': ["'self'", 'https://dmldmpdflblwwoppbvkv.supabase.co'],
-        'img-src': ["'self'", 'data:', 'https://images.unsplash.com', 'https://api.dicebear.com'],
-        'frame-src': ["'self'", "https://*.supabase.co", "https://www.google.com/"],
-
+        'script-src': ['\'self\'', `'nonce-${res.locals.nonce}'`],
+        'style-src': ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
+        'font-src': ['\'self\'', 'https://fonts.gstatic.com'],
+        'connect-src': ['\'self\'', 'https://dmldmpdflblwwoppbvkv.supabase.co'],
+        'img-src': ['\'self\'', 'data:', 'https://images.unsplash.com', 'https://api.dicebear.com'],
+        'frame-src': ['\'self\'', 'https://*.supabase.co', 'https://www.google.com/'],
       },
     },
     frameguard: {
@@ -44,8 +50,10 @@ app.use(
       maxAge: 31536000,
       includeSubDomains: true,
     },
-  })
-);
+  })(req, res, next);
+});
+
+
 
 // Enforce HTTPS in production
 app.use((req, res, next) => {
@@ -191,14 +199,22 @@ app.post('/api/v1/send-email',
     }
 });
 
-app.use(express.static(clientPath));
+app.use(express.static(clientPath, { index: false }));
 
 
 app.get('*', (req: Request, res: Response) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ error: 'API endpoint not found' });
   }
-  res.sendFile(path.join(clientPath, 'index.html'));
+  const nonce = res.locals.nonce;
+  fs.readFile(path.join(clientPath, 'index.html'), 'utf8', (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send('An error occurred');
+    }
+    data = data.replace(/<script/g, `<script nonce="${nonce}"`);
+    res.send(data);
+  });
 });
 
 app.listen(port, '0.0.0.0', () => {
