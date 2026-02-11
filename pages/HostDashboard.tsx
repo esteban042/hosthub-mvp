@@ -13,8 +13,8 @@ const formatBookingRange = (start: string, end: string) => {
   if (!start || !end) return start || '...';
   const s = new Date(start);
   const e = new Date(end);
-  const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const startStr = s.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
+  const endStr = e.toLocaleDateString('en-GB', { day: 'numeric', month: 'numeric' });
   const diffTime = Math.abs(e.getTime() - s.getTime());
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   return (
@@ -37,7 +37,7 @@ const BookingListItem: React.FC<{
           <h4 className="text-2xl font-serif text-white">{b.guestName || 'Guest'}</h4>
           <span className={`px-4 py-1.5 text-[9px] uppercase tracking-widest font-black border ${
             b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-            b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+            b.status === BookingStatus.CONFIRMED ? 'text-blue-400 border-blue-500/40' :
             'bg-rose-500/10 text-rose-400 border-rose-500/20'
             }`}>{b.status}</span>
             <CalendarDays className="w-4 h-4" />
@@ -78,6 +78,132 @@ const BookingListItem: React.FC<{
     </div>
   );
 };
+
+const BookingCard: React.FC<{
+  booking: Booking;
+  apartmentTitle: string;
+  onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+  statusFilter: string;
+  showButtons?: boolean;
+}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter, showButtons = true }) => { // CORRECTED LINE
+  return (
+    <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
+      <div className="p-6 flex-grow">
+        <div className="flex items-start justify-between mb-6">
+          <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
+          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+            b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
+            b.status === BookingStatus.CONFIRMED ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+            'bg-rose-500/10 text-rose-400 border-rose-500/20'
+            }`}>{b.status}</span>
+        </div>
+
+        <div className="space-y-3 text-sm" style={{ color: LABEL_COLOR }}>
+          <div className="flex items-center space-x-3">
+            <CalendarDays className="w-4 h-4 flex-shrink-0" />
+            <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Users className="w-4 h-4 flex-shrink-0" />
+            <span>{b.numGuests || 1} Guests</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <DollarSign className="w-4 h-4 flex-shrink-0" />
+            <span>${b.totalPrice.toLocaleString()} Total</span>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Mail className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{b.guestEmail}</span>
+          </div>
+          {b.guestPhone && (
+            <div className="flex items-center space-x-3">
+              <Phone className="w-4 h-4 flex-shrink-0" />
+              <span>{b.guestPhone}</span>
+            </div>
+          )}
+        </div>
+      </div>
+      {showButtons && (
+        <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
+          {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+            <>
+              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
+              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+            </>
+          )}
+          {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+            <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+// const BookingCard: React.FC<{
+//   booking: Booking;
+//   apartmentTitle: string;
+//   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+//   statusFilter: string;
+// }> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter }) => {
+//   return (
+//     <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
+//       <div className="p-6 flex-grow">
+//         <div className="flex items-start justify-between mb-6">
+//           <h4 className="text-xl font-bold text-white leading-tight">{b.guestName || (b.guestEmail.split('@')[0].charAt(0).toUpperCase() + b.guestEmail.split('@')[0].slice(1))}</h4>
+//           <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${
+//             b.status === BookingStatus.PAID ? 'bg-emerald-500/05 text-emerald-400 border-emerald-500/80' :
+//             b.status === BookingStatus.CONFIRMED ? 'stext-blue-400 border-blue-500/60' :
+//             'bg-rose-500/10 text-rose-400 border-rose-500/20'
+//             }`}>{b.status}</span>
+//         </div>
+
+//         {/* Details section, with Apartment Title removed for redundancy */}
+//         <div className="space-y-3 text-m" text>
+//           <div className="flex items-center space-x-3">
+//             <CalendarDays className="w-4 h-4 flex-shrink-0" />
+//             <span className="font-bold text-[rgb(214,213,213)]">{formatBookingRange(b.startDate, b.endDate)}</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <Users className="w-4 h-4 flex-shrink-0" />
+//             <span>{b.numGuests || 1} Guests</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <DollarSign className="w-4 h-4 flex-shrink-0" />
+//             <span>${b.totalPrice.toLocaleString()} Total</span>
+//           </div>
+//           <div className="flex items-center space-x-3">
+//             <Mail className="w-4 h-4 flex-shrink-0" />
+//             <span className="truncate">{b.guestEmail}</span>
+//           </div>
+//           {b.guestPhone && (
+//             <div className="flex items-center space-x-3">
+//               <Phone className="w-4 h-4 flex-shrink-0" />
+//               <span>{b.guestPhone}</span>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
+//         {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+//           <>
+//             <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
+//             <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+//           </>
+//         )}
+//         {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+//           <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+//         )}
+//       </div>
+//     </div>
+//   );
+// };
+
+
+
 
 // Sub-component for managing manual availability overrides
 const AvailabilityCalendar: React.FC<{ 
@@ -204,7 +330,7 @@ interface HostDashboardProps {
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
   host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
-  const [activeTab, setActiveTab] = useState<'bookings' | 'calendar' | 'apartments'>('bookings');
+  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
   const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
@@ -336,9 +462,17 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
         }, [myBookings, myApartments, todayStr]);
 
   // Fix: Ensure groupedAndSortedBookings is defined before the main return statement.
-  const groupedAndSortedBookings = useMemo(() => {
+const groupedAndSortedBookings = useMemo(() => {
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
     const filtered = myBookings.filter(b => {
       const isPast = b.endDate < todayStr;
+
+      if (statusFilter === 'upcoming-30d') {
+        const startDate = new Date(b.startDate);
+        return (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && startDate >= new Date(todayStr) && startDate <= thirtyDaysFromNow;
+      }
       if (statusFilter === 'past') return isPast;
       if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
       if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
@@ -404,6 +538,7 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
     setShowAptModal(false);
     setEditingApt(null);
   };
+
 
   const addPriceOverride = () => {
     const current = editingApt?.priceOverrides || [];
@@ -487,7 +622,7 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
       </div>
 
       <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
-        {['bookings', 'calendar', 'apartments', 'current-bookings'].map(tab => (
+        {['current-bookings', 'bookings', 'calendar', 'apartments'].map(tab => (
           <button 
             key={tab} 
             onClick={() => setActiveTab(tab as any)} 
@@ -499,6 +634,58 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
       </div>
 
       {activeTab === 'bookings' && (
+  <div>
+    <div className="flex flex-wrap gap-3 mb-12 px-2">
+      {[
+          { label: 'All Active', value: 'all', icon: null },
+          { label: 'Upcoming (30d)', value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
+          { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
+          { label: 'Paid', value: BookingStatus.PAID, icon: null },
+          { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
+          { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
+      ].map(filter => (
+          <button
+              key={filter.value}
+              onClick={() => setStatusFilter(filter.value as any)}
+              className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+                  statusFilter === filter.value
+                      ? 'bg-emerald-900/50 text-white shadow-l border border-stone-600'
+                      : 'bg-stone-900/50 border border-stone-800 text-[rgb(214,213,213)]'
+              }`}
+          >
+              {filter.icon}
+              {filter.label}
+          </button>
+      ))}
+    </div>
+
+    {groupedAndSortedBookings.length > 0 ? (
+      groupedAndSortedBookings.map(([title, bks]) => (
+        <div key={title} className="mb-12">
+          <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {bks.map(b => (
+              <BookingCard 
+                key={b.id} 
+                booking={b} 
+                apartmentTitle={title} 
+                onUpdateStatus={handleUpdateStatus}
+                statusFilter={statusFilter}
+              />
+            ))}
+          </div>
+        </div>
+      ))
+    ) : (
+      <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+         <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
+      </div>
+    )}
+  </div>
+)}
+
+
+      {/* {activeTab === 'bookings' && (
         <div className="space-y-12">
            <div className="flex flex-wrap gap-3 mb-8 px-2">
             {[
@@ -571,14 +758,14 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
                     </div>
 
                     <div className="flex items-center space-x-4">
-                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings */}
+                      {/* Show 'Mark as Paid' and 'Cancel' for CONFIRMED bookings *
                       {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                           <>
                               <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="bg-transparent border border-emerald-500 text-emerald-400 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all">Mark as Paid</button>
                               <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                           </>
                       )}
-                    {/* Show only 'Cancel' for PAID bookings */}
+                    {/* Show only 'Cancel' for PAID bookings *
                     {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
                     <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="bg-transparent border border-rose-600 text-rose-600 px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all">Cancel</button>
                    )}
@@ -594,7 +781,7 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
             </div>
           )}
         </div>
-      )}
+      )} */}
 
       {activeTab === 'calendar' && (
         <div className="space-y-20">
@@ -621,29 +808,39 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
   
 {activeTab === 'current-bookings' && (
     <div>
-        <div className="flex items-center space-x-2 rounded-xl px-6 py-3 ">
-            <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'current' ? 'bg-emerald-900/70  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Current Stays</button>
-            <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Check-ins Today</button>
-            <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl  ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90  text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)'}`}>Check-outs Today</button>
-        </div>
+        <div className="flex items-center px-1 space-x-2">
+    <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-emerald-900/70 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Current Stays</button>
+    <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-ins Today</button>
+    <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[12px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90 text-white' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-outs Today</button>
+</div>
+
 
         {currentTabFilter === 'current' && (
-            <div>
-                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
-                <div className="space-y-6 mt-4">
-                    {guestsCurrentlyIn.length > 0 ? (
-                        guestsCurrentlyIn.map(b => {
-                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
-                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
-                        })
-                    ) : (
-                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                            <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
-                        </div>
-                    )}
+    <div>
+        <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
+            {guestsCurrentlyIn.length > 0 ? (
+                guestsCurrentlyIn.map(b => {
+                    const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                    return (
+                        <BookingCard
+                            key={b.id}
+                            booking={b}
+                            apartmentTitle={aptTitle}
+                            onUpdateStatus={handleUpdateStatus}
+                            statusFilter={'all'}
+                            showButtons={false} // Hiding the buttons
+                        />
+                    );
+                })
+            ) : (
+                <div className="col-span-full py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+                    <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
                 </div>
-            </div>
-        )}
+            )}
+        </div>
+    </div>
+)}
 
         {currentTabFilter === 'check-in' && (
             <div>
@@ -704,7 +901,7 @@ const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' 
 
       {/* Unit Edit Modal */}
       {showAptModal && editingApt && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
+        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-start justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
            <div className="bg-[#1c1a19] border border-stone-800 w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-12 my-12 relative text-left font-dm">
               <button onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="absolute top-10 right-10 text-stone-600 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
               <h3 className="text-3xl font-bold text-white leading-none tracking-tight">Unit Configuration</h3>
