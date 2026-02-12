@@ -148,44 +148,18 @@ export const hostHubApi = {
   },
 
   async createBooking(data: Partial<Booking>): Promise<Booking> {
-    if (!data.apartmentId) throw new Error('Apartment ID is required to create a booking.');
+    const response = await fetch('/api/v1/bookings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-    const { data: aptData, error: aptError } = await supabase
-      .from('apartments')
-      .select(`hosts (*)`).eq('id', data.apartmentId)
-      .single();
-
-    if (aptError || !aptData || !aptData.hosts) {
-      throw new Error('Failed to find apartment or host for this booking.');
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ error: 'Failed to create booking.' }));
+      throw new Error(errorData.error || 'Failed to create booking.');
     }
-    const host = keysToCamel<Host>(aptData.hosts);
-
-    const { count, error: countError } = await supabase
-      .from('bookings')
-      .select('id', { count: 'exact', head: true })
-      .in('apartment_id', (await supabase.from('apartments').select('id').eq('host_id', host.id)).data?.map(a => a.id) || []);
-    if (countError) throw countError;
-
-    const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
-    const customBookingId = `${hostInitials}${String((count || 0) + 1).padStart(7, '0')}`;
-
-    const payload = {
-      id: data.id || uuidv4(),
-      custom_booking_id: customBookingId,
-      apartment_id: data.apartmentId,
-      guest_name: data.guestName,
-      guest_email: data.guestEmail,
-      guest_country: data.guestCountry,
-      num_guests: data.numGuests,
-      start_date: data.startDate,
-      end_date: data.endDate,
-      status: data.status,
-      total_price: data.totalPrice
-    };
-
-    const { data: result, error } = await supabase.from('bookings').insert(payload).select().single();
-    if (error) throw error;
-    return keysToCamel<Booking>(result);
+    
+    return await response.json();
   },
 
   async updateHosts(updatedList: Host[]): Promise<Host[]> {

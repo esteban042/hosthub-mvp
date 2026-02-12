@@ -51,67 +51,64 @@ router.post('/bookings',
   body('guestMessage').optional().trim().escape(),
   validate,
   async (req: Request, res, next) => {
-    console.log('[/bookings] Handling request...');
     const {
       apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage
     } = req.body;
     const client = await pool.connect();
-    console.log('[/bookings] DB client connected.');
 
     try {
       await client.query('BEGIN');
-      console.log('[/bookings] Transaction started.');
 
       const apartmentRes = await client.query('SELECT * FROM apartments WHERE id = $1 FOR UPDATE', [apartmentId]);
-      console.log('[/bookings] Fetched apartment for update.');
 
       if (apartmentRes.rows.length === 0) {
-        console.log('[/bookings] Apartment not found, rolling back.');
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Apartment not found' });
       }
       const apartment = apartmentRes.rows[0];
 
+      const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.host_id]);
+      if (hostRes.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Host for this apartment not found' });
+      }
+      const host = hostRes.rows[0];
+
+      const bookingCountRes = await client.query('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
+      const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
+
+      const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
+      const customBookingId = `${hostInitials}${String(bookingCount + 1).padStart(7, '0')}`;
+
       const overlappingBookingsRes = await client.query(
         `SELECT 1 FROM bookings WHERE apartment_id = $1 AND status != 'cancelled' AND (start_date, end_date) OVERLAPS ($2, $3)`,
         [apartmentId, startDate, endDate]
       );
-      console.log('[/bookings] Checked for overlapping bookings.');
 
       if (overlappingBookingsRes.rows.length > 0) {
-        console.log('[/bookings] Overlapping booking found, rolling back.');
         await client.query('ROLLBACK');
         return res.status(409).json({ error: 'The selected dates are not available' });
       }
 
       const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
       const totalPrice = nights * apartment.price_per_night;
-      console.log(`[/bookings] Calculated price: ${totalPrice} for ${nights} nights.`);
 
       const bookingRes = await client.query(
-        `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message)
-         VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10) RETURNING *`,
-        [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage]
+        `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
+         VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+        [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
       );
       const newBooking = bookingRes.rows[0];
-      console.log(`[/bookings] Inserted new booking with id: ${newBooking.id}.`);
 
       await client.query('COMMIT');
-      console.log('[/bookings] Transaction committed.');
 
-      console.log('[/bookings] Preparing to send success response.');
       res.status(201).json(keysToCamel(newBooking));
-      console.log('[/bookings] Success response sent.');
 
     } catch (err) {
-      console.error('[/bookings] CRITICAL ERROR:', err);
       await client.query('ROLLBACK');
-      console.log('[/bookings] Transaction rolled back due to error.');
       next(err);
     } finally {
-      console.log('[/bookings] Releasing client.');
       client.release();
-      console.log('[/bookings] Client released.');
     }
 });
 
