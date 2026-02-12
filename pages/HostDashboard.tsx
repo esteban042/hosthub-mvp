@@ -1,17 +1,17 @@
-import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
-import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from '../constants.tsx';
-import { v4 as uuidv4 } from 'uuid';
-import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
-import { hostHubApi, fetchApi } from '../services/api';
-import DatePicker from '../components/DatePicker';
-import StatisticsDashboard from '../components/StatisticsDashboard';
-import AvailabilityCalendar from '../components/AvailabilityCalendar';
-import BookingListItem from '../components/BookingListItem';
-import BookingCard from '../components/BookingCard';
-import { BookMarked, Building, BarChart2, Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 
-const LABEL_COLOR = 'rgb(168, 162, 158)';
+import React, { useState, useMemo } from 'react';
+import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types';
+import { fetchApi } from '../services/api';
+import StatisticsDashboard from '../components/StatisticsDashboard';
+
+import DashboardHeader from '../components/host-dashboard/DashboardHeader';
+import DashboardStats from '../components/host-dashboard/DashboardStats';
+import DashboardNav from '../components/host-dashboard/DashboardNav';
+import ApartmentEditor from '../components/host-dashboard/ApartmentEditor';
+import ApartmentsList from '../components/host-dashboard/ApartmentsList';
+import Bookings from '../components/host-dashboard/Bookings';
+import CurrentBookings from '../components/host-dashboard/CurrentBookings';
+import Calendar from '../components/host-dashboard/Calendar';
 
 interface HostDashboardProps {
   host: Host;
@@ -31,85 +31,15 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'past'  | BookingStatus.CONFIRMED | BookingStatus.PAID | BookingStatus.CANCELED>('all');
-  const [copied, setCopied] = useState(false);
-  const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
 
   const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
   const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
 
   const todayStr = new Date().toISOString().split('T')[0];
-  const addPhotoUrl = () => {
-    if (!editingApt) return;
-    const currentPhotos = editingApt.photos || [];
-    setEditingApt({ ...editingApt, photos: [...currentPhotos, ''] });
-  };
-
-  const updatePhotoUrl = (index: number, url: string) => {
-    if (!editingApt) return;
-    const currentPhotos = editingApt.photos || [];
-    const newPhotos = [...currentPhotos];
-    newPhotos[index] = url;
-    setEditingApt({ ...editingApt, photos: newPhotos });
-  };
-
-  const removePhotoUrl = (index: number) => {
-    if (!editingApt) return;
-    const currentPhotos = editingApt.photos || [];
-    setEditingApt({ ...editingApt, photos: currentPhotos.filter((_, i) => i !== index) });
-  };
-
-  const shareableUrl = useMemo(() => {
-    if (typeof window === 'undefined') return '';
-    return `${window.location.origin}/?host=${host.slug}`;
-  }, [host.slug]);
-  const { guestsCurrentlyIn, checkInsToday, checkOutsToday } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const hostAptIds = myApartments.map(a => a.id);
-    const relevantBookings = myBookings.filter(b => hostAptIds.includes(b.apartmentId));
-    
-    const guestsCurrentlyIn = relevantBookings.filter(b => {
-        const startDate = new Date(b.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        const endDate = new Date(b.endDate);
-        endDate.setHours(0, 0, 0, 0);
-        return startDate <= today && endDate >= today;
-    });
-
-    const checkInsToday = relevantBookings.filter(b => {
-        const startDate = new Date(b.startDate);
-        startDate.setHours(0, 0, 0, 0);
-        return startDate.getTime() === today.getTime();
-    });
-
-    const checkOutsToday = relevantBookings.filter(b => {
-        const endDate = new Date(b.endDate);
-        endDate.setHours(0, 0, 0, 0);
-        return endDate.getTime() === today.getTime();
-    });
-
-    return { guestsCurrentlyIn, checkInsToday, checkOutsToday };
-}, [myBookings, myApartments]);
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     const updatedBooking = { ...booking, status };
     onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
-  };
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareableUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-  const handleToggleAmenity = (amenity: string) => {
-    if (!editingApt) return;
-    const currentAmenities = editingApt.amenities || [];
-    const newAmenities = currentAmenities.includes(amenity)
-        ? currentAmenities.filter(a => a !== amenity)
-        : [...currentAmenities, amenity];
-    setEditingApt({ ...editingApt, amenities: newAmenities });
   };
 
   const stats = useMemo(() => {
@@ -121,40 +51,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     const revenueYear = myBookings
         .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
         .reduce((sum, b) => sum + b.totalPrice, 0);
-        return { activeUnits, active, past: pastCount, revenueYear };
-        }, [myBookings, myApartments, todayStr]);
-
-const groupedAndSortedBookings = useMemo(() => {
-    const thirtyDaysFromNow = new Date();
-    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-
-    const filtered = myBookings.filter(b => {
-      const isPast = b.endDate < todayStr;
-
-      if (statusFilter === 'upcoming-30d') {
-        const startDate = new Date(b.startDate);
-        return (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && startDate >= new Date(todayStr) && startDate <= thirtyDaysFromNow;
-      }
-      if (statusFilter === 'past') return isPast && b.status !== BookingStatus.CANCELED;
-      if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
-      if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
-      return !isPast && b.status === statusFilter;
-    });
-
-    const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-    const groups = new Map<string, Booking[]>();
-    for (const booking of sorted) {
-         const apt = myApartments.find(a => a.id === booking.apartmentId);
-      if (apt) {
-            const aptTitle = apt.title;
-            if (!groups.has(aptTitle)) groups.set(aptTitle, []);
-            groups.get(aptTitle)?.push(booking);
-        }
-    }
-    return Array.from(groups.entries());
-  }, [myBookings, myApartments, statusFilter, todayStr]);
-
+    return { activeUnits, active, past: pastCount, revenueYear };
+  }, [myBookings, myApartments, todayStr]);
 
   const toggleManualBlock = async (aptId: string, date: string) => {
     const existing = blockedDates.find(d => d.apartmentId === aptId && d.date === date);
@@ -174,20 +72,15 @@ const groupedAndSortedBookings = useMemo(() => {
       onBlockedDatesChange();
     } catch (error) {
       console.error("Failed to toggle blocked date:", error);
-      // Optionally, show an error message to the user
     }
   };
 
+  const handleSaveApartment = (processedApt: Partial<Apartment>) => {
+    if (!processedApt) return;
 
-  const handleSaveApartment = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingApt) return;
-
-    const processedApt = { ...editingApt };
     if (!processedApt.amenities) processedApt.amenities = [];
     if (!processedApt.photos) processedApt.photos = ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'];
     if (!processedApt.priceOverrides) processedApt.priceOverrides = [];
-
 
     if (processedApt.id) {
       onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? processedApt as Apartment : a));
@@ -211,427 +104,28 @@ const groupedAndSortedBookings = useMemo(() => {
     setEditingApt(null);
   };
 
-
-  const addPriceOverride = () => {
-    const current = editingApt?.priceOverrides || [];
-    setEditingApt({
-      ...editingApt,
-      priceOverrides: [...current, { id: `pr-${Date.now()}`, startDate: '', endDate: '', price: editingApt?.pricePerNight || 0, label: '' }]
-    });
-  };
-
-  const removePriceOverride = (id: string) => {
-    const current = editingApt?.priceOverrides || [];
-    setEditingApt({ ...editingApt, priceOverrides: current.filter(rule => rule.id !== id) });
-  };
-
-  const updatePriceRule = (id: string, updates: Partial<PriceRule>) => {
-    const current = editingApt?.priceOverrides || [];
-    setEditingApt({
-      ...editingApt,
-      priceOverrides: current.map(r => r.id === id ? { ...r, ...updates } : r)
-    });
-  };
-
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-700 font-dm">
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-        <div>
-          <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">Host Studio</h1>
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: LABEL_COLOR }}>Asset Operations</p>
-        </div>
-        
-        <div className="bg-[#1c1a19] border border-stone-800 p-4 rounded-2xl flex items-center justify-between w-full md:w-[450px] shadow-xl">
-           <div className="flex items-center space-x-4 overflow-hidden">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 flex-shrink-0">
-                <Share2 className="w-5 h-5" />
-              </div>
-              <div className="overflow-hidden">
-                 <p className="text-[9px] font-black text-stone-600 uppercase tracking-widest mb-1">Your Booking Link</p>
-                 <p className="text-xs text-stone-400 font-medium truncate">{shareableUrl}</p>
-              </div>
-           </div>
-           <button 
-             onClick={handleCopyLink}
-             className={`ml-4 p-3 rounded-xl transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-stone-900 text-stone-500 hover:text-white border border-stone-800'}`}
-           >
-              {copied ? <CheckCircle2 className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-           </button>
-        </div>
-        <button onClick={() => { setEditingApt({}); setShowAptModal(true); }} className="bg-transparent border border-white text-white hover:bg-coral-500/10 px-8 py-3 rounded-full font-bold uppercase text-[11px] tracking-widest transition-all">Add Unit</button>
-      </div>
+      <DashboardHeader hostSlug={host.slug} onAddUnit={() => { setEditingApt({}); setShowAptModal(true); }} />
+      <DashboardStats stats={stats} />
+      <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
-        <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Building("w-8 h-8")}</div>
-        <div>
-              <h4 className="text-2xl font-bold text-white leading-none">{stats.activeUnits}</h4>
-              <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Active Units</p>
-             </div>
-        </div>
-        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border border-stone-600 " style={{ borderColor: CARD_BORDER }}>
-            <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Bookings("w-8 h-8")}</div>
-            <div>
-                <h4 className="text-2xl font-bold text-white leading-none">{stats.active}</h4>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Upcoming Stays</p>
-            </div>
-        </div>
-        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
-            <div style={{ color: EMERALD_ACCENT }}><History className="w-8 h-8" strokeWidth={1.5} /></div>
-            <div>
-                <h4 className="text-2xl font-bold text-white leading-none">{stats.past}</h4>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Completed Stays</p>
-            </div>
-        </div>
-        <div className="bg-[#1c1a19] p-8 rounded-2xl flex items-center space-x-5 border" style={{ borderColor: CARD_BORDER }}>
-            <div style={{ color: EMERALD_ACCENT }}>{CORE_ICONS.Dollar("w-8 h-8")}</div>
-            <div>
-                <h4 className="text-2xl font-bold text-white leading-none">${stats.revenueYear.toLocaleString()}</h4>
-                <p className="text-[10px] font-bold uppercase tracking-widest mt-1" style={{ color: LABEL_COLOR }}>Annual Revenue</p>
-            </div>
-        </div>
-      </div>
-
-      <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
-        {[
-          { id: 'current-bookings', label: 'Current', icon: <BookMarked className="w-4 h-4" /> },
-          { id: 'bookings', label: 'Bookings', icon: <BookMarked className="w-4 h-4" /> },
-          { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-4 h-4" /> },
-          { id: 'apartments', label: 'Units', icon: <Building className="w-4 h-4" /> },
-          { id: 'statistics', label: 'Statistics', icon: <BarChart2 className="w-4 h-4" /> }
-        ].map(tab => (
-          <button 
-            key={tab.id} 
-            onClick={() => setActiveTab(tab.id as any)} 
-            className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m text-white font-bold transition-all uppercase ${activeTab === tab.id ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
-          >
-            {tab.icon}
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {activeTab === 'bookings' && (
-  <div>
-    <div className="flex flex-wrap gap-3 mb-12 px-2">
-      {[
-          { label: 'All Active', value: 'all', icon: null },
-          { label: 'Upcoming (30d)', value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
-          { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
-          { label: 'Paid', value: BookingStatus.PAID, icon: null },
-          { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
-          { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
-      ].map(filter => (
-          <button
-              key={filter.value}
-              onClick={() => setStatusFilter(filter.value as any)}
-              className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
-                  statusFilter === filter.value
-                      ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
-                      : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
-              }`}
-          >
-              {filter.icon}
-              {filter.label}
-          </button>
-      ))}
-    </div>
-
-    {groupedAndSortedBookings.length > 0 ? (
-      groupedAndSortedBookings.map(([title, bks]) => (
-        <div key={title} className="mb-12">
-          <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {bks.map(b => (
-              <BookingCard 
-                key={b.id} 
-                booking={b} 
-                apartmentTitle={title} 
-                onUpdateStatus={handleUpdateStatus}
-                statusFilter={statusFilter}
-              />
-            ))}
-          </div>
-        </div>
-      ))
-    ) : (
-      <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-         <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
-      </div>
-    )}
-  </div>
-)}
-
-      {activeTab === 'calendar' && (
-        <div className="space-y-20">
-           {myApartments.map(apt => (
-             <div key={apt.id}>
-                <div className="lg:col-span-2 space-y-8 text-left">
-                   <h3 className="text-3xl font-serif font-bold text-white tracking-tight">{apt.title}</h3>
-                   <p className="text-sm text-stone-500">Manage manual overrides and view occupancy for this unit.</p>
-                </div>
-                <div className="lg:col-span-3 text-white ">
-                   <AvailabilityCalendar 
-                      aptId={apt.id} 
-                      bookings={bookings} 
-                      blockedDates={blockedDates} 
-                      airbnbCalendarDates={airbnbCalendarDates}
-                      loadingIcal={loadingAirbnbIcal}
-                      onToggle={(d) => toggleManualBlock(apt.id, d)} 
-                   />
-                </div>
-             </div>
-           ))}
-        </div>
-      )}
-  
-{activeTab === 'current-bookings' && (
-    <div>
-        <div className="flex items-center px-1 space-x-2">
-    <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-emerald-900/70 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Current Stays</button>
-    <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-emerald-900/80 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-ins Today</button>
-    <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-emerald-900/90 text-white border border-[rgb(214,213,213)]' : 'bg-transparent border border-stone-600 text-[rgb(214,213,213)]'}`}>Check-outs Today</button>
-</div>
-
-
-        {currentTabFilter === 'current' && (
-    <div>
-        <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Currently in Unit</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
-            {guestsCurrentlyIn.length > 0 ? (
-                guestsCurrentlyIn.map(b => {
-                    const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
-                    return (
-                        <BookingCard
-                            key={b.id}
-                            booking={b}
-                            apartmentTitle={aptTitle}
-                            onUpdateStatus={handleUpdateStatus}
-                            statusFilter={'all'}
-                            showButtons={false}
-                        />
-                    );
-                })
-            ) : (
-                <div className="col-span-full py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                    <p className="text-stone-600 font-medium italic">No guests currently in units.</p>
-                </div>
-            )}
-        </div>
-    </div>
-)}
-
-        {currentTabFilter === 'check-in' && (
-            <div>
-                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-ins Today</h3>
-                <div className="space-y-6 mt-4">
-                    {checkInsToday.length > 0 ? (
-                        checkInsToday.map(b => {
-                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
-                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
-                        })
-                    ) : (
-                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                            <p className="text-stone-600 font-medium italic">No check-ins scheduled for today.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )}
-
-        {currentTabFilter === 'check-out' && (
-            <div>
-                <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight">Check-outs Today</h3>
-                <div className="space-y-6 mt-4">
-                    {checkOutsToday.length > 0 ? (
-                        checkOutsToday.map(b => {
-                            const aptTitle = myApartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
-                            return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={handleUpdateStatus} />;
-                        })
-                    ) : (
-                        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-                            <p className="text-stone-600 font-medium italic">No check-outs scheduled for today.</p>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )}
-    </div>
-)}
-
-
-      {activeTab === 'apartments' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-           {myApartments.map(apt => (
-             <div key={apt.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
-                <img src={apt.photos[0]} className="aspect-video w-full object-cover" alt={apt.title} />
-                <div className="p-8 text-left">
-                   <h4 className="text-xl font-bold text-white mb-2 leading-tight" style={UNIT_TITLE_STYLE}>{apt.title}</h4>
-                   <p className="text-[10px] font-bold tracking-widest mb-10 text-stone-600 uppercase">{apt.city}</p>
-                   <div className="flex justify-between items-center pt-6 border-t border-stone-800/60">
-                      <p className="text-xl font-bold text-coral-500">${apt.pricePerNight}<span className="text-[10px] text-stone-700 ml-2 font-bold">Base</span></p>
-                      <button onClick={() => { setEditingApt(apt); setShowAptModal(true); }} className="px-6 py-2 rounded-xl bg-transparent border border- text-stone-100 text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
-                   </div>
-                </div>
-             </div>
-           ))}
-        </div>
-      )}
-            {activeTab === 'statistics' && (
+      {activeTab === 'current-bookings' && <CurrentBookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
+      {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
+      {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingAirbnbIcal} onToggleBlock={toggleManualBlock} />}
+      {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
+      {activeTab === 'statistics' && (
         <div className="bg-[#1c1a19] border border-stone-800 rounded-2xl p-8">
           <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
         </div>
       )}
 
       {showAptModal && editingApt && (
-        <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-start justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
-           <div className="bg-[#1c1a19] border border-stone-800 w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-12 my-12 relative text-left font-dm">
-              <button onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="absolute top-10 right-10 text-stone-600 hover:text-white transition-colors"><X className="w-8 h-8" /></button>
-              <h3 className="text-3xl font-bold text-white leading-none tracking-tight">Unit Configuration</h3>
-
-              <form onSubmit={handleSaveApartment} className="space-y-12">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                    <div className="space-y-6">
-                       <div>
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Unit Title</label>
-                          <input type="text" required value={editingApt.title || ''} onChange={e => setEditingApt({...editingApt, title: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
-                       </div>
-                       <div className="grid grid-cols-2 gap-4">
-                          <div>
-                             <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">City</label>
-                             <input type="text" required value={editingApt.city || ''} onChange={e => setEditingApt({...editingApt, city: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
-                          </div>
-                          <div>
-                             <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Base Price</label>
-                             <input type="number" required value={editingApt.pricePerNight || 0} onChange={e => setEditingApt({...editingApt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
-                          </div>
-                       </div>
-                       <div>
-                          <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Map Embed URL</label>
-                          <input type="text" value={editingApt.mapEmbedUrl || ''} onChange={e => setEditingApt({...editingApt, mapEmbedUrl: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
-                       </div>
-                    </div>
-                    <div>
-                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Description</label>
-                       <textarea value={editingApt.description || ''} onChange={e => setEditingApt({...editingApt, description: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white h-[142px] resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
-                    </div>
-                 </div>
-
-                 <div className="pt-10 border-t border-stone-600/60">
-                   <div className="flex items-center justify-between mb-8">
-                      <div className="flex items-center space-x-3">
-                         <Tag className="w-5 h-5 text-emerald-400" />
-                         <h4 className="text-xl font-bold text-white tracking-tight">Seasonal Pricing Overrides</h4>
-                      </div>
-                      <button type="button" onClick={addPriceOverride} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all">+ Add Rate Rule</button>
-                   </div>
-                   
-                   <div className="space-y-4">
-                      {editingApt.priceOverrides?.map((rule) => (
-                        <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-stone-950 p-6 rounded-[1.8rem] border border-stone-600 items-end animate-in slide-in-from-bottom-2">
-                           <div>
-                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">From Date</label>
-                              <DatePicker
-                              selectedDate={rule.startDate}
-                              onSelect={(date) => updatePriceRule(rule.id, { startDate: date })}
-                            />
-
-                           </div>
-                           <div>
-                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">Until Date</label>
-                              <DatePicker
-                              selectedDate={rule.endDate}
-                              onSelect={(date) => updatePriceRule(rule.id, { endDate: date })}
-                            />
-
-                           </div>
-                           <div>
-                              <label className="block text-[10px] font-black uppercase text-[rgb(214,213,213)] mb-2">Nightly Price ($)</label>
-                              <input type="number" value={rule.price} onChange={e => updatePriceRule(rule.id, { price: parseInt(e.target.value) })} className="w-full bg-stone-900 border border-stone-600 rounded-xl p-3 text-xs text-white outline-none" />
-                           </div>
-                           <button type="button" onClick={() => removePriceOverride(rule.id)} className="p-3 bg-stone-900 border border-stone-600 rounded-xl text-stone-600 hover:text-rose-500 transition-all flex items-center justify-center">
-                              <Trash2 className="w-5 h-5" />
-                           </button>
-                        </div>
-                      ))}
-                      {(!editingApt.priceOverrides || editingApt.priceOverrides.length === 0) && (
-                        <div className="py-12 border border-dashed border-stone-600 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
-                           <Info className="w-6 h-6 mb-2 opacity-20" />
-                           <span>No manual price overrides active for this unit.</span>
-                        </div>
-                      )}
-                   </div>
-                 </div>
-                 <div className="pt-10 border-t border-stone-800/60">
-    <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-3">
-            <Tag className="w-5 h-5 text-emerald-400" />
-            <h4 className="text-xl font-bold text-white tracking-tight">Unit Photos</h4>
-        </div>
-        <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all">+ Add Photo URL</button>
-    </div>
-    <div className="space-y-4">
-        {editingApt.photos?.map((photo, index) => (
-            <div key={index} className="flex items-center space-x-4 bg-stone-950 p-4 rounded-2xl border border-stone-600 animate-in slide-in-from-bottom-2">
-                <input
-                    type="text"
-                    value={photo}
-                    onChange={e => updatePhotoUrl(index, e.target.value)}
-                    placeholder="https://example.com/image.png"
-                    className="flex-grow bg-stone-900 border border-stone-600 rounded-xl p-3 text-xs text-white outline-none focus:ring-1 focus:ring-coral-500"
-                />
-                <button
-                    type="button"
-                    onClick={() => removePhotoUrl(index)}
-                    className="p-3 bg-stone-900 border border-stone-600 rounded-xl text-stone-600 hover:text-rose-500 transition-all"
-                >
-                    <Trash2 className="w-5 h-5" />
-                </button>
-            </div>
-        ))}
-        {(!editingApt.photos || editingApt.photos.length === 0) && (
-            <div className="py-12 border border-dashed border-stone-600 rounded-[2rem] flex flex-col items-center justify-center text-stone-600 italic text-sm">
-                <Info className="w-6 h-6 mb-2 opacity-20" />
-                <span>No photos added for this unit. Add at least one photo URL.</span>
-            </div>
-        )}
-    </div>
-</div>
-
-                 <div className="pt-10 border-t border-stone-800/60">
-    <div className="flex items-center space-x-3 mb-8">
-        <Tag className="w-5 h-5 text-emerald-400" />
-        <h4 className="text-xl font-bold text-white tracking-tight">Amenities</h4>
-    </div>
-    <div className="flex flex-wrap gap-4">
-        {ALL_AMENITIES.map(amenity => {
-            const isSelected = editingApt.amenities?.includes(amenity.label);
-            return (
-                <button
-                    type="button"
-                    key={amenity.label}
-                    onClick={() => handleToggleAmenity(amenity.label)}
-                    className={`flex items-center space-x-3 px-6 py-4 rounded-2xl border transition-all text-sm font-medium ${
-                        isSelected
-                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
-                            : 'bg-stone-900 border-stone-800 text-stone-400 hover:border-stone-700'
-                    }`}
-                >
-                    {amenity.icon}
-                    <span>{amenity.label}</span>
-                </button>
-            );
-        })}
-    </div>
-</div>
-
-                 <div className="flex space-x-4 pt-6 border-t border-stone-800/60">
-                    <button type="button" onClick={() => { setShowAptModal(false); setEditingApt(null); }} className="flex-1 font-bold py-5 rounded-full border border-stone-800 text-[10px] uppercase tracking-widest text-[rgb(214,213,213)] hover:text-white border-white transition-all">Discard</button>
-                    <button type="submit" className="flex-1 bg-transparent border border-coral-500 text-coral-500 hover:bg-coral-500/10 font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest active:scale-95">Save Unit</button>
-                 </div>
-              </form>
-           </div>
-        </div>
+        <ApartmentEditor 
+          editingApt={editingApt} 
+          onSave={handleSaveApartment} 
+          onClose={() => { setShowAptModal(false); setEditingApt(null); }} 
+        />
       )}
     </div>
   );

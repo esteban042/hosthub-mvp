@@ -1,0 +1,101 @@
+import React from 'react';
+import { Booking, BookingStatus } from '../../types';
+import BookingCard from '../BookingCard';
+import { CalendarDays, History, X } from 'lucide-react';
+
+interface BookingsProps {
+  bookings: Booking[];
+  apartments: any[];
+  onUpdateStatus: (booking: Booking, status: BookingStatus) => void;
+}
+
+const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatus }) => {
+  const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const groupedAndSortedBookings = React.useMemo(() => {
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+
+    const filtered = bookings.filter(b => {
+      const isPast = b.endDate < todayStr;
+
+      if (statusFilter === 'upcoming-30d') {
+        const startDate = new Date(b.startDate);
+        return (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && startDate >= new Date(todayStr) && startDate <= thirtyDaysFromNow;
+      }
+      if (statusFilter === 'past') return isPast && b.status !== BookingStatus.CANCELED;
+      if (statusFilter === BookingStatus.CANCELED) return b.status === BookingStatus.CANCELED;
+      if (statusFilter === 'all') return !isPast && b.status !== BookingStatus.CANCELED;
+      return !isPast && b.status === statusFilter;
+    });
+
+    const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
+
+    const groups = new Map<string, Booking[]>();
+    for (const booking of sorted) {
+      const apt = apartments.find(a => a.id === booking.apartmentId);
+      if (apt) {
+        const aptTitle = apt.title;
+        if (!groups.has(aptTitle)) groups.set(aptTitle, []);
+        groups.get(aptTitle)?.push(booking);
+      }
+    }
+    return Array.from(groups.entries());
+  }, [bookings, apartments, statusFilter, todayStr]);
+
+  const filters = [
+    { label: 'All Active', value: 'all', icon: null },
+    { label: 'Upcoming (30d)', value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
+    { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
+    { label: 'Paid', value: BookingStatus.PAID, icon: null },
+    { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
+    { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
+  ];
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-3 mb-12 px-2">
+        {filters.map(filter => (
+          <button
+            key={filter.value}
+            onClick={() => setStatusFilter(filter.value as any)}
+            className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
+              statusFilter === filter.value
+                ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
+                : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
+            }`}
+          >
+            {filter.icon}
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      {groupedAndSortedBookings.length > 0 ? (
+        groupedAndSortedBookings.map(([title, bks]) => (
+          <div key={title} className="mb-12">
+            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {bks.map(b => (
+                <BookingCard 
+                  key={b.id} 
+                  booking={b} 
+                  apartmentTitle={title} 
+                  onUpdateStatus={onUpdateStatus}
+                  statusFilter={statusFilter}
+                />
+              ))}
+            </div>
+          </div>
+        ))
+      ) : (
+        <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
+          <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Bookings;
