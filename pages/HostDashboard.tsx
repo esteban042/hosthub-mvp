@@ -3,7 +3,7 @@ import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from 
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from '../constants.tsx';
 import { v4 as uuidv4 } from 'uuid';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
-import { hostHubApi } from '../services/api';
+import { hostHubApi, fetchApi } from '../services/api';
 import DatePicker from '../components/DatePicker';
 import StatisticsDashboard from '../components/StatisticsDashboard';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
@@ -67,8 +67,9 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const hostAptIds = apartments.filter(a => a.hostId === host.id).map(a => a.id);
-    const relevantBookings = bookings.filter(b => hostAptIds.includes(b.apartmentId));
+    const hostAptIds = myApartments.map(a => a.id);
+    const relevantBookings = myBookings.filter(b => hostAptIds.includes(b.apartmentId));
+    
     const guestsCurrentlyIn = relevantBookings.filter(b => {
         const startDate = new Date(b.startDate);
         startDate.setHours(0, 0, 0, 0);
@@ -90,7 +91,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     });
 
     return { guestsCurrentlyIn, checkInsToday, checkOutsToday };
-}, [bookings, apartments, host.id]);
+}, [myBookings, myApartments]);
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     const updatedBooking = { ...booking, status };
@@ -157,13 +158,24 @@ const groupedAndSortedBookings = useMemo(() => {
 
   const toggleManualBlock = async (aptId: string, date: string) => {
     const existing = blockedDates.find(d => d.apartmentId === aptId && d.date === date);
-
-    if (existing) {
-        await hostHubApi.deleteBlockedDate(existing.id);
-    } else {
-        await hostHubApi.createBlockedDate({ id: uuidv4(), apartmentId: aptId, date });
+    
+    try {
+      if (existing) {
+        await fetchApi('/api/v1/blocked-dates', {
+          method: 'DELETE',
+          body: JSON.stringify([existing]),
+        });
+      } else {
+        await fetchApi('/api/v1/blocked-dates', {
+          method: 'POST',
+          body: JSON.stringify([{ apartmentId: aptId, date }]),
+        });
+      }
+      onBlockedDatesChange();
+    } catch (error) {
+      console.error("Failed to toggle blocked date:", error);
+      // Optionally, show an error message to the user
     }
-    onBlockedDatesChange();
   };
 
 
@@ -493,6 +505,10 @@ const groupedAndSortedBookings = useMemo(() => {
                              <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Base Price</label>
                              <input type="number" required value={editingApt.pricePerNight || 0} onChange={e => setEditingApt({...editingApt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
                           </div>
+                       </div>
+                       <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Map Embed URL</label>
+                          <input type="text" value={editingApt.mapEmbedUrl || ''} onChange={e => setEditingApt({...editingApt, mapEmbedUrl: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
                        </div>
                     </div>
                     <div>

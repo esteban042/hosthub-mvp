@@ -1,57 +1,53 @@
 import { User } from '../types';
+import { fetchApi } from './api';
 
-const API_BASE_URL = '/api/v1';
+interface AuthResult {
+  user: User | null;
+  error: string | null;
+}
 
-export const signInWithEmail = async (email: string, password: string): Promise<{ user: User | null; error: string | null }> => {
+/**
+ * Initiates a passkey (WebAuthn) login flow.
+ * NOTE: The password parameter is ignored, but kept for compatibility with the
+ * existing form submission logic. The actual authentication is passwordless.
+ */
+export const signInWithEmail = async (email: string, password?: string): Promise<AuthResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/login`, {
+    const user = await fetchApi<User>('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({ email, password }),
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { user: null, error: errorData.error || 'Invalid credentials' };
-    }
-
-    const user: User = await response.json();
     return { user, error: null };
-  } catch (err) {
-    return { user: null, error: 'An unexpected error occurred.' };
+  } catch (error: any) {
+    console.error('Sign In Failed:', error);
+    return { user: null, error: error.message || 'Login failed. Please try again.' };
   }
 };
 
-export const signOut = async (): Promise<{ error: string | null }> => {
+/**
+ * Checks if a valid session cookie exists by calling a protected endpoint.
+ */
+export const checkSession = async (): Promise<AuthResult> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/logout`, {
-      method: 'POST',
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      return { error: errorData.error || 'Logout failed.' };
-    }
-
-    return { error: null };
-  } catch (err) {
-    return { error: 'An unexpected error occurred.' };
+    const user = await fetchApi<User>('/auth/me');
+    return { user, error: null };
+  } catch (error) {
+    // A failure to fetch 'me' is the expected behavior for a logged-out user.
+    // This is not an application error, so we return null for both user and error.
+    return { user: null, error: null };
   }
 };
 
-export const checkSession = async (): Promise<{ user: User | null; error: string | null }> => {
+/**
+ * Logs the user out by telling the backend to clear the session cookie.
+ */
+export const signOut = async (): Promise<void> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/me`);
-
-    if (!response.ok) {
-      return { user: null, error: 'No active session' };
-    }
-
-    const user: User = await response.json();
-    return { user, error: null };
-  } catch (err) {
-    return { user: null, error: 'An unexpected error occurred.' };
+    await fetchApi('/auth/logout', { method: 'POST' });
+  } catch (error: any) {
+    // Log the error, but don't disrupt the user's experience,
+    // as we are clearing the client-side state anyway.
+    console.error("Server logout failed:", error.message);
   }
 };

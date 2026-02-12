@@ -1,271 +1,24 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Host, Apartment, Booking, BlockedDate, BookingStatus, PremiumConfig, PremiumSection, PriceRule } from '../types';
-import { isOverlapping } from '../services/bookingService'; 
+import { Host, Apartment, Booking, BlockedDate } from '../types';
 import { formatDate } from '../utils/dates';
-import { 
-  Bed, 
-  Bath, 
-  Users, 
-  MapPin, 
-  Calendar, 
-  Search, 
-  Building2, 
-  Clock, 
-  ClipboardList, 
-  DollarSign, 
-  Mail, 
-  Phone, 
-  Edit3,
-  Wifi,
-  Utensils,
-  ParkingCircle,
-  Flame,
-  Wind,
-  WashingMachine,
-  Waves,
-  Tv,
-  Coffee,
-  Umbrella,
-  ShowerHead,
-  FlameKindling,
-  CircleHelp
-} from 'lucide-react';
-import { ALL_AMENITIES, THEME_GRAY, EMERALD_ACCENT, CARD_BORDER, UNIT_TITLE_STYLE, CORE_ICONS, AMENITY_ICONS } from '../constants.tsx';
+import { CORE_ICONS } from '../constants';
+import HeroCalendar from '../components/HeroCalendar';
+import GuestPopover from '../components/GuestPopover';
+import FeaturedStays from '../components/FeaturedStays';
+import PremiumLandingExtension from '../components/PremiumLandingExtension';
 
 interface GuestLandingPageProps {
   host: Host;
   apartments: Apartment[];
   bookings: Booking[];
   blockedDates: BlockedDate[]; 
-  airbnbCalendarDates: string[]; 
+  airbnbCalendarDates: string[];
   onNewBooking: (booking: Booking) => void;
   onSelectApartment: (id: string) => void;
 }
 
-export const HeroCalendar: React.FC<{ 
-  onSelect: (start: string, end: string) => void,
-  startDate: string,
-  endDate: string,
-  apartment?: Apartment, 
-  allBookings: Booking[], 
-  allBlockedDates: BlockedDate[], 
-  airbnbBlockedDates: string[], 
-}> = ({ onSelect, startDate, endDate, apartment, allBookings, allBlockedDates, airbnbBlockedDates }) => {
-  const [month, setMonth] = useState(new Date());
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  const offset = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
-
-  const getPriceForDate = (dateStr: string) => {
-    if (!apartment) return null;
-    const override = apartment.priceOverrides?.find((rule: PriceRule) => dateStr >= rule.startDate && dateStr <= rule.endDate);
-    return override ? override.price : (apartment.pricePerNight || 0);
-  };
-
-  const isBooked = (dateStr: string) =>
-    allBookings.some(
-      (b) =>
-        b.apartmentId === apartment?.id && 
-        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID) &&
-        isOverlapping(dateStr, dateStr + 'T23:59:59', b.startDate, b.endDate) 
-    );
-
-  const isBlockedManually = (dateStr: string) =>
-    allBlockedDates.some(
-      (d) =>
-        (d.apartmentId === apartment?.id || d.apartmentId === 'all') &&
-        d.date === dateStr
-    );
-
-  const isAirbnbBlocked = (dateStr: string) => airbnbBlockedDates.includes(dateStr);
-
-  const handleDayClick = (dateStr: string) => {
-    const clickedDate = new Date(dateStr);
-    clickedDate.setUTCHours(0, 0, 0, 0);
-    if (clickedDate < today) return;
-
-    const isDayUnavailable = isBooked(dateStr) || isBlockedManually(dateStr) || isAirbnbBlocked(dateStr);
-    if (isDayUnavailable) return; 
-
-    if (!startDate || (startDate && endDate)) {
-      onSelect(dateStr, '');
-    } else {
-      if (dateStr < startDate) {
-        onSelect(dateStr, '');
-      } else {
-        onSelect(startDate, dateStr);
-      }
-    }
-  };
-
-
-  const days = [];
-  for (let i = 0; i < offset; i++) days.push(<div key={`e-${i}`} />);
-  for (let d = 1; d <= daysInMonth(month); d++) {
-    const dObj = new Date(month.getFullYear(), month.getMonth(), d);
-    const dStr = dObj.toISOString().split('T')[0];
-
-    // Check if the current day is in the past.
-    const isPast = dObj < today;
-    
-    const isSelected = dStr === startDate || dStr === endDate;
-    const inRange = startDate && endDate && dStr >= startDate && dStr <= endDate;
-    const price = getPriceForDate(dStr);
-
-    const isCurrentlyBooked = isBooked(dStr);
-    const isCurrentlyBlockedManually = isBlockedManually(dStr);
-    const isCurrentlyAirbnbBlocked = isAirbnbBlocked(dStr);
-
-    // Add isPast to the check to make the day unavailable.
-    const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked || isPast;
-
-// ...
-    let dayClass = 'text-stone-300 hover:bg-stone-800'; 
-    
-    if (isSelected) {
-      dayClass = 'bg-coral-500 text-white border-coral-500';
-    } else if (inRange) {
-      dayClass = 'bg-coral-500/20 text-coral-500 border-coral-500/10';
-    } else if (isUnavailable) {
-      dayClass = 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed line-through'; 
-    }
-
-    days.push(
-      <button 
-        key={dStr} onClick={() => handleDayClick(dStr)}
-        disabled={isUnavailable} 
-        className={`flex flex-col items-center justify-center rounded-xl transition-all ${
-          apartment ? 'h-14 w-full border border-transparent' : 'h-10 w-10'
-        } ${dayClass}`}
-      >
-        <span className={`${apartment ? 'text-[11px] font-bold' : 'text-xs font-bold'}`}>{d}</span>
-        {price !== null && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-700' : isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
-      </button>
-    );
-  }
-
-  return (
-    <div className={`p-6 bg-stone-950 border border-stone-800 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 ${apartment ? 'w-full' : 'w-[320px]'}`}>
-      <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7"/></svg></button>
-        <span className="text-white font-serif font-bold text-sm">{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7"/></svg></button>
-      </div>
-      <div className="grid grid-cols-7 gap-1 text-[9px] font-black text-stone-600 text-center mb-2 uppercase tracking-widest">
-        {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d}>{d}</div>)}
-      </div>
-      <div className="grid grid-cols-7 gap-1">{days}</div>
-    </div>
-  );
-};
-
-const GuestPopover: React.FC<{
-  guests: number;
-  onSelect: (val: number) => void;
-  onClose: () => void;
-}> = ({ guests, onSelect, onClose }) => {
-  return (
-    <div className="p-8 bg-stone-950 border border-stone-800 rounded-3xl shadow-2xl w-[300px] animate-in zoom-in-95 duration-200">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex flex-col">
-          <span className="text-white font-serif font-bold text-lg">Guests</span>
-          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Select capacity</span>
-        </div>
-      </div>
-      <div className="flex items-center justify-between p-4 bg-stone-900 border border-stone-800 rounded-2xl">
-        <button 
-          onClick={() => guests > 1 && onSelect(guests - 1)}
-          className="w-10 h-10 rounded-full border border-stone-700 flex items-center justify-center text-white hover:border-coral-500 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M20 12H4" /></svg>
-        </button>
-        <span className="text-xl font-black text-white">{guests}</span>
-        <button 
-          onClick={() => guests < 10 && onSelect(guests + 1)}
-          className="w-10 h-10 rounded-full border border-stone-700 flex items-center justify-center text-white hover:border-coral-500 transition-colors"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M12 4v16m8-8H4" /></svg>
-        </button>
-      </div>
-      <button onClick={onClose} className="w-full mt-6 bg-coral-500 text-white font-black py-4 rounded-xl text-[10px] uppercase tracking-widest shadow-lg shadow-coral-500/20 active:scale-95">Apply</button>
-    </div>
-  );
-};
-
-const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: string }> = ({ config, hostName }) => {
-  if (!config.isEnabled) return null;
-
-  return (
-    <div className="mt-40 space-y-40 animate-in fade-in duration-1000">
-      <div className="max-w-4xl mx-auto text-center space-y-8">
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-emerald-400">Host Feature</span>
-        <h2 className="text-5xl md:text-7xl font-serif font-bold text-white tracking-tight leading-tight">
-          Beyond the <span className="text-coral-500 italic">Ordinary</span>
-        </h2>
-        <p className="text-xl text-[#cfcece] font-medium leading-relaxed max-w-2xl mx-auto">
-          We don't just provide accommodation; we curate environments where memories take root and flourish. Explore the heart of our hospitality.
-        </p>
-      </div>
-
-      <div className="space-y-32">
-        {config.sections.map((section: PremiumSection, idx: number) => {
-          const isEven = idx % 2 === 0;
-          const imageUrl = config.images[idx % config.images.length];
-          const secondImageUrl = config.images[(idx + 1) % config.images.length];
-
-          return (
-            <div key={idx} className={`flex flex-col ${isEven ? 'lg:flex-row' : 'lg:flex-row-reverse'} gap-16 lg:gap-24 items-center`}>
-              <div className="w-full lg:w-1/2 relative">
-                <div className={`aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-stone-800 shadow-2xl relative z-10 ${isEven ? 'ml-0' : 'ml-auto'}`}>
-                  <img src={imageUrl} className="w-full h-full object-cover" alt={section.title} />
-                  <div className="absolute inset-0 bg-stone-950/10 hover:bg-transparent transition-colors duration-500" />
-                </div>
-                <div className={`absolute -bottom-12 ${isEven ? '-right-12' : '-left-12'} hidden lg:block w-48 h-64 rounded-2xl overflow-hidden border-4 border-stone-950 shadow-2xl z-20`}>
-                   <img src={secondImageUrl} className="w-full h-full object-cover" alt="Detail" />
-                </div>
-              </div>
-
-              <div className="w-full lg:w-1/2 space-y-8">
-                <div className="flex items-center space-x-4">
-                  <span className="text-coral-500 font-serif text-5xl opacity-30 italic">0{idx + 1}</span>
-                  <div className="h-px w-12 bg-stone-800"></div>
-                  <h3 className="text-3xl md:text-4xl font-serif font-bold text-white tracking-tight">{section.title}</h3>
-                </div>
-                <p className="text-xl leading-relaxed text-[#cfcece] font-medium">
-                  {section.content}
-                </p>
-                <div className="pt-4">
-                  <div className="inline-flex items-center space-x-3 text-stone-500 border-b border-stone-800 pb-2">
-                    <span className="text-[10px] font-black uppercase tracking-widest">HostHub Verified</span>
-                    <svg className="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" /></svg>
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {config.images.length > 3 && (
-        <div className="pt-20">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
-            {config.images.slice(0, 4).map((img: string, i: number) => (
-              <div key={i} className={`rounded-3xl overflow-hidden border border-stone-800 relative group h-full ${i % 2 === 0 ? 'mt-8' : 'mb-8'}`}>
-                <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={`Gallery ${i}`} />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-};
-
 export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({ 
-  host, apartments, onSelectApartment, bookings, blockedDates, airbnbCalendarDates
+  host, apartments, onSelectApartment, bookings, blockedDates, airbnbCalendarDates, onNewBooking 
 }) => {
   const [isDatesOpen, setIsDatesOpen] = useState(false);
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
@@ -371,59 +124,9 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
         </div>
       </section>
 
-      <section className="max-w-7xl mx-auto px-6 py-32">
-        <div className="mb-16">
-          <h2 className="text-5xl font-serif font-bold text-white mb-2 tracking-tight">Featured stays</h2>
-          <p className="text-stone-500 text-lg font-medium">{hostApartments.length} properties available</p>
-          </div>
+      <FeaturedStays apartments={hostApartments} onSelectApartment={onSelectApartment} />
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-          {hostApartments.map((apt, idx) => (
-            <div 
-              key={apt.id} 
-              onClick={() => onSelectApartment(apt.id)}
-              className="group cursor-pointer animate-in fade-in duration-700"
-              style={{ animationDelay: `${idx * 150}ms` }}
-            >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-2xl mb-6 border border-stone-800 shadow-xl">
-                <img src={apt.photos[0]} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[3000ms]" alt={apt.title} />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-                
-                <div className="absolute bottom-4 left-4 bg-stone-900/80 backdrop-blur-md px-4 py-2 rounded-xl border border-white/10 shadow-lg">
-                  <span className="text-white font-black text-xl">${apt.pricePerNight || 0}</span>
-                  <span className="text-[10px] font-bold text-stone-400 ml-1 uppercase">/ night</span>
-                </div>
-              </div>
-
-              <div className="px-1">
-                <h3 className="text-2xl font-serif font-bold text-white tracking-tight mb-1 leading-none">{apt.title}</h3>
-                
-                <div className="flex items-center space-x-2 text-[12px] font-bold uppercase tracking-[0.15em] text-stone-500 mb-6 mt-2">
-                  <div className="text-stone-500">{CORE_ICONS.Location("w-3.5 h-3.5")}</div>
-                  <span>{apt.city}</span>
-                </div>
-
-                <div className="flex items-center space-x-10">
-                   <div className="flex items-center space-x-2">
-                     <div className="text-stone-500">{CORE_ICONS.Bed("w-4 h-4")}</div>
-                     <span className="text-stone-400 font-medium text-sm">{apt.bedrooms}</span>
-                   </div>
-                   <div className="flex items-center space-x-2">
-                     <div className="text-stone-500">{CORE_ICONS.Bath("w-4 h-4")}</div>
-                     <span className="text-stone-400 font-medium text-sm">{apt.bathrooms}</span>
-                   </div>
-                   <div className="flex items-center space-x-2">
-                     <div className="text-stone-500">{CORE_ICONS.Guests("w-4 h-4")}</div>
-                     <span className="text-stone-400 font-medium text-sm">{apt.capacity}</span>
-                   </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
-      </section>
+      {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
     </div>
   );
 };

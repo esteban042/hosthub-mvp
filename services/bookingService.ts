@@ -36,7 +36,7 @@ export const checkAvailability = (
   const bookingConflicts = existingBookings.filter(
     (b) =>
       b.apartmentId === apartmentId &&
-      (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED) &&
+      (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) &&
       isOverlapping(startDate, endDate, b.startDate, b.endDate)
   );
   conflicts.push(...bookingConflicts);

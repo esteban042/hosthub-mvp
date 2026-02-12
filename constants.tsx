@@ -14,9 +14,16 @@ export const ALL_AMENITIES = [
   { label: 'Wifi', icon: <Wifi className="w-5 h-5" /> },
   { label: 'TV', icon: <Tv className="w-5 h-5" /> },
   { label: 'Kitchen', icon: <Utensils className="w-5 h-5" /> },
-  { label: 'Air Conditioning', icon: <Snowflake className="w-5 h-5" /> },
+  { label: 'Air Conditioning', icon: <Wind className="w-5 h-5" /> },
   { label: 'Heating', icon: <Heater className="w-5 h-5" /> },
   { label: 'Free Parking', icon: <ParkingCircle className="w-5 h-5" /> },
+  { label: 'Washer', icon: <WashingMachine className="w-5 h-5" /> },
+  { label: 'Pool', icon: <Waves className="w-5 h-5" /> },
+  { label: 'Coffee Maker', icon: <Coffee className="w-5 h-5" /> },
+  { label: 'BBQ Grill', icon: <FlameKindling className="w-5 h-5" /> },
+  { label: 'Fireplace', icon: <Flame className="w-5 h-5" /> },
+  { label: 'Beach Access', icon: <Umbrella className="w-5 h-5" /> },
+  { label: 'Outdoor Shower', icon: <ShowerHead className="w-5 h-5" /> },
 ];
 
 export const CORE_ICONS = {

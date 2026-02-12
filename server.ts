@@ -34,13 +34,17 @@ app.get('/health', async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
-app.use('/api/v1', apiLimiter, apiRoutes, authRoutes);
+// Register auth routes separately
+app.use('/auth', authRoutes);
+
+// All other API routes are under /api/v1 and have a rate limiter
+app.use('/api/v1', apiLimiter, apiRoutes);
 
 app.use(express.static(clientPath, { index: false }));
 
 app.get('*', (req: Request, res: Response, next: NextFunction) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ error: 'API endpoint not found' });
+  if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
+    return res.status(404).json({ error: 'Endpoint not found' });
   }
   const nonce = res.locals.nonce;
   fs.readFile(path.join(clientPath, 'index.html'), 'utf8', (err, data) => {
@@ -68,6 +72,7 @@ app.listen(config.port, '0.0.0.0', () => {
   Port: ${config.port}
   Health Check: http://0.0.0.0:${config.port}/health
   API Base: http://0.0.0.0:${config.port}/api/v1
+  Auth Base: http://0.0.0.0:${config.port}/auth
   Static Root: ${clientPath}
   ---------------------------------
   `);

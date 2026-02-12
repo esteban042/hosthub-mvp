@@ -15,9 +15,17 @@ const AvailabilityCalendar: React.FC<{
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
 
+  const isBooked = (dateStr: string) => 
+    bookings.some(b => 
+      b.apartmentId === aptId && 
+      dateStr >= b.startDate && 
+      dateStr < b.endDate && 
+      (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID)
+    );
 
-  const isBooked = (dateStr: string) => bookings.some(b => b.apartmentId === aptId && dateStr >= b.startDate && dateStr < b.endDate && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID));
-  const isBlockedManually = (dateStr: string) => blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
+  const isBlockedManually = (dateStr: string) => 
+    blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
+
   const isAirbnbBlocked = (dateStr: string) => airbnbCalendarDates.includes(dateStr);
 
   const renderMonth = (monthDate: Date) => {
@@ -30,18 +38,18 @@ const AvailabilityCalendar: React.FC<{
 
     for (let d = 1; d <= numDays; d++) {
       const dateObj = new Date(monthDate.getFullYear(), monthDate.getMonth(), d);
-
+      
+      // Correctly format the date string to YYYY-MM-DD to avoid timezone issues
       const year = dateObj.getFullYear();
       const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
       const day = dateObj.getDate().toString().padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
 
-
       const booked = isBooked(dateStr);
       const blockedManually = isBlockedManually(dateStr);
       const airbnbBlocked = isAirbnbBlocked(dateStr);
 
-      let dayClass = 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white'; 
+      let dayClass = 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white';
       
       if (booked) { 
         dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
