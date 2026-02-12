@@ -35,10 +35,9 @@ export const hostHubApi = {
     identifier?: { slug?: string; email?: string },
     isGuest: boolean = false
   ): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
-    // Step 1: Securely select host data. Only public fields for guests.
     const hostSelect = isGuest
-      ? 'id, slug, name, bio, avatar, business_name, landing_page_picture, premium_config, country, payment_instructions' // Public fields
-      : '*'; // All fields for authenticated users
+      ? 'id, slug, name, bio, avatar, business_name, landing_page_picture, premium_config, country, payment_instructions'
+      : '*';
 
     let hostQuery = supabase.from('hosts').select(hostSelect);
     if (identifier?.slug) {
@@ -46,7 +45,6 @@ export const hostHubApi = {
     } else if (identifier?.email) {
       hostQuery = hostQuery.eq('contact_email', identifier.email);
     } else {
-      // Fallback for when no identifier is provided.
       hostQuery = hostQuery.limit(1);
     }
 
@@ -60,41 +58,36 @@ export const hostHubApi = {
     }
 
     let host = keysToCamel<Host>(hostData);
-    // Blank out sensitive fields for guests as an extra layer of security.
     if (isGuest) {
         host = { ...host, commissionRate: 0, subscriptionType: SubscriptionType.BASIC, contactEmail: '', physicalAddress: '', phoneNumber: '', notes: null, airbnbCalendarLink: null };
     }
 
-    // Step 2: Get apartments for the identified host.
     const { data: aptsData, error: aptsError } = await supabase.from('apartments').select('*').eq('host_id', host.id);
     if (aptsError) throw aptsError;
     const apartments = keysToCamel<Apartment[]>(aptsData || []);
     const apartmentIds = apartments.map(a => a.id);
 
-    // Step 3: Securely select booking data. ONLY non-sensitive fields for guests.
     const bookingSelect = isGuest ? 'apartment_id, start_date, end_date' : '*';
     const { data: bookingsData, error: bookingsError } = await supabase.from('bookings').select(bookingSelect).in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
     if (bookingsError) throw bookingsError;
     let bookings = keysToCamel<Booking[]>(bookingsData || []);
 
-    // Step 4: For guests, replace all sensitive booking info with empty placeholders.
     if (isGuest) {
       bookings = bookings.map(b => ({
         ...b,
-        id: uuidv4(), // Generate a fake ID to prevent any real ID leakage
+        id: uuidv4(),
         customBookingId: '',
         guestName: '',
         guestEmail: '',
         guestCountry: '',
         guestPhone: null,
         numGuests: 0,
-        status: BookingStatus.CONFIRMED, // Needed for calendar availability display
+        status: BookingStatus.CONFIRMED,
         totalPrice: 0,
         notes: null,
       }));
     }
 
-    // Step 5: Get manually blocked dates (non-sensitive).
     const { data: blockedData, error: blockedError } = await supabase.from('blocked_dates').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
     if (blockedError) throw blockedError;
     const blockedDates = keysToCamel<BlockedDate[]>(blockedData || []);
@@ -102,35 +95,14 @@ export const hostHubApi = {
     return { host, apartments, bookings, blockedDates };
   },
 
-  async getHostDataByUserId(userId: string): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] } | null> {
-    const { data: hostData, error: hostError } = await supabase.from('hosts').select('*').eq('user_id', userId).single();
-
-    if (hostError) {
-        console.error("Error fetching host by user ID:", hostError);
-        if (hostError.code === 'PGRST116') { // PostgREST error for "exact one row not found"
-            throw new Error('Host profile not found for the logged-in user.');
-        }
-        throw new Error("Database query for host failed.");
+  async getHostDashboardData(): Promise<{ host: Host; apartments: Apartment[]; bookings: Booking[]; blockedDates: BlockedDate[] }> {
+    const response = await fetch('/api/v1/host-dashboard');
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Failed to fetch host dashboard data.' }));
+        throw new Error(errorData.error || 'Failed to fetch host dashboard data.');
     }
-    if (!hostData) return null;
-
-    const host = keysToCamel<Host>(hostData);
-
-    const { data: aptsData, error: aptsError } = await supabase.from('apartments').select('*').eq('host_id', host.id);
-    if (aptsError) throw aptsError;
-    const apartments = keysToCamel<Apartment[]>(aptsData || []);
-    const apartmentIds = apartments.map(a => a.id);
-
-    const { data: bookingsData, error: bookingsError } = await supabase.from('bookings').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
-    if (bookingsError) throw bookingsError;
-    const bookings = keysToCamel<Booking[]>(bookingsData || []);
-
-    const { data: blockedData, error: blockedError } = await supabase.from('blocked_dates').select('*').in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
-    if (blockedError) throw blockedError;
-    const blockedDates = keysToCamel<BlockedDate[]>(blockedData || []);
-
-    return { host, apartments, bookings, blockedDates };
-},
+    return response.json();
+  },
 
   async getAllHosts(): Promise<Host[]> {
     const { data, error } = await supabase.from('hosts').select('*');
@@ -261,7 +233,6 @@ export const hostHubApi = {
             total_price: b.totalPrice,
             status: b.status,
         };
-        // Use .select() to get the updated row back. This is crucial.
         return supabase.from('bookings').update(payload).eq('id', b.id).select();
     });
 
@@ -269,18 +240,13 @@ export const hostHubApi = {
 
     const successfullyUpdatedBookings: Booking[] = [];
     for (const result of results) {
-        // A failed update can either have an error or return no data.
         if (result.error || !result.data || result.data.length === 0) {
             console.error("Supabase update error or no rows updated:", result.error);
-            // Throw an error that the frontend can catch.
-            // This will trigger the `catch` block in `handleUpdateStatus`.
             throw new Error('Database update failed. A security policy may have prevented the change.');
         }
-        // If successful, convert the snake_case result from DB to camelCase and add to our list.
         successfullyUpdatedBookings.push(...keysToCamel<Booking[]>(result.data));
     }
 
-    // Return the array of bookings that were confirmed to be updated in the DB.
     return successfullyUpdatedBookings;
   },
 

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
 import { hostHubApi, fetchAndParseIcal } from './services/api';
@@ -9,7 +8,7 @@ import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
-import { onAuthStateChange, signInWithEmail, signOut } from './services/authService';
+import { checkSession, signInWithEmail, signOut } from './services/authService';
 
 const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -47,7 +46,6 @@ const App: React.FC = () => {
       setApartments(apartments);
       setBookings(bookings);
       setBlockedDates(blockedDates);
-      // Removed the leaky call to getAllHosts
     } catch (err: any) {
       setError(err.message || "Connection failed.");
     } finally {
@@ -55,12 +53,11 @@ const App: React.FC = () => {
     }
   };
 
-  const fetchHostData = async (userId: string) => {
-    if (!userId) return;
+  const fetchHostData = async () => {
     clearData();
     setLoading(true);
     try {
-      const hostData = await hostHubApi.getHostDataByUserId(userId);
+      const hostData = await hostHubApi.getHostDashboardData();
       if (hostData) {
         setCurrentHost(hostData.host);
         setApartments(hostData.apartments);
@@ -97,22 +94,24 @@ const App: React.FC = () => {
   
   // --- AUTH & SESSION MANAGEMENT ---
   useEffect(() => {
-    const unsubscribe = onAuthStateChange((authUser) => {
-      setUser(authUser);
-      if (authUser) {
+    const restoreSession = async () => {
+      const { user, error } = await checkSession();
+      if (user) {
+        setUser(user);
         setShowLogin(false);
-        if (authUser.role === UserRole.ADMIN) {
+        if (user.role === UserRole.ADMIN) {
           fetchAdminData();
-        } else if (authUser.role === UserRole.HOST) {
-          fetchHostData(authUser.id);
+        } else if (user.role === UserRole.HOST) {
+          fetchHostData();
         }
       } else {
         const params = new URLSearchParams(window.location.search);
         const hostSlug = params.get('host');
         fetchGuestData(hostSlug || undefined);
       }
-    });
-    return () => unsubscribe();
+      setLoading(false);
+    };
+    restoreSession();
   }, []);
 
   // Load Airbnb iCal
@@ -148,16 +147,29 @@ const App: React.FC = () => {
   };
 
   const handleAuth = async (email: string, pass: string): Promise<string | null> => {
-    const { error } = await signInWithEmail(email, pass);
+    const { user, error } = await signInWithEmail(email, pass);
     if (error) {
-      return error.message;
+      return error;
+    }
+    if (user) {
+      setUser(user);
+      setShowLogin(false);
+      if (user.role === UserRole.ADMIN) {
+        fetchAdminData();
+      } else if (user.role === UserRole.HOST) {
+        fetchHostData();
+      }
     }
     return null;
   };
 
-  const handleLogout = () => {
-    signOut();
+  const handleLogout = async () => {
+    await signOut();
+    setUser(null);
     clearData();
+    const params = new URLSearchParams(window.location.search);
+    const hostSlug = params.get('host');
+    fetchGuestData(hostSlug || undefined);
   };
 
   const handleHostChange = (slug: string) => {
@@ -183,14 +195,14 @@ const App: React.FC = () => {
   const handleUpdateBookings = async (updatedBookings: Booking[]) => {
     await hostHubApi.updateBookings(updatedBookings);
     if (user?.role === UserRole.HOST) {
-        fetchHostData(user.id);
+        fetchHostData();
     }
   };
 
   const handleUpdateApartments = async (updatedApartments: Apartment[]) => {
     await hostHubApi.updateApartments(updatedApartments);
     if (user?.role === UserRole.HOST) {
-        fetchHostData(user.id);
+        fetchHostData();
     }
   };
 
