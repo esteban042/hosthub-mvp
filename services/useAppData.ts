@@ -36,10 +36,16 @@ export const useAppData = () => {
           setBookings(allBookings);
         } else if (sessionUser.role === UserRole.HOST) {
           const hostData = await hostHubApi.getHostDashboardData();
-          setCurrentHost(hostData.host);
-          setApartments(hostData.apartments);
-          setBookings(hostData.bookings);
-          setBlockedDates(hostData.blockedDates);
+          if (hostData && hostData.host) {
+            setCurrentHost(hostData.host);
+            setApartments(hostData.apartments || []);
+            setBookings(hostData.bookings || []);
+            setBlockedDates(hostData.blockedDates || []);
+          } else if (!showLoadingScreen) {
+            console.error("Background refresh of host data failed. UI state preserved.");
+          } else {
+            throw new Error("Failed to load essential host data.");
+          }
         }
       } else {
         const params = new URLSearchParams(window.location.search);
@@ -55,7 +61,9 @@ export const useAppData = () => {
       }
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
-      setUser(null);
+      if (showLoadingScreen) {
+          setUser(null);
+      }
     } finally {
       if (showLoadingScreen) {
         setLoading(false);
@@ -72,10 +80,6 @@ export const useAppData = () => {
     if (error) {
       return error;
     }
-    // ** THE DEFINITIVE FIX **
-    // Upon successful authentication, the server sets an httpOnly cookie.
-    // The most reliable way to ensure the app uses this new cookie is to
-    // force a full page reload. This eliminates all race conditions.
     if (user) {
       window.location.reload();
     }
@@ -84,7 +88,6 @@ export const useAppData = () => {
 
   const handleLogout = async () => {
     await signOut();
-    // After logout, redirect to the root and let the app reload naturally.
     window.location.assign('/');
   };
 
@@ -92,14 +95,13 @@ export const useAppData = () => {
     const newUrl = new URL(window.location.href);
     newUrl.searchParams.set('host', slug);
     window.history.pushState({}, '', newUrl);
-    // Reload the data for the new host.
     loadApplicationData();
   };
   
-  const createApiHandler = (apiCall: (data?: any) => Promise<any>) => async (data?: any) => {
+  const createApiHandler = (apiCall: (data?: any) => Promise<any>, options: { silent?: boolean } = {}) => async (data?: any) => {
     try {
       await apiCall(data);
-      await loadApplicationData();
+      await loadApplicationData(!options.silent);
     } catch (err: any) {
       setError(err.message);
     }
@@ -120,8 +122,8 @@ export const useAppData = () => {
     handleLogout,
     handleHostChange,
     handleNewBooking: createApiHandler(hostHubApi.createBooking),
-    handleUpdateBookings: createApiHandler(hostHubApi.updateBookings),
-    handleUpdateApartments: createApiHandler(hostHubApi.updateApartments),
+    handleUpdateBookings: createApiHandler(hostHubApi.updateBookings, { silent: true }),
+    handleUpdateApartments: createApiHandler(hostHubApi.updateApartments, { silent: true }),
     handleUpdateHosts: createApiHandler(hostHubApi.updateHosts),
     handleBlockedDatesChange: () => loadApplicationData(false),
     loadingAirbnbIcal: false,

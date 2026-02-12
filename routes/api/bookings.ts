@@ -3,6 +3,7 @@ import { body, param } from 'express-validator';
 import { pool, keysToCamel } from '../../db';
 import { validate } from '../../middleware/validation';
 import { protect, Request } from '../../middleware/auth';
+import { sendEmail } from '../../services/email';
 
 const router = Router();
 
@@ -47,14 +48,14 @@ router.post('/',
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Apartment not found' });
       }
-      const apartment = apartmentRes.rows[0];
+      const apartment = keysToCamel(apartmentRes.rows[0]);
 
-      const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.host_id]);
+      const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.hostId]);
       if (hostRes.rows.length === 0) {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Host for this apartment not found' });
       }
-      const host = hostRes.rows[0];
+      const host = keysToCamel(hostRes.rows[0]);
 
       const bookingCountRes = await client.query('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
       const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
@@ -73,18 +74,34 @@ router.post('/',
       }
 
       const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
-      const totalPrice = nights * apartment.price_per_night;
+      const totalPrice = nights * apartment.pricePerNight;
 
       const bookingRes = await client.query(
         `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
          VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
         [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
       );
-      const newBooking = bookingRes.rows[0];
+      const newBooking = keysToCamel(bookingRes.rows[0]);
 
       await client.query('COMMIT');
 
-      res.status(201).json(keysToCamel(newBooking));
+      res.status(201).json(newBooking);
+
+      // TODO: Add a feature flag to enable/disable this feature
+      try {
+        await sendEmail(
+          newBooking.guestEmail,
+          'Your Booking Confirmation',
+          'BookingConfirmation',
+          {
+            booking: newBooking,
+            apartment,
+            host
+          }
+        );
+      } catch (emailError) {
+        console.error('Failed to send confirmation email:', emailError);
+      }
 
     } catch (err) {
       await client.query('ROLLBACK');
