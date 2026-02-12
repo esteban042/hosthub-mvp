@@ -48,10 +48,57 @@ router.post('/bookings',
 });
 
 router.get('/bookings/:id', 
+  protect,
   param('id').isInt(),
   validate,
-  async (req, res, next) => {
-    res.status(501).send('Not Implemented');
+  async (req: Request, res, next) => {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        `SELECT
+          b.id AS booking_id,
+          b.start_date,
+          b.end_date,
+          b.total_price,
+          b.status,
+          b.user_id AS guest_id,
+          a.id AS apartment_id,
+          a.name AS apartment_name,
+          a.description AS apartment_description,
+          a.location AS apartment_location,
+          a.host_id,
+          h_user.id as host_user_id
+        FROM
+          bookings b
+        JOIN
+          apartments a ON b.apartment_id = a.id
+        JOIN
+          hosts h ON a.host_id = h.id
+        JOIN
+          users h_user ON h.user_id = h_user.id
+        WHERE
+          b.id = $1`,
+        [id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Booking not found' });
+      }
+
+      const booking = result.rows[0];
+
+      if (booking.guest_id !== userId && booking.host_user_id !== userId) {
+        return res.status(403).json({ error: 'You are not authorized to view this booking' });
+      }
+
+      res.json(keysToCamel(booking));
+    } catch (err) {
+      next(err);
+    } finally {
+      client.release();
+    }
 });
 
 router.post('/users', 
