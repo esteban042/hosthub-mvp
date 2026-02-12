@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import { body, param } from 'express-validator';
 import bcrypt from 'bcryptjs';
@@ -20,13 +21,13 @@ router.post('/apartments',
 });
 
 router.get('/apartments/:id', 
-  param('id').isInt(),
+  param('id').isString().notEmpty(),
   validate,
   async (req, res, next) => {
     const client = await pool.connect();
     try {
       const { id } = req.params;
-      const result = await client.query('SELECT * FROM apartments WHERE id::text = $1', [id]);
+      const result = await client.query('SELECT * FROM apartments WHERE id = $1', [id]);
       if (result.rows.length === 0) {
         return res.status(404).json({ error: 'Apartment not found' });
       }
@@ -39,17 +40,84 @@ router.get('/apartments/:id',
 });
 
 router.post('/bookings', 
-  body('apartmentId').isInt(),
+  body('apartmentId').isString().notEmpty(),
   body('startDate').isISO8601(),
   body('endDate').isISO8601(),
+  body('guestEmail').isEmail().normalizeEmail(),
+  body('guestName').not().isEmpty().trim().escape(),
+  body('guestCountry').not().isEmpty().trim().escape(),
+  body('guestPhone').optional().trim().escape(),
+  body('numGuests').isInt({ gt: 0 }),
+  body('guestMessage').optional().trim().escape(),
   validate,
-  async (req, res, next) => {
-    res.status(501).send('Not Implemented');
+  async (req: Request, res, next) => {
+    console.log('[/bookings] Handling request...');
+    const {
+      apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage
+    } = req.body;
+    const client = await pool.connect();
+    console.log('[/bookings] DB client connected.');
+
+    try {
+      await client.query('BEGIN');
+      console.log('[/bookings] Transaction started.');
+
+      const apartmentRes = await client.query('SELECT * FROM apartments WHERE id = $1 FOR UPDATE', [apartmentId]);
+      console.log('[/bookings] Fetched apartment for update.');
+
+      if (apartmentRes.rows.length === 0) {
+        console.log('[/bookings] Apartment not found, rolling back.');
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Apartment not found' });
+      }
+      const apartment = apartmentRes.rows[0];
+
+      const overlappingBookingsRes = await client.query(
+        `SELECT 1 FROM bookings WHERE apartment_id = $1 AND status != 'cancelled' AND (start_date, end_date) OVERLAPS ($2, $3)`,
+        [apartmentId, startDate, endDate]
+      );
+      console.log('[/bookings] Checked for overlapping bookings.');
+
+      if (overlappingBookingsRes.rows.length > 0) {
+        console.log('[/bookings] Overlapping booking found, rolling back.');
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'The selected dates are not available' });
+      }
+
+      const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
+      const totalPrice = nights * apartment.price_per_night;
+      console.log(`[/bookings] Calculated price: ${totalPrice} for ${nights} nights.`);
+
+      const bookingRes = await client.query(
+        `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message)
+         VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10) RETURNING *`,
+        [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage]
+      );
+      const newBooking = bookingRes.rows[0];
+      console.log(`[/bookings] Inserted new booking with id: ${newBooking.id}.`);
+
+      await client.query('COMMIT');
+      console.log('[/bookings] Transaction committed.');
+
+      console.log('[/bookings] Preparing to send success response.');
+      res.status(201).json(keysToCamel(newBooking));
+      console.log('[/bookings] Success response sent.');
+
+    } catch (err) {
+      console.error('[/bookings] CRITICAL ERROR:', err);
+      await client.query('ROLLBACK');
+      console.log('[/bookings] Transaction rolled back due to error.');
+      next(err);
+    } finally {
+      console.log('[/bookings] Releasing client.');
+      client.release();
+      console.log('[/bookings] Client released.');
+    }
 });
 
 router.get('/bookings/:id', 
   protect,
-  param('id').isInt(),
+  param('id').isString().notEmpty(),
   validate,
   async (req: Request, res, next) => {
     const { id } = req.params;
@@ -63,21 +131,26 @@ router.get('/bookings/:id',
           b.end_date,
           b.total_price,
           b.status,
-          b.user_id AS guest_id,
+          b.guest_name, 
+          b.guest_email, 
+          b.guest_country, 
+          b.guest_phone, 
+          b.num_guests, 
+          b.guest_message,
           a.id AS apartment_id,
           a.name AS apartment_name,
           a.description AS apartment_description,
           a.location AS apartment_location,
-          a.host_id,
-          h_user.id as host_user_id
+          h.id AS host_id,
+          u.id as host_user_id
         FROM
           bookings b
         JOIN
           apartments a ON b.apartment_id = a.id
         JOIN
           hosts h ON a.host_id = h.id
-        JOIN
-          users h_user ON h.user_id = h_user.id
+        LEFT JOIN
+          users u ON h.user_id = u.id
         WHERE
           b.id = $1`,
         [id]
@@ -89,7 +162,7 @@ router.get('/bookings/:id',
 
       const booking = result.rows[0];
 
-      if (booking.guest_id !== userId && booking.host_user_id !== userId) {
+      if (!req.user || booking.host_user_id !== req.user.id) {
         return res.status(403).json({ error: 'You are not authorized to view this booking' });
       }
 
@@ -137,9 +210,9 @@ router.get('/host-dashboard', protect, async (req: Request, res, next) => {
   const client = await pool.connect();
 
   try {
-    const hostRes = await client.query('SELECT * FROM hosts WHERE user_id = $1', [userId]);
+    const hostRes = await client.query('SELECT * FROM hosts WHERE user_id::text = $1', [userId]);
     if (hostRes.rows.length === 0) {
-      return res.status(404).json({ error: 'Host profile not found for this user.' });
+      return res.status(404).json({ error: 'Host profile not found for this user. Please create a host profile.' });
     }
     const host = hostRes.rows[0];
 
@@ -151,10 +224,10 @@ router.get('/host-dashboard', protect, async (req: Request, res, next) => {
     let blockedDates = [];
 
     if (apartmentIds.length > 0) {
-      const bookingsRes = await client.query('SELECT * FROM bookings WHERE apartment_id = ANY($1)', [apartmentIds]);
+      const bookingsRes = await client.query('SELECT * FROM bookings WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
       bookings = bookingsRes.rows;
 
-      const blockedDatesRes = await client.query('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1)', [apartmentIds]);
+      const blockedDatesRes = await client.query('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
       blockedDates = blockedDatesRes.rows;
     }
 
