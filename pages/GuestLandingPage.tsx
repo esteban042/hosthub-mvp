@@ -321,7 +321,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 </div>
 
                 {isDatesOpen && (
-                  <div className="absolute top-full left-0 mt-4 z-[100]">
+                  <div className="absolute top-full left-0 mt-4 z-[100] calendar-container">
                     <HeroCalendar 
                       startDate={dates.start} endDate={dates.end} 
                       onSelect={(s, e) => {
@@ -349,7 +349,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 </div>
 
                 {isGuestsOpen && (
-                  <div className="absolute top-full left-1/3 mt-4 z-[100]">
+                  <div className="absolute top-full left-1/3 mt-4 z-[100] guests-container">
                     <GuestPopover 
                       guests={numGuests} 
                       onSelect={setNumGuests} 
