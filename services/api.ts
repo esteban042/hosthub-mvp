@@ -101,7 +101,26 @@ export const hostHubApi = {
         const errorData = await response.json().catch(() => ({ error: 'Failed to fetch host dashboard data.' }));
         throw new Error(errorData.error || 'Failed to fetch host dashboard data.');
     }
-    return response.json();
+    const hostData = await response.json();
+
+    if (hostData && hostData.apartments) {
+        const apartmentIds = hostData.apartments.map((a: Apartment) => a.id);
+        const { data: blockedData, error: blockedError } = await supabase
+            .from('blocked_dates')
+            .select('*')
+            .in('apartment_id', apartmentIds.length > 0 ? apartmentIds : ['none']);
+
+        if (blockedError) {
+            console.error("Manual fetch of blocked dates failed:", blockedError);
+            hostData.blockedDates = [];
+        } else {
+            hostData.blockedDates = keysToCamel<BlockedDate[]>(blockedData || []);
+        }
+    } else {
+        hostData.blockedDates = [];
+    }
+
+    return hostData;
   },
 
   async getAllHosts(): Promise<Host[]> {
@@ -250,16 +269,34 @@ export const hostHubApi = {
     return successfullyUpdatedBookings;
   },
 
-  async updateBlockedDates(updatedList: BlockedDate[]): Promise<BlockedDate[]> {
-    const promises = updatedList.map(d => {
-      return supabase.from('blocked_dates').upsert({
-        id: d.id,
-        apartment_id: d.apartmentId,
-        date: d.date,
-      });
-    });
-    await Promise.all(promises);
-    return updatedList;
+  async createBlockedDate(blockedDate: BlockedDate): Promise<BlockedDate> {
+    const { data, error } = await supabase
+        .from('blocked_dates')
+        .insert({
+            id: blockedDate.id,
+            apartment_id: blockedDate.apartmentId,
+            date: blockedDate.date,
+        })
+        .select()
+        .single();
+
+    if (error) {
+        console.error("Error creating blocked date:", error);
+        throw error;
+    }
+    return keysToCamel<BlockedDate>(data);
+  },
+
+  async deleteBlockedDate(id: string): Promise<void> {
+      const { error } = await supabase
+          .from('blocked_dates')
+          .delete()
+          .eq('id', id);
+
+      if (error) {
+          console.error("Error deleting blocked date:", error);
+          throw error;
+      }
   },
 
   async seedDatabase(): Promise<void> {

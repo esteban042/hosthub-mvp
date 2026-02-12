@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from './types';
 import { hostHubApi, fetchAndParseIcal } from './services/api';
 import { GuestLandingPage } from './pages/GuestLandingPage';
@@ -33,15 +33,11 @@ const App: React.FC = () => {
     setError(null);
   };
 
-  // --- DATA FETCHING ---
-  const fetchGuestData = async (slug?: string) => {
+  const fetchGuestData = useCallback(async (slug?: string) => {
     clearData();
     setLoading(true);
     try {
       const { host, apartments, bookings, blockedDates } = await hostHubApi.getLandingData({ slug }, true);
-
-
-
       setCurrentHost(host);
       setApartments(apartments);
       setBookings(bookings);
@@ -51,9 +47,9 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchHostData = async () => {
+  const fetchHostData = useCallback(async () => {
     clearData();
     setLoading(true);
     try {
@@ -71,9 +67,9 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchAdminData = async () => {
+  const fetchAdminData = useCallback(async () => {
     clearData();
     setLoading(true);
     try {
@@ -90,20 +86,29 @@ const App: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
-  // --- AUTH & SESSION MANAGEMENT ---
+  const reloadData = useCallback(() => {
+    if (user) {
+      if (user.role === UserRole.ADMIN) {
+        fetchAdminData();
+      } else if (user.role === UserRole.HOST) {
+        fetchHostData();
+      }
+    } else {
+      const params = new URLSearchParams(window.location.search);
+      const hostSlug = params.get('host');
+      fetchGuestData(hostSlug || undefined);
+    }
+  }, [user, fetchAdminData, fetchHostData, fetchGuestData]);
+
   useEffect(() => {
     const restoreSession = async () => {
+      setLoading(true);
       const { user, error } = await checkSession();
       if (user) {
         setUser(user);
         setShowLogin(false);
-        if (user.role === UserRole.ADMIN) {
-          fetchAdminData();
-        } else if (user.role === UserRole.HOST) {
-          fetchHostData();
-        }
       } else {
         const params = new URLSearchParams(window.location.search);
         const hostSlug = params.get('host');
@@ -112,9 +117,15 @@ const App: React.FC = () => {
       setLoading(false);
     };
     restoreSession();
-  }, []);
+  }, [fetchGuestData]);
+  
+  useEffect(() => {
+    if (user) {
+      reloadData();
+    }
+  }, [user, reloadData]);
 
-  // Load Airbnb iCal
+
   useEffect(() => {
     const loadAirbnbIcal = async () => {
       if (currentHost?.airbnbCalendarLink) {
@@ -139,8 +150,7 @@ const App: React.FC = () => {
     setSeeding(true);
     try {
       await hostHubApi.seedDatabase();
-      const params = new URLSearchParams(window.location.search);
-      await fetchGuestData(params.get('host') || undefined);
+      reloadData();
     } finally {
       setSeeding(false);
     }
@@ -154,11 +164,6 @@ const App: React.FC = () => {
     if (user) {
       setUser(user);
       setShowLogin(false);
-      if (user.role === UserRole.ADMIN) {
-        fetchAdminData();
-      } else if (user.role === UserRole.HOST) {
-        fetchHostData();
-      }
     }
     return null;
   };
@@ -177,12 +182,10 @@ const App: React.FC = () => {
     setSelectedAptId(null);
   };
 
-  // --- DATA MUTATIONS ---
   const handleNewBooking = async (newBooking: Booking) => {
     try {
       const createdBooking = await hostHubApi.createBooking(newBooking);
-      const data = await hostHubApi.getLandingData(currentHost?.slug);
-      setBookings(data.bookings);
+      reloadData();
       const bookedApartment = apartments.find(apt => apt.id === newBooking.apartmentId);
       if (currentHost && bookedApartment) {
         await hostHubApi.sendEmail(newBooking.guestEmail, `Booking Confirmed: ${bookedApartment.title}`, 'BookingConfirmed', createdBooking, bookedApartment, currentHost);
@@ -194,33 +197,23 @@ const App: React.FC = () => {
 
   const handleUpdateBookings = async (updatedBookings: Booking[]) => {
     await hostHubApi.updateBookings(updatedBookings);
-    if (user?.role === UserRole.HOST) {
-        fetchHostData();
-    }
+    reloadData();
   };
 
   const handleUpdateApartments = async (updatedApartments: Apartment[]) => {
     await hostHubApi.updateApartments(updatedApartments);
-    if (user?.role === UserRole.HOST) {
-        fetchHostData();
-    }
+    reloadData();
   };
 
   const handleUpdateHosts = async (updatedHosts: Host[]) => {
     await hostHubApi.updateHosts(updatedHosts);
-    fetchAdminData();
-    if (user && user.role === UserRole.HOST) {
-      const self = updatedHosts.find(h => h.id === user.id);
-      if (self) setCurrentHost(self);
-    }
+    reloadData();
   };
 
-  const handleUpdateBlockedDates = async (updatedBlocked: BlockedDate[]) => {
-    await hostHubApi.updateBlockedDates(updatedBlocked);
-    setBlockedDates(updatedBlocked);
+  const handleBlockedDatesChange = () => {
+    reloadData();
   };
   
-  // --- UI RENDERING ---
   if (loading) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing HostHub Cluster...</p></div>;
 
   if (!currentHost && !user) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm"><div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10"><Database className="w-10 h-10 text-emerald-400" /></div><h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight">System Unprovisioned</h2><p className="text-stone-500 max-w-md mx-auto mb-12">No environment data found. Provision mock ecosystem to begin.</p>{error && <div className="mb-10 p-4 bg-rose-500/10 border border-rose-500/20 rounded-2xl flex items-center space-x-3 text-left max-w-lg mx-auto"><AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0" /><p className="text-xs text-rose-400 font-medium">{error}</p></div>}<div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4"><button disabled={seeding} onClick={handleSeed} className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-emerald-500/20 flex items-center space-x-3">{seeding ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}<span>Provision Mock Data</span></button><button onClick={() => setShowLogin(true)} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Access Admin Console</button></div></div>;
@@ -232,8 +225,8 @@ const App: React.FC = () => {
         switch (user.role) {
             case UserRole.ADMIN: return <AdminDashboard hosts={hosts} apartments={apartments} bookings={bookings} onUpdateHosts={handleUpdateHosts} />;
             case UserRole.HOST: 
-                if(currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} onUpdateBookings={handleUpdateBookings} onUpdateBlockedDates={handleUpdateBlockedDates} onUpdateApartments={handleUpdateApartments} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
-                return null; // or a loading/error state
+                if(currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={bookings} blockedDates={blockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
+                return null;
             default: return null;
         }
     }

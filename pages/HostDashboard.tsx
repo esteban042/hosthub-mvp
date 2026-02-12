@@ -1,8 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, PriceRule, BlockedDate } from '../types';
 import { ALL_AMENITIES, THEME_GRAY, CORE_ICONS, UNIT_TITLE_STYLE, CARD_BORDER, EMERALD_ACCENT } from '../constants.tsx';
-import { BookingConfirmationTemplate, BookingCancellationTemplate } from '../components/EmailTemplates';
+import { v4 as uuidv4 } from 'uuid';
 import { Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 import { hostHubApi } from '../services/api';
 import DatePicker from '../components/DatePicker';
@@ -10,7 +9,6 @@ import StatisticsDashboard from '../components/StatisticsDashboard';
 import AvailabilityCalendar from '../components/AvailabilityCalendar';
 import BookingListItem from '../components/BookingListItem';
 import BookingCard from '../components/BookingCard';
-import formatBookingRange from '../components/utils';
 import { BookMarked, Building, BarChart2, Tag, Trash2, Info, ChevronLeft, ChevronRight, X, History, CalendarDays, Users, DollarSign, Mail, Phone, Share2, Copy, CheckCircle2 } from 'lucide-react';
 
 const LABEL_COLOR = 'rgb(168, 162, 158)';
@@ -21,14 +19,14 @@ interface HostDashboardProps {
   bookings: Booking[];
   blockedDates: BlockedDate[];
   onUpdateBookings: (bookings: Booking[]) => void;
-  onUpdateBlockedDates: (dates: BlockedDate[]) => void;
+  onBlockedDatesChange: () => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
   airbnbCalendarDates: string[]; 
   loadingAirbnbIcal: boolean; 
 }
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onUpdateBlockedDates, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
+  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
   const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
@@ -95,40 +93,9 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 }, [bookings, apartments, host.id]);
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
-    const originalStatus = booking.status;
     const updatedBooking = { ...booking, status };
-
-    // Optimistically update the UI for immediate feedback.
     onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
-
-    try {
-      // Attempt to persist the change to the database.
-      await hostHubApi.updateBookings([updatedBooking]);
-
-      // If the database update is successful and the booking is being canceled, send an email.
-      if (status === BookingStatus.CANCELED) {
-        const bookedApartment = apartments.find(apt => apt.id === booking.apartmentId);
-        if (bookedApartment) {
-          await hostHubApi.sendEmail(
-            booking.guestEmail,
-            `Update on your booking for ${bookedApartment.title}`,
-            'BookingCancellation',
-            updatedBooking, // Correctly passing the object with the 'canceled' status
-            bookedApartment,
-            host
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Failed to update booking status. The UI has been reverted.", error);
-      
-      // If any API call fails, revert the optimistic UI update to maintain data consistency.
-      onUpdateBookings(bookings.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
-      
-      // Optionally, you could add a user-facing error message here.
-    }
   };
-
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(shareableUrl);
@@ -156,7 +123,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         return { activeUnits, active, past: pastCount, revenueYear };
         }, [myBookings, myApartments, todayStr]);
 
-  // Fix: Ensure groupedAndSortedBookings is defined before the main return statement.
 const groupedAndSortedBookings = useMemo(() => {
     const thirtyDaysFromNow = new Date();
     thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
@@ -174,8 +140,6 @@ const groupedAndSortedBookings = useMemo(() => {
       return !isPast && b.status === statusFilter;
     });
 
-    
-
     const sorted = filtered.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
 
     const groups = new Map<string, Booking[]>();
@@ -191,41 +155,42 @@ const groupedAndSortedBookings = useMemo(() => {
   }, [myBookings, myApartments, statusFilter, todayStr]);
 
 
-  const toggleManualBlock = (aptId: string, date: string) => {
-  // The 'date' from the calendar is the correct 'YYYY-MM-DD' string.
-  // We find the date using a direct comparison, which is the same logic
-  // that correctly highlights the cell in red.
-  const existingIdx = blockedDates.findIndex(d => d.apartmentId === aptId && d.date === date);
+  const toggleManualBlock = async (aptId: string, date: string) => {
+    const existing = blockedDates.find(d => d.apartmentId === aptId && d.date === date);
 
-  if (existingIdx >= 0) {
-    // Found it: remove the date from the array.
-    onUpdateBlockedDates(blockedDates.filter((_, i) => i !== existingIdx));
-  } else {
-    // Didn't find it: add the new date.
-    onUpdateBlockedDates([...blockedDates, { id: `block-${Date.now()}`, apartmentId: aptId, date: date }]);
-  }
-};
+    if (existing) {
+        await hostHubApi.deleteBlockedDate(existing.id);
+    } else {
+        await hostHubApi.createBlockedDate({ id: uuidv4(), apartmentId: aptId, date });
+    }
+    onBlockedDatesChange();
+  };
+
 
   const handleSaveApartment = (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingApt) return;
-    if (editingApt.id) {
-      onUpdateApartments(myApartments.map(a => a.id === editingApt.id ? { ...a, ...editingApt } as Apartment : a));
+
+    const processedApt = { ...editingApt };
+    if (!processedApt.amenities) processedApt.amenities = [];
+    if (!processedApt.photos) processedApt.photos = ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'];
+    if (!processedApt.priceOverrides) processedApt.priceOverrides = [];
+
+
+    if (processedApt.id) {
+      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? processedApt as Apartment : a));
     } else {
       const newApt: Apartment = {
-        ...editingApt,
+        ...processedApt,
         id: `apt-${Date.now()}`,
         hostId: host.id,
-        amenities: editingApt.amenities || [],
-        photos: editingApt.photos || ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'],
-        priceOverrides: editingApt.priceOverrides || [],
-        capacity: editingApt.capacity || 2,
-        bedrooms: editingApt.bedrooms || 1,
-        bathrooms: editingApt.bathrooms || 1,
-        pricePerNight: editingApt.pricePerNight || 100,
-        title: editingApt.title || 'Untitled sanctuary',
-        description: editingApt.description || '',
-        city: editingApt.city || '',
+        capacity: processedApt.capacity || 2,
+        bedrooms: processedApt.bedrooms || 1,
+        bathrooms: processedApt.bathrooms || 1,
+        pricePerNight: processedApt.pricePerNight || 100,
+        title: processedApt.title || 'Untitled sanctuary',
+        description: processedApt.description || '',
+        city: processedApt.city || '',
         isActive: true,
       } as Apartment;
       onUpdateApartments([...apartments, newApt]);
@@ -264,7 +229,6 @@ const groupedAndSortedBookings = useMemo(() => {
           <p className="text-[10px] font-bold uppercase tracking-[0.3em]" style={{ color: LABEL_COLOR }}>Asset Operations</p>
         </div>
         
-        {/* Shareable Link Card */}
         <div className="bg-[#1c1a19] border border-stone-800 p-4 rounded-2xl flex items-center justify-between w-full md:w-[450px] shadow-xl">
            <div className="flex items-center space-x-4 overflow-hidden">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-400 flex-shrink-0">
@@ -432,7 +396,7 @@ const groupedAndSortedBookings = useMemo(() => {
                             apartmentTitle={aptTitle}
                             onUpdateStatus={handleUpdateStatus}
                             statusFilter={'all'}
-                            showButtons={false} // Hiding the buttons
+                            showButtons={false}
                         />
                     );
                 })
@@ -507,8 +471,6 @@ const groupedAndSortedBookings = useMemo(() => {
         </div>
       )}
 
-
-      {/* Unit Edit Modal */}
       {showAptModal && editingApt && (
         <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-2xl flex items-start justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
            <div className="bg-[#1c1a19] border border-stone-800 w-full max-w-4xl rounded-[3rem] p-10 shadow-2xl space-y-12 my-12 relative text-left font-dm">
@@ -587,7 +549,6 @@ const groupedAndSortedBookings = useMemo(() => {
                  <div className="pt-10 border-t border-stone-800/60">
     <div className="flex items-center justify-between mb-8">
         <div className="flex items-center space-x-3">
-            {/* Using an existing icon for consistency */}
             <Tag className="w-5 h-5 text-emerald-400" />
             <h4 className="text-xl font-bold text-white tracking-tight">Unit Photos</h4>
         </div>
@@ -656,8 +617,6 @@ const groupedAndSortedBookings = useMemo(() => {
            </div>
         </div>
       )}
-
-      
     </div>
   );
 };
