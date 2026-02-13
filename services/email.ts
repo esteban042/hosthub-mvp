@@ -6,6 +6,7 @@ import ReactDOMServer from 'react-dom/server';
 import {
   BookingConfirmationTemplate,
   BookingCancellationTemplate,
+  DirectMessageTemplate,
 } from '../components/EmailTemplates.js';
 
 export function getSmtpPassword() {
@@ -26,6 +27,10 @@ export async function sendEmail(toEmail: string, subject: string, templateName: 
   } else if (templateName === 'BookingCancellation') {
     htmlContent = ReactDOMServer.renderToString(
       React.createElement(BookingCancellationTemplate, data)
+    );
+  } else if (templateName === 'DirectMessage') {
+    htmlContent = ReactDOMServer.renderToString(
+      React.createElement(DirectMessageTemplate, data)
     );
   }
 

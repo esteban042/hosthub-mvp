@@ -101,6 +101,10 @@ export const sanctumApi = {
         sanctumApi.simulateEmail(toEmail, subject, templateName, booking);
       });
   },
+
+  sendMessage: (booking: Booking, message: string) => {
+    return sanctumApi.post('/api/v1/send-message', { booking, message });
+  },
   
   simulateEmail(to: string, subject: string, template: string, booking: any) {
     console.group('%c [MOCK EMAIL DISPATCHED] ', 'background: #e97c62; color: #fff; font-weight: bold;');

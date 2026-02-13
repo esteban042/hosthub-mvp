@@ -2,6 +2,7 @@ import React from 'react';
 import { Booking, BookingStatus } from '../../types';
 import BookingCard from '../BookingCard';
 import { CalendarDays, History, X } from 'lucide-react';
+import MessageModal from './MessageModal';
 
 interface BookingsProps {
   bookings: Booking[];
@@ -11,7 +12,27 @@ interface BookingsProps {
 
 const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatus }) => {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
   const todayStr = new Date().toISOString().split('T')[0];
+
+  const handleOpenModal = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBooking(null);
+    setIsModalOpen(false);
+  };
+
+  const handleSendMessage = (message: string) => {
+    if (selectedBooking) {
+      // TODO: Replace with actual API call
+      console.log(`Sending message to ${selectedBooking.guestEmail}: ${message}`);
+      // Here you would call your API to send the email
+    }
+  };
 
   const groupedAndSortedBookings = React.useMemo(() => {
     const thirtyDaysFromNow = new Date();
@@ -83,6 +104,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
                   booking={b} 
                   apartmentTitle={title} 
                   onUpdateStatus={onUpdateStatus}
+                  onSendMessage={handleOpenModal} // Updated to open the modal
                   statusFilter={statusFilter}
                 />
               ))}
@@ -94,6 +116,13 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
           <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
         </div>
       )}
+
+      <MessageModal 
+        booking={selectedBooking}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSend={handleSendMessage}
+      />
     </div>
   );
 };

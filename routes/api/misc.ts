@@ -25,6 +25,38 @@ router.post('/send-email',
     }
 });
 
+router.post('/send-message',
+  protect,
+  body('booking').isObject(),
+  body('message').not().isEmpty().trim().escape(),
+  validate,
+  async (req: Request, res, next) => {
+    const { booking, message } = req.body;
+    const hostId = req.user.id;
+
+    try {
+      const client = await pool.connect();
+      const hostResult = await client.query('SELECT * FROM hosts WHERE id = $1', [hostId]);
+      const host = hostResult.rows[0];
+      client.release();
+
+      if (!host) {
+        return res.status(404).json({ error: 'Host not found' });
+      }
+
+      const result = await sendEmail(
+        booking.guestEmail,
+        `Message from ${host.name} regarding your booking`,
+        'DirectMessage',
+        { booking, message, host }
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.get('/public-hosts', 
   async (req, res, next) => {
     try {

@@ -1,11 +1,12 @@
 import React from 'react';
 import { Host, Apartment, Booking } from '../types';
-import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard, X } from 'lucide-react';
+import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard, X, MessageSquare } from 'lucide-react';
 
 interface TemplateProps {
   host: Host;
   apartment: Apartment;
   booking: Booking;
+  message?: string;
 }
 
 const containerStyle: React.CSSProperties = {
@@ -56,6 +57,32 @@ const InfoBlock: React.FC<{ icon: React.ElementType, title: string, content: str
     </div>
   );
 };
+
+export const DirectMessageTemplate: React.FC<TemplateProps> = ({ host, apartment, booking, message }) => {
+  return (
+    <div style={containerStyle}>
+      <div style={{...cardStyle, border: '1px solid #6ee7b7'}}>
+        <div style={headerStyle}>
+          <MessageSquare size={50} style={{ margin: 'auto', color: '#6ee7b7', backgroundColor: 'rgba(52, 211, 153, 0.1)', padding: '0.5rem', borderRadius: '9999px' }} />
+          <h1 style={{ fontSize: '2.25rem', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.025em', marginTop: '0.75rem' }}>A new message from {host.name}</h1>
+          <p style={{ color: '#9ca3af', fontSize: '1.125rem' }}>Regarding your booking for {apartment.title}</p>
+        </div>
+        <div style={contentStyle}>
+          <InfoBlock 
+            icon={MessageSquare} 
+            title="Message Content"
+            content={message}
+          />
+          <div style={{ marginTop: '2rem', backgroundColor: 'rgba(17, 24, 39, 0.7)', padding: '1.5rem', borderRadius: '0.75rem', border: '1px solid #4b5563' }}>
+            <InfoRow icon={Hash} label="Booking ID" value={booking.customBookingId || 'N/A'} />
+            <InfoRow icon={Home} label="Apartment" value={apartment.title} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 export const BookingConfirmationTemplate: React.FC<TemplateProps> = ({ host, apartment, booking }) => {
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });

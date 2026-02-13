@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Booking, BookingStatus } from '../types';
-import { Building, CalendarDays, Users, DollarSign, Mail, Phone } from 'lucide-react';
+import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare } from 'lucide-react';
 import { formatBookingRange } from '../utils/formatBookingRange';
 import { getGuestDisplayName } from '../utils/bookingUtils';
 import { CARD_BORDER } from '../constants';
@@ -29,9 +30,10 @@ const BookingCard: React.FC<{
   booking: Booking;
   apartmentTitle: string;
   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
+  onSendMessage: (booking: Booking) => void;
   statusFilter: string;
   showButtons?: boolean;
-}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, statusFilter, showButtons = true }) => {
+}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, statusFilter, showButtons = true }) => {
   const guestDisplayName = getGuestDisplayName(b.guestName, b.guestEmail);
 
   return (
@@ -61,15 +63,25 @@ const BookingCard: React.FC<{
       </div>
       {showButtons && (
         <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
-          {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
-            <>
-              <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
-              <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-            </>
-          )}
-          {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-            <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
-          )}
+            {statusFilter !== 'past' && b.status !== BookingStatus.CANCELED && (
+                <button 
+                onClick={() => onSendMessage(b)} 
+                className="flex-shrink-0 bg-transparent border border-sky-500 text-sky-400 p-3 rounded-xl hover:bg-sky-500/10 hover:text-sky-300 transition-all"
+                >
+                <MessageSquare className="w-4 h-4" />
+                </button>
+            )}
+            <div className="flex-grow flex items-center justify-center space-x-2">
+                {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
+                    <>
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+                    </>
+                )}
+                {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+                )}
+            </div>
         </div>
       )}
     </div>
