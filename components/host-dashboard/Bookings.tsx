@@ -1,16 +1,18 @@
 import React from 'react';
-import { Booking, BookingStatus } from '../../types';
+import { Booking, BookingStatus, Host, Apartment } from '../../types';
 import BookingCard from '../BookingCard';
 import { CalendarDays, History, X } from 'lucide-react';
 import MessageModal from './MessageModal';
+import { sanctumApi } from '../../services/api';
 
 interface BookingsProps {
   bookings: Booking[];
-  apartments: any[];
-  onUpdateStatus: (booking: Booking, status: BookingStatus) => void;
+  apartments: Apartment[];
+  host: Host;
+  onUpdateBooking: (booking: Booking, status: BookingStatus) => void;
 }
 
-const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatus }) => {
+const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdateBooking }) => {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
@@ -26,11 +28,27 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
     setIsModalOpen(false);
   };
 
-  const handleSendMessage = (message: string) => {
+  const handleSendMessage = async (message: string) => {
     if (selectedBooking) {
-      // TODO: Replace with actual API call
-      console.log(`Sending message to ${selectedBooking.guestEmail}: ${message}`);
-      // Here you would call your API to send the email
+      try {
+        await sanctumApi.sendMessage(selectedBooking.id, message);
+        handleCloseModal();
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    }
+  };
+
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+    if (status === BookingStatus.CANCELED) {
+        try {
+            await sanctumApi.cancelBooking(booking.id);
+            onUpdateBooking(booking, status); // To update the UI
+        } catch (error) {
+            console.error("Failed to cancel booking:", error);
+        }
+    } else {
+        onUpdateBooking(booking, status);
     }
   };
 
@@ -103,8 +121,8 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
                   key={b.id} 
                   booking={b} 
                   apartmentTitle={title} 
-                  onUpdateStatus={onUpdateStatus}
-                  onSendMessage={handleOpenModal} // Updated to open the modal
+                  onUpdateStatus={handleUpdateStatus}
+                  onSendMessage={handleOpenModal}
                   statusFilter={statusFilter}
                 />
               ))}

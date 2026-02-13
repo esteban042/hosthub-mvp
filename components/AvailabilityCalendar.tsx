@@ -24,7 +24,7 @@ const AvailabilityCalendar: React.FC<{
     );
 
   const isBlockedManually = (dateStr: string) => 
-    blockedDates.some(d => d.apartmentId === aptId && d.date === dateStr);
+    blockedDates.some(d => d.apartmentId === aptId && new Date(d.date).toISOString().split('T')[0] === dateStr);
 
   const isAirbnbBlocked = (dateStr: string) => airbnbCalendarDates.includes(dateStr);
 
@@ -39,7 +39,6 @@ const AvailabilityCalendar: React.FC<{
     for (let d = 1; d <= numDays; d++) {
       const dateObj = new Date(monthDate.getFullYear(), monthDate.getMonth(), d);
       
-      // Correctly format the date string to YYYY-MM-DD to avoid timezone issues
       const year = dateObj.getFullYear();
       const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
       const day = dateObj.getDate().toString().padStart(2, '0');

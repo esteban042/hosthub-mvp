@@ -85,15 +85,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     try {
       const newConfirmedBooking = await sanctumApi.createBooking(bookingDetails);
 
-      await sanctumApi.sendEmail(
-        email,
-        `Your Booking for ${apartment.title} is Confirmed!`,
-        'BookingConfirmation',
-        newConfirmedBooking,
-        apartment,
-        host
-      );
-
       onNewBooking(newConfirmedBooking);
 
     } catch (error) {

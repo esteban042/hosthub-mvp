@@ -170,7 +170,7 @@ router.get('/:id',
     }
 });
 
-router.put('/',
+router.put('/', 
   protect,
   body().isArray(),
   validate,
@@ -212,6 +212,9 @@ router.put('/',
             guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id
         } = booking;
 
+        const originalBookingRes = await client.query('SELECT * FROM bookings WHERE id = $1', [id]);
+        const originalBooking = originalBookingRes.rows[0];
+
         const updateRes = await client.query(
           `UPDATE bookings SET
             guest_name = $1, guest_email = $2, guest_country = $3, num_guests = $4,
@@ -219,7 +222,26 @@ router.put('/',
           WHERE id = $9 RETURNING *`,
           [guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id]
         );
-        resultBookings.push(keysToCamel(updateRes.rows[0]));
+        const updatedBooking = keysToCamel(updateRes.rows[0]);
+        resultBookings.push(updatedBooking);
+
+        if (updatedBooking.status === 'canceled' && originalBooking.status !== 'canceled') {
+            const apartmentRes = await client.query('SELECT * FROM apartments WHERE id = $1', [originalBooking.apartment_id]);
+            const apartment = apartmentRes.rows[0];
+            const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.host_id]);
+            const host = hostRes.rows[0];
+
+            await sendEmail(
+                updatedBooking.guestEmail,
+                `Your Booking for ${keysToCamel(apartment).title} has been Canceled`,
+                'BookingCancellation',
+                {
+                  booking: updatedBooking,
+                  apartment: keysToCamel(apartment),
+                  host: keysToCamel(host)
+                }
+            );
+        }
       }
 
       await client.query('COMMIT');

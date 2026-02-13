@@ -13,6 +13,7 @@ export const config = {
   port: parseInt(getEnvVar('PORT', '8081'), 10),
   jwtSecret: getEnvVar('JWT_SECRET'),
   databaseUrl: getEnvVar('DATABASE_URL'),
+  adminEmail: getEnvVar('ADMIN_EMAIL'),
   brevo: {
     smtpUser: getEnvVar('BREVO_SMTP_USER', ''),
     smtpPass: getEnvVar('BREVO_SMTP_PASS', ''),

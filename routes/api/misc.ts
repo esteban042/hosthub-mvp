@@ -10,7 +10,7 @@ const router = Router();
 router.post('/send-email', 
   body('toEmail').isEmail().normalizeEmail(),
   body('subject').not().isEmpty().trim().escape(),
-  body('templateName').isIn(['BookingConfirmation', 'BookingCancellation']),
+  body('templateName').isIn(['BookingConfirmation', 'BookingCancellation', 'DirectMessage']),
   body('booking').isObject(),
   body('apartment').isObject(),
   body('host').isObject(),
@@ -38,17 +38,25 @@ router.post('/send-message',
       const client = await pool.connect();
       const hostResult = await client.query('SELECT * FROM hosts WHERE id = $1', [hostId]);
       const host = hostResult.rows[0];
-      client.release();
 
       if (!host) {
+        client.release();
         return res.status(404).json({ error: 'Host not found' });
+      }
+
+      const apartmentResult = await client.query('SELECT * FROM apartments WHERE id = $1', [booking.apartmentId]);
+      const apartment = apartmentResult.rows[0];
+      client.release();
+
+      if (!apartment) {
+        return res.status(404).json({ error: 'Apartment not found' });
       }
 
       const result = await sendEmail(
         booking.guestEmail,
         `Message from ${host.name} regarding your booking`,
         'DirectMessage',
-        { booking, message, host }
+        { booking, message, host, apartment }
       );
       res.status(200).json(result);
     } catch (error) {

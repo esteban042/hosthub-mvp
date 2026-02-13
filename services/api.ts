@@ -1,4 +1,3 @@
-
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
@@ -92,27 +91,12 @@ export const sanctumApi = {
     body: JSON.stringify(data),
   }),
 
-  sendEmail: (toEmail: string, subject: string, templateName: string, booking: Booking, apartment: Apartment, host: Host) => {
-      return fetchApi('/api/v1/send-email', {
-          method: 'POST',
-          body: JSON.stringify({ toEmail, subject, templateName, booking, apartment, host }),
-      }).catch(error => {
-        console.warn('Email dispatch failed, falling back to console simulation.');
-        sanctumApi.simulateEmail(toEmail, subject, templateName, booking);
-      });
+  sendMessage: (bookingId: string, message: string) => {
+    return sanctumApi.post('/api/v1/messages', { bookingId, message });
   },
 
-  sendMessage: (booking: Booking, message: string) => {
-    return sanctumApi.post('/api/v1/send-message', { booking, message });
-  },
-  
-  simulateEmail(to: string, subject: string, template: string, booking: any) {
-    console.group('%c [MOCK EMAIL DISPATCHED] ', 'background: #e97c62; color: #fff; font-weight: bold;');
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Template:', template);
-    console.log('Booking Info:', booking);
-    console.groupEnd();
+  cancelBooking: (bookingId: string) => {
+    return sanctumApi.put(`/api/v1/bookings/${bookingId}/cancel`, {});
   },
 
   async createBlockedDate(blockedDate: BlockedDate): Promise<BlockedDate> {

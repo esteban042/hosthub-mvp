@@ -111,7 +111,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === 'current-bookings' && <CurrentBookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
-      {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
+      {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} host={host} onUpdateBooking={handleUpdateStatus} />}
       {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingAirbnbIcal} onToggleBlock={toggleManualBlock} />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && (
