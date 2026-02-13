@@ -52,7 +52,7 @@ export async function sendEmail(toEmail: string, subject: string, templateName: 
   });
 
   await transporter.sendMail({
-    from: `"HostHub Luxury Stays" <${senderEmail}>`,
+    from: `"Sanctum Stays" <${senderEmail}>`,
     to: toEmail,
     subject: subject,
     html: htmlContent,

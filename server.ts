@@ -67,7 +67,7 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
 
 app.listen(config.port, '0.0.0.0', () => {
   console.log(`
-  🚀 HostHub Unified Server active!
+  🚀 Sanctum Unified Server active!
   ---------------------------------
   Port: ${config.port}
   Health Check: http://0.0.0.0:${config.port}/health

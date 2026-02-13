@@ -54,7 +54,7 @@ export const Layout: React.FC<LayoutProps> = ({
             <div className="w-10 h-10 bg-transparent border border-emerald-400 rounded-xl flex items-center justify-center">
               <svg className="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
             </div>
-            <h1 className="text-2xl font-serif font-bold text-emerald-400">HostHub</h1>
+            <h1 className="text-2xl font-serif font-bold text-emerald-400">Sanctum</h1>
           </div>
           
           {/* <nav className="hidden md:flex items-center space-x-1">
@@ -100,8 +100,8 @@ export const Layout: React.FC<LayoutProps> = ({
 
       <footer className="bg-stone-950 border-t border-stone-900 py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <h2 className="text-xl font-serif font-bold text-emerald-400">HostHub</h2>
-          <p className="text-stone-500 text-sm">© 2026 HostHub Platform. All rights reserved.</p>
+          <h2 className="text-xl font-serif font-bold text-emerald-400">Sanctum</h2>
+          <p className="text-stone-500 text-sm">© 2026 Sanctum Platform. All rights reserved.</p>
           <div className="flex space-x-6 text-sm text-stone-400 font-medium">
              <button onClick={() => setActiveLegal('privacy')} className="hover:text-white cursor-pointer transition-colors">Privacy</button>
              <button onClick={() => setActiveLegal('terms')} className="hover:text-white cursor-pointer transition-colors">Terms</button>
@@ -122,7 +122,7 @@ export const Layout: React.FC<LayoutProps> = ({
         </section>
         <section className="space-y-4">
           <h4 className="text-white font-bold uppercase tracking-widest text-xs">3. Digital Security</h4>
-          <p>Our platform utilizes enterprise-grade encryption to protect your digital footprint. All interactions within the HostHub Network are logged and monitored for unauthorized access.</p>
+          <p>Our platform utilizes enterprise-grade encryption to protect your digital footprint. All interactions within the sanctum Network are logged and monitored for unauthorized access.</p>
         </section>
       </LegalModal>
 

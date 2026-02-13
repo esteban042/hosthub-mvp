@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Apartment, Host, Booking, BlockedDate } from '../types';
-import { hostHubApi } from '../services/api';
+import { sanctumApi } from '../services/api';
 import { BookingConfirmationCard } from '../components/BookingConfirmationCard';
 import ApartmentHeader from '../components/ApartmentHeader';
 import ApartmentStats from '../components/ApartmentStats';
@@ -30,7 +30,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     window.scrollTo(0, 0);
     const fetchAvailability = async () => {
       try {
-        const { bookings, blockedDates } = await hostHubApi.getApartmentAvailability(apartment.id);
+        const { bookings, blockedDates } = await sanctumApi.getApartmentAvailability(apartment.id);
         setBookings(bookings.map(b => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] })));
         setBlockedDates(blockedDates.map(d => ({ ...d, date: d.date.split('T')[0] })));
       } catch (error) {

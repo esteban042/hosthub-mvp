@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
-import { hostHubApi } from './api';
+import { sanctumApi } from './api';
 import { checkSession, signInWithEmail, signOut } from './authService';
 import { format } from 'date-fns';
 
@@ -29,15 +29,15 @@ export const useAppData = () => {
       if (sessionUser) {
         if (sessionUser.role === UserRole.ADMIN) {
           const [allHosts, allApartments, allBookings] = await Promise.all([
-            hostHubApi.getAllHosts(),
-            hostHubApi.getAllApartments(),
-            hostHubApi.getAllBookings(),
+            sanctumApi.getAllHosts(),
+            sanctumApi.getAllApartments(),
+            sanctumApi.getAllBookings(),
           ]);
           setHosts(allHosts);
           setApartments(allApartments);
           setBookings(allBookings);
         } else if (sessionUser.role === UserRole.HOST) {
-          const hostData = await hostHubApi.getHostDashboardData();
+          const hostData = await sanctumApi.getHostDashboardData();
           if (hostData && hostData.host) {
             setCurrentHost(hostData.host);
             setApartments(hostData.apartments || []);
@@ -53,11 +53,11 @@ export const useAppData = () => {
         const params = new URLSearchParams(window.location.search);
         const hostSlug = params.get('host');
         if (hostSlug) {
-          const guestData = await hostHubApi.getLandingData({ slug: hostSlug }, true);
+          const guestData = await sanctumApi.getLandingData({ slug: hostSlug }, true);
           setCurrentHost(guestData.host);
           setApartments(guestData.apartments);
         } else {
-          const publicHosts = await hostHubApi.getPublicHosts();
+          const publicHosts = await sanctumApi.getPublicHosts();
           setHosts(publicHosts as Host[]);
         }
       }
@@ -151,14 +151,14 @@ export const useAppData = () => {
     bookings,
     blockedDates,
     onToggleBlock,
-    handleSeed: createApiHandler(hostHubApi.seedDatabase),
+    handleSeed: createApiHandler(sanctumApi.seedDatabase),
     handleAuth,
     handleLogout,
     handleHostChange,
-    handleNewBooking: createApiHandler(hostHubApi.createBooking),
-    handleUpdateBookings: createApiHandler(hostHubApi.updateBookings, { silent: true }),
-    handleUpdateApartments: createApiHandler(hostHubApi.updateApartments, { silent: true }),
-    handleUpdateHosts: createApiHandler(hostHubApi.updateHosts),
+    handleNewBooking: createApiHandler(sanctumApi.createBooking),
+    handleUpdateBookings: createApiHandler(sanctumApi.updateBookings, { silent: true }),
+    handleUpdateApartments: createApiHandler(sanctumApi.updateApartments, { silent: true }),
+    handleUpdateHosts: createApiHandler(sanctumApi.updateHosts),
     handleBlockedDatesChange: () => loadApplicationData(false),
     loadingAirbnbIcal: false,
     currentHostAirbnbBlockedDates: [],

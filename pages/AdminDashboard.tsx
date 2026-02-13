@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus } from '../types';
 import { Plus } from 'lucide-react';
-import { hostHubApi as api } from '../services/api';
+import { sanctumApi as api } from '../services/api';
 import AdminStats from '../components/admin/AdminStats';
 import HostsGrid from '../components/admin/HostsGrid';
 import HostConfigurationModal from '../components/admin/HostConfigurationModal';

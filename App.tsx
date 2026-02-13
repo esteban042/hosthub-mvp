@@ -9,6 +9,8 @@ import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
 
+document.title = "Sanctum";
+
 const App: React.FC = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [selectedAptId, setSelectedAptId] = useState<string | null>(null);
@@ -66,7 +68,7 @@ const App: React.FC = () => {
 
 
   if (loading && !user && !currentHost && hosts.length === 0) {
-    return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing HostHub Cluster...</p></div>;
+    return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Sanctum Cluster...</p></div>;
   }
 
   const renderInitialSetup = () => {

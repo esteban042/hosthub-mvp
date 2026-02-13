@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
-import { hostHubApi } from '../services/api';
+import { sanctumApi } from '../services/api';
 import { formatDate } from '../utils/dates';
 import HeroCalendar from './HeroCalendar';
 import { CORE_ICONS } from '../constants';
@@ -83,9 +83,9 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     };
 
     try {
-      const newConfirmedBooking = await hostHubApi.createBooking(bookingDetails);
+      const newConfirmedBooking = await sanctumApi.createBooking(bookingDetails);
 
-      await hostHubApi.sendEmail(
+      await sanctumApi.sendEmail(
         email,
         `Your Booking for ${apartment.title} is Confirmed!`,
         'BookingConfirmation',

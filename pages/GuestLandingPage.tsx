@@ -46,7 +46,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
     <div className="min-h-screen">
       <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient">
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to HostHub</p>
+          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to Sanctum</p>
           <h1 className="text-6xl md:text-9xl font-serif font-bold text-white leading-tight tracking-tight">
             Your Perfect Escape <br/>
             <span className="text-coral-500 italic">Awaits</span>

@@ -1,6 +1,6 @@
-# HostHub API
+# Sanctum API
 
-This document provides a collection of useful `curl` commands and SQL statements for interacting with the HostHub API and database.
+This document provides a collection of useful `curl` commands and SQL statements for interacting with the Sanctum API and database.
 
 ## `curl` Commands
 

@@ -1,7 +1,7 @@
 {
-  "name": "hosthub",
+  "name": "sanctum",
   "version": "1.0.0",
-  "description": "Unified Frontend and Backend for HostHub",
+  "description": "Unified Frontend and Backend for Sanctum",
   "main": "server.ts",
   "type": "module",
   "scripts": {

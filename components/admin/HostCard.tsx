@@ -44,7 +44,7 @@ const HostCard: React.FC<HostCardProps> = ({ host, apartments, bookings, onConfi
       <div className="mb-8">
         <h4 className="text-2xl font-serif font-bold text-white mb-2">{host.name}</h4>
         <div className="flex items-center justify-between p-3 bg-stone-950 border border-stone-800 rounded-xl">
-            <p className="text-[10px] text-stone-600 font-bold truncate max-w-[160px]">{host.slug}.hosthub.com</p>
+            <p className="text-[10px] text-stone-600 font-bold truncate max-w-[160px]">{host.slug}.sanctum.com</p>
             <button 
               onClick={() => handleCopyLink(host.slug)}
               className={`transition-colors ${isCopied ? 'text-emerald-400' : 'text-stone-700 hover:text-white'}`}

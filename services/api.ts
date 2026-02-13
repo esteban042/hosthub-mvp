@@ -1,3 +1,4 @@
+
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
@@ -45,7 +46,7 @@ export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): 
   return response.json() as T;
 }
 
-export const hostHubApi = {
+export const sanctumApi = {
   async getLandingData(identifier?: { slug?: string; email?: string }, isGuest: boolean = false) {
     const params = new URLSearchParams();
     if (identifier?.slug) params.append('slug', identifier.slug);
@@ -97,7 +98,7 @@ export const hostHubApi = {
           body: JSON.stringify({ toEmail, subject, templateName, booking, apartment, host }),
       }).catch(error => {
         console.warn('Email dispatch failed, falling back to console simulation.');
-        hostHubApi.simulateEmail(toEmail, subject, templateName, booking);
+        sanctumApi.simulateEmail(toEmail, subject, templateName, booking);
       });
   },
   

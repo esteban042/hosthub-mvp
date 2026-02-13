@@ -91,7 +91,7 @@ const AvailabilityCalendar: React.FC<{
         <div className="mt-8 pt-6 border-t border-stone-800/60 flex flex-wrap gap-4 justify-center text-[10px] uppercase tracking-widest font-bold">
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500/20 border border-blue-500/40"></span>
-                <span className="text-blue-500/70">HostHub Booked</span>
+                <span className="text-blue-500/70">sanctum Booked</span>
             </div>
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500/20 border border-rose-500/40"></span>
