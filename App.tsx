@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { UserRole } from './types';
 import { useAppData } from './services/useAppData';
@@ -8,6 +9,7 @@ import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
+import GenericLandingPage from './components/GenericLandingPage';
 
 document.title = "Sanctum";
 
@@ -75,6 +77,10 @@ const App: React.FC = () => {
     if (user || currentHost || loading) return null;
     const params = new URLSearchParams(window.location.search);
     if (params.get('host')) return null;
+
+    if (hosts.length > 0) {
+      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} />;
+    }
 
     return (
       <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm">

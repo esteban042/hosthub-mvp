@@ -47,6 +47,9 @@ export interface Host {
     sections: { title: string; content: string }[];
     isEnabled: boolean;
   } | null;
+  terms: string | null;
+  conditions: string | null;
+  faq: string | null;
 }
 
 export interface Apartment {

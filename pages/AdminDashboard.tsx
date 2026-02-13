@@ -49,9 +49,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleSaveHost = async (hostToSave: Partial<Host>) => {
     try {
       if (hostToSave.id) {
-        // For now, we continue to update the host on the client-side.
-        // A follow-up action will be to move this to a PUT request.
-        onUpdateHosts(hosts.map(h => h.id === hostToSave.id ? { ...h, ...hostToSave } as Host : h));
+        const { data: updatedHost } = await api.put(`/api/hosts/${hostToSave.id}`, hostToSave);
+        onUpdateHosts(hosts.map(h => h.id === updatedHost.id ? updatedHost : h));
       } else {
         const hostToCreate = {
           name: hostToSave.name || 'New Elite Host',

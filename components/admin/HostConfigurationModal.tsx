@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Host, SubscriptionType, PremiumConfig, PremiumSection } from '../../types';
-import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap } from 'lucide-react';
+import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText } from 'lucide-react';
 import { COUNTRIES } from '../../utils/countries';
 
 interface HostConfigurationModalProps {
@@ -16,7 +16,7 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
   isOpen, onClose, onSave, initialHost, monthlyStats 
 }) => {
   const [editingHost, setEditingHost] = useState<Partial<Host> | null>(initialHost);
-  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'statistics'>('basics');
+  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'legal' | 'statistics'>('basics');
 
   useEffect(() => {
     setEditingHost(initialHost);
@@ -121,6 +121,13 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
           >
             <Layout className="w-4 h-4" />
             <span>Premium Content</span>
+          </button>
+          <button 
+            onClick={() => setActiveModalTab('legal')} 
+            className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'legal' ? 'bg-stone-800 text-white' : 'text-stone-600 hover:text-stone-400'}`}
+          >
+            <FileText className="w-4 h-4" />
+            <span>Legal</span>
           </button>
           <button 
             onClick={() => setActiveModalTab('statistics')} 
@@ -278,6 +285,23 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                     </div>
                   </div>
                 )}
+            </div>
+          )}
+
+          {activeModalTab === 'legal' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">Terms of Service</label>
+                <textarea value={editingHost.terms || ''} onChange={e => setEditingHost({...editingHost, terms: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white h-48 resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">Conditions</label>
+                <textarea value={editingHost.conditions || ''} onChange={e => setEditingHost({...editingHost, conditions: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white h-48 resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)] mb-3">FAQ</label>
+                <textarea value={editingHost.faq || ''} onChange={e => setEditingHost({...editingHost, faq: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-5 text-sm text-white h-48 resize-none focus:ring-1 focus:ring-coral-500 outline-none" />
+              </div>
             </div>
           )}
 

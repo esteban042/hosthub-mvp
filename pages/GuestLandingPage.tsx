@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useMemo } from 'react';
 import { Host, Apartment, Booking, BlockedDate } from '../types';
 import { formatDate } from '../utils/dates';
@@ -6,6 +7,7 @@ import HeroCalendar from '../components/HeroCalendar';
 import GuestPopover from '../components/GuestPopover';
 import FeaturedStays from '../components/FeaturedStays';
 import PremiumLandingExtension from '../components/PremiumLandingExtension';
+import Modal from '../components/Modal';
 
 interface GuestLandingPageProps {
   host: Host;
@@ -24,6 +26,10 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   const [isGuestsOpen, setIsGuestsOpen] = useState(false);
   const [dates, setDates] = useState({ start: '', end: '' });
   const [numGuests, setNumGuests] = useState(1);
+  const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
+  const [isConditionsModalOpen, setIsConditionsModalOpen] = useState(false);
+  const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+
   const hostApartments = useMemo(() => 
     apartments.filter(apt => apt.hostId === host.id), [apartments, host.id]);
 
@@ -127,6 +133,31 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
       <FeaturedStays apartments={hostApartments} onSelectApartment={onSelectApartment} />
 
       {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
+
+      <footer className="bg-stone-900 text-white py-8">
+        <div className="container mx-auto text-center">
+          <p className="text-sm text-stone-400">
+            &copy; {new Date().getFullYear()} {host.name}. All rights reserved.
+          </p>
+          <div className="mt-4">
+            <button onClick={() => setIsTermsModalOpen(true)} className="text-sm text-stone-400 hover:text-white mx-2">Terms</button>
+            <button onClick={() => setIsConditionsModalOpen(true)} className="text-sm text-stone-400 hover:text-white mx-2">Conditions</button>
+            <button onClick={() => setIsFaqModalOpen(true)} className="text-sm text-stone-400 hover:text-white mx-2">FAQ</button>
+          </div>
+        </div>
+      </footer>
+
+      <Modal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} title="Terms">
+        <p>{host.terms}</p>
+      </Modal>
+
+      <Modal isOpen={isConditionsModalOpen} onClose={() => setIsConditionsModalOpen(false)} title="Conditions">
+        <p>{host.conditions}</p>
+      </Modal>
+
+      <Modal isOpen={isFaqModalOpen} onClose={() => setIsFaqModalOpen(false)} title="FAQ">
+        <p>{host.faq}</p>
+      </Modal>
     </div>
   );
 };
