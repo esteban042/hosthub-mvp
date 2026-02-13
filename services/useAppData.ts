@@ -1,7 +1,9 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
 import { hostHubApi } from './api';
 import { checkSession, signInWithEmail, signOut } from './authService';
+import { format } from 'date-fns';
 
 export const useAppData = () => {
   const [loading, setLoading] = useState(true);
@@ -75,6 +77,37 @@ export const useAppData = () => {
     loadApplicationData();
   }, [loadApplicationData]);
 
+  const onToggleBlock = useCallback(async (apartmentId: string, date: Date) => {
+    const dateToToggle = format(date, 'yyyy-MM-dd');
+
+    const existingBlock = blockedDates.find(
+      (blockedDate) =>
+        blockedDate.apartmentId === apartmentId &&
+        format(new Date(blockedDate.date), 'yyyy-MM-dd') === dateToToggle
+    );
+
+    const method = existingBlock ? 'DELETE' : 'POST';
+    
+    try {
+        const response = await fetch('/api/v1/blocked-dates', {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify([{ apartmentId, date: dateToToggle }])
+        });
+
+        if (!response.ok) {
+            const res = await response.json();
+            throw new Error(res.error || `Failed to ${method} blocked date`);
+        }
+        
+        await loadApplicationData(false);
+    } catch (err: any) {
+        setError(err.message);
+    }
+  }, [blockedDates, loadApplicationData]);
+
   const handleAuth = async (email: string, pass: string): Promise<string | null> => {
     const { user, error } = await signInWithEmail(email, pass);
     if (error) {
@@ -117,6 +150,7 @@ export const useAppData = () => {
     apartments,
     bookings,
     blockedDates,
+    onToggleBlock,
     handleSeed: createApiHandler(hostHubApi.seedDatabase),
     handleAuth,
     handleLogout,
