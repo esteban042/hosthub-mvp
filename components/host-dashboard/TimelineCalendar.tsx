@@ -35,25 +35,27 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
 
   return (
     <div className="bg-stone-900/70 text-white rounded-xl p-4 font-sans overflow-x-auto backdrop-blur-sm">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-stone-700">
-          <ChevronLeftIcon className="h-6 w-6" />
-        </button>
-        <h2 className="text-xl font-bold">{format(currentDate, 'MMMM yyyy')}</h2>
-        <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-stone-700">
-          <ChevronRightIcon className="h-6 w-6" />
-        </button>
-      </div>
-
       {/* Grid */}
       <div className="grid" style={{ gridTemplateColumns: `minmax(150px, 1fr) repeat(${daysInMonth.length}, minmax(50px, 1fr))` }}>
+        {/* Header */}
+        <div style={{ gridColumn: '1 / -1' }}>
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-stone-700">
+              <ChevronLeftIcon className="h-6 w-6" />
+            </button>
+            <h2 className="text-xl font-bold">{format(currentDate, 'MMMM yyyy')}</h2>
+            <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-stone-700">
+              <ChevronRightIcon className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+
         {/* Apartment Column Header */}
         <div className="sticky left-0 bg-stone-900/70 z-20 p-2 border-r border-b border-stone-700 font-semibold backdrop-blur-sm">Unit</div>
         {/* Days Header */}
         {daysInMonth.map(day => (
           <div key={day.toString()} className="text-center p-2 border-b border-stone-700">
-            <div className="text-xs text-stone-400">{format(day, 'E')}</div>
+es            <div className="text-xs text-stone-400">{format(day, 'E')}</div>
             <div>{format(day, 'dd')}</div>
           </div>
         ))}

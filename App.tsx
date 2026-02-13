@@ -79,7 +79,7 @@ const App: React.FC = () => {
     if (params.get('host')) return null;
 
     if (hosts.length > 0) {
-      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} />;
+      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} onSignIn={() => setShowLogin(true)} />;
     }
 
     return (
@@ -97,7 +97,17 @@ const App: React.FC = () => {
   };
 
   const initialSetup = renderInitialSetup();
-  if (initialSetup) return initialSetup;
+  if (initialSetup) {
+    if (showLogin) {
+        return (
+            <>
+                {initialSetup}
+                <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />
+            </>
+        )
+    }
+    return initialSetup;
+  }
 
   const renderContent = () => {
     if (showLogin) return <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />;

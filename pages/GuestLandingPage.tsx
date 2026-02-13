@@ -56,11 +56,6 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   }, []);
 
   const particleOptions = {
-    background: {
-      color: {
-        value: "#111827"
-      }
-    },
     fpsLimit: 60,
     interactivity: {
       events: {
@@ -123,7 +118,12 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
   return (
     <div className="min-h-screen">
-      <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6">
+       <section
+        className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 bg-cover bg-center"
+        style={{
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url(${host.premiumConfig?.heroImage || 'https://images.unsplash.com/photo-1499678329028-101435549a4e?q=80&w=2940&auto=format&fit=crop'})`,
+        }}
+      >
         <Particles
             id="tsparticles"
             init={particlesInit}
@@ -196,7 +196,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                   </div>
                 )}
 
-                <button className="bg-coral-500 hover:bg-coral-600 text-white font-black py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-coral-500/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0 animate-breathing">
+                <button className="bg- coral-500 hover:bg-coral-600 text-white font-black py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-coral-500/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0 animate-breathing">
                    {CORE_ICONS.Search("w-6 h-6")}
                    <span className="uppercase text-[12px] tracking-widest">Search</span>
                 </button>
@@ -220,7 +220,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             <p className="text-sm text-stone-400">&copy; {new Date().getFullYear()}. All rights reserved.</p>
           </div>
           <div className="flex items-center space-x-4">
-            {host.socialMediaLinks?.twitter && <a href={host.socialMediaLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Twitter("w-6 h-6")}</a>}
+            {host.socialMediaLinks?.twitter && <a href={host.socialMediaLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.X("w-6 h-6")}</a>}
             {host.socialMediaLinks?.instagram && <a href={host.socialMediaLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Instagram("w-6 h-6")}</a>}
             {host.socialMediaLinks?.facebook && <a href={host.socialMediaLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Facebook("w-6 h-6")}</a>}
           </div>
