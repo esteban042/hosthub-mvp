@@ -1,4 +1,4 @@
-import { Home, Bath, Wind, ParkingCircle, Tv, Utensils, Wifi, Heater, Snowflake, Sun, Star, ShieldCheck, MapPin, Building, BookMarked, DollarSign, Calendar, Search, Users as Guests, Bed, Pin, Flame, WashingMachine, Waves, Coffee, Umbrella, ShowerHead, FlameKindling, CircleHelp } from 'lucide-react';
+import { Home, Bath, Wind, ParkingCircle, Tv, Utensils, Wifi, Heater, Snowflake, Sun, Star, ShieldCheck, MapPin, Building, BookMarked, DollarSign, Calendar, Search, Users as Guests, Bed, Pin, Flame, WashingMachine, Waves, Coffee, Umbrella, ShowerHead, FlameKindling, CircleHelp, Twitter, Instagram, Facebook } from 'lucide-react';
 
 export const THEME_GRAY = 'rgb(168, 162, 158)';
 export const EMERALD_ACCENT = 'rgb(52, 211, 153)';
@@ -38,7 +38,10 @@ export const CORE_ICONS = {
     Guests: (className: string) => <Guests className={className} />,
     Bed: (className: string) => <Bed className={className} />,
     Bath: (className: string) => <Bath className={className} />,
-    Location: (className: string) => <Pin className={className} />
+    Location: (className: string) => <Pin className={className} />,
+    Twitter: (className: string) => <Twitter className={className} />,
+    Instagram: (className: string) => <Instagram className={className} />,
+    Facebook: (className: string) => <Facebook className={className} />
 };
 
 export const AMENITY_ICONS: Record<string, (c: string) => React.ReactElement> = {

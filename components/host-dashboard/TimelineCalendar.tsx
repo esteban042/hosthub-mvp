@@ -49,7 +49,7 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
       {/* Grid */}
       <div className="grid" style={{ gridTemplateColumns: `minmax(150px, 1fr) repeat(${daysInMonth.length}, minmax(50px, 1fr))` }}>
         {/* Apartment Column Header */}
-        <div className="sticky left-0 bg-stone-900/70 z-20 p-2 border-r border-b border-stone-700 font-semibold backdrop-blur-sm">Apartment</div>
+        <div className="sticky left-0 bg-stone-900/70 z-20 p-2 border-r border-b border-stone-700 font-semibold backdrop-blur-sm">Unit</div>
         {/* Days Header */}
         {daysInMonth.map(day => (
           <div key={day.toString()} className="text-center p-2 border-b border-stone-700">

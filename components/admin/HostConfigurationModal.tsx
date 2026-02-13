@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Host, SubscriptionType, PremiumConfig, PremiumSection } from '../../types';
-import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText } from 'lucide-react';
+import { Host, SubscriptionType } from '../../types';
+import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText, Link } from 'lucide-react';
 import { COUNTRIES } from '../../utils/countries';
 
 interface HostConfigurationModalProps {
@@ -40,7 +40,7 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
     });
   };
 
-  const updatePremiumSection = (idx: number, updates: Partial<PremiumSection>) => {
+  const updatePremiumSection = (idx: number, updates: Partial<{ title: string; content: string }>) => {
     const sections = [...(editingHost.premiumConfig?.sections || [])];
     sections[idx] = { ...sections[idx], ...updates };
     setEditingHost({
@@ -220,8 +220,8 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
           )}
 
           {activeModalTab === 'content' && (
-            <div className="space-y-12">
-                <div className="flex items-center justify-between p-6 bg-stone-950 border border-stone-800 rounded-3xl">
+             <div className="space-y-12">
+              <div className="flex items-center justify-between p-6 bg-stone-950 border border-stone-800 rounded-3xl">
                   <div className="flex items-center space-x-4">
                       <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${editingHost.premiumConfig?.isEnabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-stone-900 text-stone-600'}`}>
                         <Zap className="w-6 h-6" />
@@ -240,51 +240,62 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                   </button>
                 </div>
 
-                {editingHost.premiumConfig?.isEnabled && (
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in slide-in-from-bottom-4 duration-500">
-                    <div className="space-y-8">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
-                              <ImageIcon className="w-4 h-4" />
-                              <span>Gallery Assets</span>
-                          </h4>
-                          <button type="button" onClick={addPremiumImage} className="text-[10px] font-black uppercase tracking-widest text-emerald-400">+ Add Image</button>
-                        </div>
-                        <div className="space-y-3">
-                          {(editingHost.premiumConfig?.images || []).map((img, idx) => (
-                            <div key={idx} className="flex space-x-2">
-                                <input type="url" value={img} onChange={e => updatePremiumImage(idx, e.target.value)} className="flex-1 bg-stone-950 border border-stone-800 rounded-xl p-4 text-xs text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://..." />
-                                <button type="button" onClick={() => removePremiumImage(idx)} className="p-4 bg-stone-900 text-stone-600 hover:text-rose-500 rounded-xl transition-all">
-                                  <Trash2 className="w-4 h-4" />
-                                </button>
-                            </div>
-                          ))}
-                        </div>
-                    </div>
-
-                    <div className="space-y-8">
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
-                              <Type className="w-4 h-4" />
-                              <span>Story Sections</span>
-                          </h4>
-                          <button type="button" onClick={addPremiumSection} className="text-[10px] font-black uppercase tracking-widest text-emerald-400">+ Add Section</button>
-                        </div>
-                        <div className="space-y-6">
-                          {(editingHost.premiumConfig?.sections || []).map((section, idx) => (
-                            <div key={idx} className="p-6 bg-stone-950 border border-stone-800 rounded-3xl space-y-4">
-                                <div className="flex justify-between items-center">
-                                  <p className="text-[10px] font-black text-stone-700 uppercase tracking-widest">Section {idx + 1}</p>
-                                  <button type="button" onClick={() => removePremiumSection(idx)} className="text-stone-700 hover:text-rose-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
-                                </div>
-                                <input type="text" value={section.title} onChange={e => updatePremiumSection(idx, {title: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-sm text-white outline-none" placeholder="Section Title" />
-                                <textarea value={section.content} onChange={e => updatePremiumSection(idx, {content: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-stone-400 h-24 resize-none outline-none" placeholder="Narrative content..." />
-                            </div>
-                          ))}
-                        </div>
-                    </div>
+              {editingHost.premiumConfig?.isEnabled && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 animate-in slide-in-from-bottom-4 duration-500">
+                  <div className="space-y-8">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
+                            <ImageIcon className="w-4 h-4" />
+                            <span>Gallery Assets</span>
+                        </h4>
+                        <button type="button" onClick={addPremiumImage} className="text-[10px] font-black uppercase tracking-widest text-emerald-400">+ Add Image</button>
+                      </div>
+                      <div className="space-y-3">
+                        {(editingHost.premiumConfig?.images || []).map((img, idx) => (
+                          <div key={idx} className="flex space-x-2">
+                              <input type="url" value={img} onChange={e => updatePremiumImage(idx, e.target.value)} className="flex-1 bg-stone-950 border border-stone-800 rounded-xl p-4 text-xs text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="https://..." />
+                              <button type="button" onClick={() => removePremiumImage(idx)} className="p-4 bg-stone-900 text-stone-600 hover:text-rose-500 rounded-xl transition-all">
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                          </div>
+                        ))}
+                      </div>
                   </div>
-                )}
+
+                  <div className="space-y-8">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
+                            <Type className="w-4 h-4" />
+                            <span>Story Sections</span>
+                        </h4>
+                        <button type="button" onClick={addPremiumSection} className="text-[10px] font-black uppercase tracking-widest text-emerald-400">+ Add Section</button>
+                      </div>
+                      <div className="space-y-6">
+                        {(editingHost.premiumConfig?.sections || []).map((section, idx) => (
+                          <div key={idx} className="p-6 bg-stone-950 border border-stone-800 rounded-3xl space-y-4">
+                              <div className="flex justify-between items-center">
+                                <p className="text-[10px] font-black text-stone-700 uppercase tracking-widest">Section {idx + 1}</p>
+                                <button type="button" onClick={() => removePremiumSection(idx)} className="text-stone-700 hover:text-rose-500 transition-colors"><Trash2 className="w-3.5 h-3.5" /></button>
+                              </div>
+                              <input type="text" value={section.title} onChange={e => updatePremiumSection(idx, {title: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-sm text-white outline-none" placeholder="Section Title" />
+                              <textarea value={section.content} onChange={e => updatePremiumSection(idx, {content: e.target.value})} className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-stone-400 h-24 resize-none outline-none" placeholder="Narrative content..." />
+                          </div>
+                        ))}
+                      </div>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-8">
+                <h4 className="text-xs font-black uppercase tracking-widest text-stone-500 flex items-center space-x-2">
+                  <Link className="w-4 h-4" />
+                  <span>Social Media Links</span>
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input type="url" value={editingHost.socialMediaLinks?.twitter || ''} onChange={e => setEditingHost({...editingHost, socialMediaLinks: {...editingHost.socialMediaLinks, twitter: e.target.value}})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="Twitter URL" />
+                  <input type="url" value={editingHost.socialMediaLinks?.instagram || ''} onChange={e => setEditingHost({...editingHost, socialMediaLinks: {...editingHost.socialMediaLinks, instagram: e.target.value}})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="Instagram URL" />
+                  <input type="url" value={editingHost.socialMediaLinks?.facebook || ''} onChange={e => setEditingHost({...editingHost, socialMediaLinks: {...editingHost.socialMediaLinks, facebook: e.target.value}})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 outline-none" placeholder="Facebook URL" />
+                </div>
+              </div>
             </div>
           )}
 

@@ -1,3 +1,4 @@
+
 export enum UserRole {
   GUEST = 'guest',
   HOST = 'host',
@@ -50,6 +51,11 @@ export interface Host {
   terms: string | null;
   conditions: string | null;
   faq: string | null;
+  socialMediaLinks?: {
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+  };
 }
 
 export interface Apartment {

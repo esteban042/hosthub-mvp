@@ -13,7 +13,7 @@ const ApartmentCard: React.FC<ApartmentCardProps> = ({ apartment, onSelectApartm
     <div 
       key={apartment.id} 
       onClick={() => onSelectApartment(apartment.id)}
-      className="group cursor-pointer animate-in fade-in duration-700"
+      className="group cursor-pointer animate-in fade-in duration-700 transform transition-transform ease-in-out hover:scale-105 hover:shadow-2xl hover:shadow-stone-900/50"
       style={{ animationDelay: `${idx * 150}ms` }}
     >
       <div className="relative aspect-[4/3] overflow-hidden rounded-2xl mb-6 border border-stone-800 shadow-xl">

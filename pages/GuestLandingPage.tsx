@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Host, Apartment, Booking, BlockedDate } from '../types';
 import { formatDate } from '../utils/dates';
 import { CORE_ICONS } from '../constants';
@@ -8,6 +8,9 @@ import GuestPopover from '../components/GuestPopover';
 import FeaturedStays from '../components/FeaturedStays';
 import PremiumLandingExtension from '../components/PremiumLandingExtension';
 import Modal from '../components/Modal';
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
+import type { Engine } from "tsparticles-engine";
 
 interface GuestLandingPageProps {
   host: Host;
@@ -30,6 +33,10 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   const [isConditionsModalOpen, setIsConditionsModalOpen] = useState(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
 
+  const particlesInit = useCallback(async (engine: Engine) => {
+    await loadFull(engine);
+  }, []);
+
   const hostApartments = useMemo(() => 
     apartments.filter(apt => apt.hostId === host.id), [apartments, host.id]);
 
@@ -48,9 +55,81 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
     };
   }, []);
 
+  const particleOptions = {
+    background: {
+      color: {
+        value: "#111827"
+      }
+    },
+    fpsLimit: 60,
+    interactivity: {
+      events: {
+        onHover: {
+          enable: true,
+          mode: "repulse"
+        },
+        resize: true
+      },
+      modes: {
+        repulse: {
+          distance: 100,
+          duration: 0.4
+        }
+      }
+    },
+    particles: {
+      color: {
+        value: "#ffffff"
+      },
+      links: {
+        color: "#ffffff",
+        distance: 150,
+        enable: true,
+        opacity: 0.1,
+        width: 1
+      },
+      collisions: {
+        enable: true
+      },
+      move: {
+        direction: "none",
+        enable: true,
+        outModes: {
+          default: "bounce"
+        },
+        random: false,
+        speed: 1,
+        straight: false
+      },
+      number: {
+        density: {
+          enable: true,
+          area: 800
+        },
+        value: 80
+      },
+      opacity: {
+        value: 0.1
+      },
+      shape: {
+        type: "circle"
+      },
+      size: {
+        value: { min: 1, max: 5 }
+      }
+    },
+    detectRetina: true
+  }
+
   return (
     <div className="min-h-screen">
-      <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 hero-gradient">
+      <section className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6">
+        <Particles
+            id="tsparticles"
+            init={particlesInit}
+            options={particleOptions}
+            className="absolute top-0 left-0 w-full h-full z-0"
+        />
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
           <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-400 mb-6">Welcome to Sanctum</p>
           <h1 className="text-6xl md:text-9xl font-serif font-bold text-white leading-tight tracking-tight">
@@ -117,7 +196,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                   </div>
                 )}
 
-                <button className="bg-coral-500 hover:bg-coral-600 text-white font-black py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-coral-500/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0">
+                <button className="bg-coral-500 hover:bg-coral-600 text-white font-black py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-coral-500/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0 animate-breathing">
                    {CORE_ICONS.Search("w-6 h-6")}
                    <span className="uppercase text-[12px] tracking-widest">Search</span>
                 </button>
@@ -134,11 +213,19 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
       {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
 
-      <footer className="bg-stone-900 text-white py-8">
-        <div className="container mx-auto text-center">
-          <p className="text-sm text-stone-400">
-            &copy; {new Date().getFullYear()} {host.name}. All rights reserved.
-          </p>
+      <footer className="bg-stone-900 text-white py-12">
+        <div className="container mx-auto flex justify-between items-center">
+          <div>
+            <p className="text-2xl font-bold">{host.name}</p>
+            <p className="text-sm text-stone-400">&copy; {new Date().getFullYear()}. All rights reserved.</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            {host.socialMediaLinks?.twitter && <a href={host.socialMediaLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Twitter("w-6 h-6")}</a>}
+            {host.socialMediaLinks?.instagram && <a href={host.socialMediaLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Instagram("w-6 h-6")}</a>}
+            {host.socialMediaLinks?.facebook && <a href={host.socialMediaLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-stone-400 hover:text-white">{CORE_ICONS.Facebook("w-6 h-6")}</a>}
+          </div>
+        </div>
+        <div className="container mx-auto text-center mt-8">
           <div className="mt-4">
             <button onClick={() => setIsTermsModalOpen(true)} className="text-sm text-stone-400 hover:text-white mx-2">Terms</button>
             <button onClick={() => setIsConditionsModalOpen(true)} className="text-sm text-stone-400 hover:text-white mx-2">Conditions</button>
