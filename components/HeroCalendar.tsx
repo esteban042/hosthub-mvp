@@ -13,7 +13,8 @@ export const HeroCalendar: React.FC<{
   const [month, setMonth] = useState(new Date());
   
   const today = new Date();
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  today.setUTCHours(0, 0, 0, 0);
+  const todayStr = today.toISOString().split('T')[0];
 
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const offset = new Date(month.getFullYear(), month.getMonth(), 1).getDay();
@@ -36,7 +37,7 @@ export const HeroCalendar: React.FC<{
     allBlockedDates.some(
       (d) =>
         (d.apartmentId === apartment?.id || d.apartmentId === 'all') &&
-        d.date === dateStr
+        new Date(d.date).toISOString().split('T')[0] === dateStr
     );
 
   const isAirbnbBlocked = (dateStr: string) => airbnbBlockedDates.includes(dateStr);
@@ -81,14 +82,13 @@ export const HeroCalendar: React.FC<{
   const days = [];
   for (let i = 0; i < offset; i++) days.push(<div key={`e-${i}`} />);
   for (let d = 1; d <= daysInMonth(month); d++) {
-    const year = month.getFullYear();
-    const monthNum = month.getMonth();
-    const dStr = `${year}-${String(monthNum + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const dayDate = new Date(Date.UTC(month.getFullYear(), month.getMonth(), d));
+    const dStr = dayDate.toISOString().split('T')[0];
 
     const isPast = dStr < todayStr;
     
     const isSelected = dStr === startDate || dStr === endDate;
-    const inRange = startDate && endDate && dStr >= startDate && dStr <= endDate;
+    const inRange = startDate && endDate && dStr > startDate && dStr < endDate;
     const price = getPriceForDate(dStr);
 
     const isCurrentlyBooked = isBooked(dStr);
@@ -97,14 +97,14 @@ export const HeroCalendar: React.FC<{
 
     const isUnavailable = isCurrentlyBooked || isCurrentlyBlockedManually || isCurrentlyAirbnbBlocked || isPast;
 
-    let dayClass = 'text-stone-300 hover:bg-stone-800'; 
+    let dayClass = 'text-charcoal hover:bg-stone-200'; 
     
     if (isSelected) {
-      dayClass = 'bg-coral-500 text-white border-coral-500';
+      dayClass = 'bg-sky-500 text-white';
     } else if (inRange) {
-      dayClass = 'bg-coral-500/20 text-coral-500 border-coral-500/10';
+      dayClass = 'bg-sky-500/20 text-sky-700';
     } else if (isUnavailable) {
-      dayClass = 'bg-stone-900 border-stone-800 text-stone-600 cursor-not-allowed line-through'; 
+      dayClass = 'bg-stone-100 border-stone-200 text-stone-400 cursor-not-allowed line-through'; 
     }
 
     days.push(
@@ -116,19 +116,19 @@ export const HeroCalendar: React.FC<{
         } ${dayClass}`}
       >
         <span className={`${apartment ? 'text-[11px] font-bold' : 'text-xs font-bold'}`}>{d}</span>
-        {price !== null && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-700' : isSelected ? 'text-white/80' : 'text-stone-500'}`}>${price}</span>}
+        {price !== null && <span className={`text-[8px] font-medium ${isUnavailable ? 'text-stone-400' : isSelected ? 'text-white/80' : 'text-charcoal/50'}`}>${price}</span>}
       </button>
     );
   }
 
   return (
-    <div className={`p-6 bg-stone-950 border border-stone-800 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 ${apartment ? 'w-full' : 'w-[320px]'}`}>
+    <div className={`p-6 bg-alabaster border border-stone-200 rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 ${apartment ? 'w-full' : 'w-[320px]'}`}>
       <div className="flex items-center justify-between mb-6">
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7"/></svg></button>
-        <span className="text-white font-serif font-bold text-sm">{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
-        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7"/></svg></button>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="text-charcoal/50 hover:text-charcoal transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M15 19l-7-7 7-7"/></svg></button>
+        <span className="text-charcoal font-serif font-bold text-sm">{month.toLocaleString('default', { month: 'long', year: 'numeric' })}</span>
+        <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="text-charcoal/50 hover:text-charcoal transition-colors"><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M9 5l7 7-7 7"/></svg></button>
       </div>
-      <div className="grid grid-cols-7 gap-1 text-[9px] font-black text-stone-600 text-center mb-2 uppercase tracking-widest">
+      <div className="grid grid-cols-7 gap-1 text-[9px] font-black text-charcoal/50 text-center mb-2 uppercase tracking-widest">
         {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => <div key={d}>{d}</div>)}
       </div>
       <div className="grid grid-cols-7 gap-1">{days}</div>

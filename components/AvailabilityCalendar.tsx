@@ -51,7 +51,7 @@ const AvailabilityCalendar: React.FC<{
       let dayClass = 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white';
       
       if (booked) { 
-        dayClass = 'bg-blue-500/20 border-blue-500/40 text-blue-500'; 
+        dayClass = 'bg-sky-accent/20 border-sky-accent/40 text-sky-accent'; 
       } else if (blockedManually) { 
         dayClass = 'bg-rose-500/20 border-rose-500/40 text-rose-500'; 
       } else if (airbnbBlocked) {
@@ -70,7 +70,7 @@ const AvailabilityCalendar: React.FC<{
     }
 
     return (
-      <div className="p-8 bg-[#1c1a19] rounded-[2rem] border" style={{ borderColor: CARD_BORDER }}>
+      <div className="p-8 bg-charcoal-darker rounded-[2rem] border" style={{ borderColor: CARD_BORDER }}>
         <div className="flex items-center justify-between mb-8">
            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))} className="text-stone-500 hover:text-white transition-colors"><ChevronLeft className="w-5 h-5" /></button>
            <h4 className="text-white font-serif text-lg font-bold">{monthName}</h4>
@@ -89,8 +89,8 @@ const AvailabilityCalendar: React.FC<{
         </div>
         <div className="mt-8 pt-6 border-t border-stone-800/60 flex flex-wrap gap-4 justify-center text-[10px] uppercase tracking-widest font-bold">
             <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500/20 border border-blue-500/40"></span>
-                <span className="text-blue-500/70">sanctum Booked</span>
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-accent/20 border border-sky-accent/40"></span>
+                <span className="text-sky-accent/70">sanctum Booked</span>
             </div>
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500/20 border border-rose-500/40"></span>

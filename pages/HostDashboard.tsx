@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types';
 import { fetchApi } from '../services/api';
@@ -115,7 +114,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingAirbnbIcal} onToggleBlock={toggleManualBlock} />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && (
-        <div className="bg-[#1c1a19] border border-stone-800 rounded-2xl p-8">
+        <div className="bg-sky-700/50 border border-zinc-800/60 rounded-2xl p-8">
           <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
         </div>
       )}

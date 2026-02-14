@@ -4,16 +4,13 @@ import { Booking, BookingStatus } from '../types';
 import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare } from 'lucide-react';
 import { formatBookingRange } from '../utils/formatBookingRange';
 import { getGuestDisplayName } from '../utils/bookingUtils';
-import { CARD_BORDER } from '../constants';
-
-const LABEL_COLOR = 'rgb(168, 162, 158)';
 
 const getStatusBadgeStyle = (status: BookingStatus) => {
   switch (status) {
     case BookingStatus.PAID:
-      return 'bg-emerald-500/5 text-emerald-400 border-emerald-500/80';
+      return 'bg-emerald-accent/10 text-green-600 border-green-600';
     case BookingStatus.CONFIRMED:
-      return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+      return 'bg-sky-700/10 text-sky-700 border-sky-700/60';
     default:
       return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   }
@@ -22,7 +19,7 @@ const getStatusBadgeStyle = (status: BookingStatus) => {
 const BookingInfoLine: React.FC<{ icon: React.ReactNode; text: React.ReactNode; isBold?: boolean }> = ({ icon, text, isBold }) => (
   <div className="flex items-center space-x-3">
     {icon}
-    <span className={isBold ? 'font-bold text-[rgb(214,213,213)]' : ''}>{text}</span>
+    <span className={isBold ? 'font-bold text-charcoal' : 'text-charcoal/80'}>{text}</span>
   </div>
 );
 
@@ -37,10 +34,10 @@ const BookingCard: React.FC<{
   const guestDisplayName = getGuestDisplayName(b.guestName, b.guestEmail);
 
   return (
-    <div key={b.id} className="bg-[#1c1a19] rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-500/30 transition-all" style={{ borderColor: CARD_BORDER }}>
+    <div key={b.id} className="bg-white/50 rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-accent/30 transition-all border-charcoal/10">
       <div className="p-6 flex-grow">
         <div className="flex items-start justify-between mb-4">
-          <h4 className="text-xl font-bold text-white leading-tight">{guestDisplayName}</h4>
+          <h4 className="text-xl font-bold text-charcoal leading-tight">{guestDisplayName}</h4>
           <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${getStatusBadgeStyle(b.status)}`}>
             {b.status}
           </span>
@@ -48,12 +45,12 @@ const BookingCard: React.FC<{
 
         {!showButtons && (
             <div className="flex items-center space-x-3 text-m mb-6">
-                <Building className="w-4 h-4 text-[rgb(214,213,213)]" />
-                <span className="text-[rgb(214,213,213)] font-medium">{apartmentTitle}</span>
+                <Building className="w-4 h-4 text-charcoal/80" />
+                <span className="text-charcoal/80 font-medium">{apartmentTitle}</span>
             </div>
         )}
 
-        <div className="space-y-3 text-sm" style={{ color: LABEL_COLOR }}>
+        <div className="space-y-3 text-sm text-charcoal/60">
           <BookingInfoLine icon={<CalendarDays className="w-4 h-4 flex-shrink-0" />} text={formatBookingRange(b.startDate, b.endDate)} isBold />
           <BookingInfoLine icon={<Users className="w-4 h-4 flex-shrink-0" />} text={`${b.numGuests || 1} Guests`} />
           <BookingInfoLine icon={<DollarSign className="w-4 h-4 flex-shrink-0" />} text={`$${b.totalPrice.toLocaleString()} Total`} />
@@ -62,11 +59,11 @@ const BookingCard: React.FC<{
         </div>
       </div>
       {showButtons && (
-        <div className="border-t border-stone-800/60 p-4 flex items-center justify-center space-x-2">
+        <div className="border-t border-charcoal/10 p-4 flex items-center justify-center space-x-2">
             {statusFilter !== 'past' && b.status !== BookingStatus.CANCELED && (
                 <button 
                 onClick={() => onSendMessage(b)} 
-                className="flex-shrink-0 bg-transparent border border-sky-500 text-sky-400 p-3 rounded-xl hover:bg-sky-500/10 hover:text-sky-300 transition-all"
+                className="flex-shrink-0 bg-transparent border border-sky-600 text-sky-600 p-3 rounded-xl hover:bg-sky-600/10 hover:text-white transition-all"
                 >
                 <MessageSquare className="w-4 h-4" />
                 </button>
@@ -74,12 +71,27 @@ const BookingCard: React.FC<{
             <div className="flex-grow flex items-center justify-center space-x-2">
                 {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                     <>
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} className="flex-1 bg-transparent border border-emerald-500 text-emerald-400 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500/10 hover:text-emerald-300 transition-all text-center">Mark as Paid</button>
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+                    <button 
+                      onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} 
+                      className="flex-1 bg-transparent border border-green-600  text-green-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center"
+                    >
+                      Mark as Paid
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
+                      className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all text-center"
+                    >
+                      Cancel
+                    </button>
                     </>
                 )}
                 {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-                    <button onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:border-rose-500 hover:text-rose-400 transition-all text-center">Cancel</button>
+                    <button 
+                      onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
+                      className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all text-center"
+                    >
+                      Cancel
+                    </button>
                 )}
             </div>
         </div>

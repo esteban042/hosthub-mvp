@@ -101,8 +101,8 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
             onClick={() => setStatusFilter(filter.value as any)}
             className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
               statusFilter === filter.value
-                ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
-                : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
+                ? 'bg-sky-700/40 text-white shadow-l border border-zinc-800'
+                : 'bg-transparent border border-zinc-800]'
             }`}
           >
             {filter.icon}
@@ -114,7 +114,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
       {groupedAndSortedBookings.length > 0 ? (
         groupedAndSortedBookings.map(([title, bks]) => (
           <div key={title} className="mb-12">
-            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
+            <h3 className="text-2xl font-serif font-bold px-2 tracking-tight mb-6">{title}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {bks.map(b => (
                 <BookingCard 

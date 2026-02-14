@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus } from '../types';
 import { Plus } from 'lucide-react';
@@ -6,12 +5,14 @@ import { sanctumApi as api } from '../services/api';
 import AdminStats from '../components/admin/AdminStats';
 import HostsGrid from '../components/admin/HostsGrid';
 import HostConfigurationModal from '../components/admin/HostConfigurationModal';
+import { SKY_ACCENT, TEXT_COLOR } from '../constants';
 
 interface AdminDashboardProps {
   hosts: Host[];
   apartments: Apartment[];
   bookings: Booking[];
   onUpdateHosts: (hosts: Host[]) => void;
+  onUpdateApartments: (apartments: Apartment[]) => void;
 }
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({ 
@@ -49,7 +50,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleSaveHost = async (hostToSave: Partial<Host>) => {
     try {
       if (hostToSave.id) {
-        const { data: updatedHost } = await api.put(`/api/hosts/${hostToSave.id}`, hostToSave);
+        const { data: updatedHost } = await api.put(`/api/v1/hosts/${hostToSave.id}`, hostToSave);
         onUpdateHosts(hosts.map(h => h.id === updatedHost.id ? updatedHost : h));
       } else {
         const hostToCreate = {
@@ -58,14 +59,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           ...hostToSave,
         };
         
-        const { data: newHost } = await api.post('/api/hosts', hostToCreate);
+        const { data: newHost } = await api.post('/api/v1/hosts', hostToCreate);
         onUpdateHosts([...hosts, newHost]);
       }
       setShowHostModal(false);
       setEditingHost(null);
     } catch (error) {
       console.error('Failed to save host:', error);
-      // Here you could add a state to show an error message to the user
     }
   };
 
@@ -83,12 +83,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-1000 font-dm text-left">
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
         <div className="space-y-1">
-          <h1 className="text-4xl md:text-5xl font-bold text-white tracking-tight">Global Administration</h1>
-          <p className="text-coral-500 font-bold uppercase tracking-[0.3em] text-[10px]">Platform HQ</p>
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight" style={{ color: TEXT_COLOR }}>Global Administration</h1>
+          <p className="font-bold uppercase tracking-[0.3em] text-[10px]" style={{ color: SKY_ACCENT }}>Platform HQ</p>
         </div>
         <button 
           onClick={() => { setEditingHost({ premiumConfig: { isEnabled: false, images: [], sections: [] } }); setShowHostModal(true); }}
-          className="bg-transparent text-white border border-white px-10 py-5 rounded-2xl font-black text-[11px] tracking-widest transition-all hover:border-emerald-600 hover:text-emerald-600 flex items-center space-x-3 active:scale-95"
+          className="bg-transparent px-10 py-5 rounded-2xl text-[12px] text-sky-accent tracking-widest transition-all flex items-center space-x-3 active:scale-95 shadow-lg shadow-sky-accent/30"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           <span>Onboard Host</span>

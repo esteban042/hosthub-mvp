@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import Modal from '../Modal';
 import { Booking } from '../../types';
 import { Send } from 'lucide-react';
+import { SKY_ACCENT } from '../../constants';
 
 interface MessageModalProps {
   booking: Booking | null;
@@ -29,18 +31,19 @@ const MessageModal: React.FC<MessageModalProps> = ({ booking, isOpen, onClose, o
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={<span className="text-white">{`Message to ${booking.guestName}`}</span>}>
-      <div className="p-6 bg-stone-900">
+    <Modal isOpen={isOpen} onClose={onClose} title={`Message to ${booking.guestName}`}>
+      <div>
         <textarea
           value={message}
           onChange={(e) => setMessage(e.target.value)}
-          className="w-full bg-stone-950 border border-stone-600 rounded-2xl py-5 px-6 text-sm font-medium text-white focus:ring-1 focus:ring-emerald-500 outline-none placeholder:text-stone-700 h-[140px] resize-y"
+          className="w-full bg-white/50 border border-stone-300 rounded-2xl py-5 px-6 text-sm font-medium text-charcoal focus:ring-1 focus:ring-sky-accent outline-none placeholder:text-charcoal/60 h-[140px] resize-y"
           placeholder="Write your message here..."
         />
         <div className="mt-6 flex justify-end">
-          <button 
+          <button
             onClick={handleSend}
-            className="bg-transparent border border-emerald-500 text-emerald-500 font-bold py-3 px-4 rounded-lg hover:bg-emerald-500 hover:text-white transition-all flex items-center justify-center w-12 h-12"
+            style={{ backgroundColor: SKY_ACCENT }}
+            className="text-white font-bold rounded-full transition-all flex items-center justify-center w-12 h-12 active:scale-95"
             aria-label="Send Message"
           >
             <Send className="w-5 h-5" />

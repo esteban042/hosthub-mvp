@@ -11,7 +11,7 @@ const FeaturedStays: React.FC<FeaturedStaysProps> = ({ apartments, onSelectApart
   return (
     <section className="max-w-7xl mx-auto px-6 py-32">
       <div className="mb-16">
-        <h2 className="text-5xl font-serif font-bold text-white mb-2 tracking-tight">Featured stays</h2>
+        <h2 className="text-5xl font-serif font-bold mb-2 tracking-tight">Featured stays</h2>
         <p className="text-stone-500 text-lg font-medium">{apartments.length} properties available</p>
       </div>
 

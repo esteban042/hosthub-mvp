@@ -16,12 +16,12 @@ const DashboardNav: React.FC<DashboardNavProps> = ({ activeTab, onTabChange }) =
   ];
 
   return (
-    <div className="flex bg-[#141211] border border-stone-600 p-2 rounded-xl w-fit mb-12">
+    <div className="flex bg-white/50 border border-zinc-800/30 p-2 rounded-xl w-fit mb-12">
       {tabs.map(tab => (
         <button 
           key={tab.id} 
           onClick={() => onTabChange(tab.id as any)} 
-          className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m text-white font-bold transition-all uppercase ${activeTab === tab.id ? 'bg-sky-950 text-white shadow-lg' : 'text-[rgb(214,213,213)]'}`}
+          className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m font-bold transition-all uppercase ${activeTab === tab.id ? 'bg-sky-accent text-alabaster shadow-lg' : 'text-charcoal/60 hover:bg-black/5'}`}
         >
           {tab.icon}
           <span>{tab.label}</span>
