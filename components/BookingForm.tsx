@@ -44,15 +44,30 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
-    if (!/^[a-zA-Z\s]*$/.test(name)) {
+    if (!name.trim()) {
+      errors.name = 'Please enter your full name.';
+    } else if (!/^[a-zA-Z\s]*$/.test(name)) {
       errors.name = 'Name should only contain letters and spaces.';
     }
-    if (!/^\S+@\S+\.\S+$/.test(email)) {
+
+    if (!email.trim()) {
+      errors.email = 'Please enter a valid email address.';
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
       errors.email = 'Please enter a valid email address.';
     }
+
     if (phone && !/^(\+\d{1,3}[- ]?)?\d{10}$/.test(phone)) {
       errors.phone = 'Please enter a valid phone number.';
     }
+    
+    if (!startDate || !endDate) {
+      errors.dates = 'Please select your check-in and check-out dates.';
+    }
+    
+    if (!guestCountry) {
+      errors.guestCountry = 'Please select your country of residence.';
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -80,9 +95,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
 
     try {
       const newConfirmedBooking = await sanctumApi.createBooking(bookingDetails);
-
       onNewBooking(newConfirmedBooking);
-
     } catch (error) {
       console.error("Failed to create booking:", error);
     } finally {
@@ -94,7 +107,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
       <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
         <div>
-          <span className="text-[10px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Estimated total</span>
+          <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Estimated total</span>
           <span className="text-5xl font-black text-charcoal">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
         </div>
         <div className="text-right">
@@ -108,7 +121,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
             type="text" required placeholder="Enter full name" value={name} onChange={e => setName(e.target.value)}
             className="w-full bg-white/50 border border-stone-300 rounded-2xl py-5 px-6 text-sm font-medium text-charcoal focus:ring-1 focus:ring-sky-accent transition-all outline-none placeholder:text-charcoal/50"
           />
-          {formErrors.name && <p className="text-rose-500 text-xs mt-1">{formErrors.name}</p>}
+          {formErrors.name && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.name}</p>}
         </div>
 
         <div className="space-y-2 relative">
@@ -116,7 +129,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
           <button
             type="button"
             onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            className={`w-full bg-white/50 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen ? 'border-sky-accent' : 'border-stone-300'}`}
+            className={`w-full bg-white/50 border rounded-2xl py-5 px-6 text-sm font-medium transition-all flex items-center justify-between group ${isCalendarOpen || formErrors.dates ? 'border-rose-500' : 'border-stone-300'}`}
           >
             <div className="flex items-center space-x-3">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isCalendarOpen ? 'bg-sky-accent text-white' : 'bg-stone-200 text-sky-accent'}`}>
@@ -127,7 +140,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               </span>
             </div>
           </button>
-
+          {formErrors.dates && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.dates}</p>}
           {isCalendarOpen && (
             <div className="absolute top-full left-0 right-0 z-[100] mt-4 bg-white p-4 rounded-3xl shadow-2xl border border-stone-200">
               <HeroCalendar
@@ -148,7 +161,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm text-charcoal font-medium ml-1">Number of guests</label>
+          <label className="block text-sm font-medium ml-1">Number of guests</label>
           <div className="flex items-center justify-between p-4 bg-white/50 border border-stone-300 rounded-2xl">
             <button
               type="button"
@@ -157,7 +170,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M20 12H4" /></svg>
             </button>
-            <span className="text-xl font-black text-charcoal">{numGuests}</span>
+            <span className="text-l font-black text-charcoal">{numGuests}</span>
             <button
               type="button"
               onClick={() => setNumGuests(prev => Math.min(apartment.capacity || 10, prev + 1))}
@@ -175,7 +188,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               type="email" required placeholder="contact@domain.com" value={email} onChange={e => setEmail(e.target.value)}
               className="w-full bg-white/50 border border-stone-300 rounded-2xl py-5 px-6 text-sm font-medium text-charcoal focus:ring-1 focus:ring-sky-accent outline-none placeholder:text-charcoal/50"
             />
-            {formErrors.email && <p className="text-rose-500 text-xs mt-1">{formErrors.email}</p>}
+            {formErrors.email && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.email}</p>}
           </div>
 
           <div className="space-y-2">
@@ -187,6 +200,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               <option value="">Select a country</option>
               {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
+            {formErrors.guestCountry && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.guestCountry}</p>}
           </div>
 
           <div className="space-y-2">
@@ -195,7 +209,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               type="tel" placeholder="e.g., +1 555 123 4567" value={phone} onChange={e => setPhone(e.target.value)}
               className="w-full bg-white/50 border border-stone-300 rounded-2xl py-5 px-6 text-sm font-medium text-charcoal focus:ring-1 focus:ring-sky-accent outline-none placeholder:text-charcoal/50"
             />
-            {formErrors.phone && <p className="text-rose-500 text-xs mt-1">{formErrors.phone}</p>}
+            {formErrors.phone && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.phone}</p>}
           </div>
         </div>
 
@@ -210,8 +224,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         </div>
 
         <button
-          disabled={!name || !email || !startDate || !endDate || isBooking}
-          className="w-full bg-sky-700/90 text-charcoal disabled:bg-transparent disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
+          disabled={isBooking}
+          className="w-full bg-sky-700/80 text-white disabled:bg-transparent disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
         >
           {isBooking ? 'Booking...' : 'Book now'}
         </button>

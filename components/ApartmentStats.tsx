@@ -11,7 +11,7 @@ const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
     <div className="flex items-center space-x-12 py-8 border-y border-stone-800/40 mb-16 overflow-x-auto whitespace-nowrap scrollbar-hide">
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 flex items-center justify-center text-sky-700 ">
-          {CORE_ICONS.Bed("w-6 h-6")}
+          {CORE_ICONS.Bed("w-8 h-8")}
         </div>
         <div className="flex flex-col">
           <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Beds</span>
@@ -20,7 +20,7 @@ const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
       </div>
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 flex items-center justify-center text-sky-700">
-          {CORE_ICONS.Bath("w-6 h-6")}
+          {CORE_ICONS.Bath("w-8 h-8")}
         </div>
         <div className="flex flex-col">
           <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Baths</span>
@@ -29,7 +29,7 @@ const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
       </div>
       <div className="flex items-center space-x-4">
         <div className="w-12 h-12 flex items-center justify-center text-sky-700 ">
-          {CORE_ICONS.Guests("w-6 h-6")}
+          {CORE_ICONS.Guests("w-7 h-7")}
         </div>
         <div className="flex flex-col">
           <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Guests</span>

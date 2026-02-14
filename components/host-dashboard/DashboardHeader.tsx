@@ -44,7 +44,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ hostSlug, onAddUnit }
       </div>
       <button 
         onClick={onAddUnit} 
-        className="bg-transparent border border-sky-700 text-sky-700 px-8 py-3 rounded-full font-bold uppercase text-[12px] tracking-widest transition-all flex items-center space-x-2"
+        className="bg-transparent border border-sky-700 text-sky-700 px-8 py-3 rounded-full font-bold uppercase text-[12px] tracking-widest transition-all flex items-center space-x-2 hover:bg-cyan-700 hover:text-white"
       >
         <Plus className="w-4 h-4" strokeWidth={3} />
         <span>Add Unit</span>

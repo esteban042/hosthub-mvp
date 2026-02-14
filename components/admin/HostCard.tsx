@@ -27,7 +27,7 @@ const HostCard: React.FC<HostCardProps> = ({ host, apartments, bookings, onConfi
   const canceledBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && b.status === BookingStatus.CANCELED).length;
 
   return (
-    <div className="bg-alabaster/40 backdrop-blur-3xl border border-stone-200 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
+    <div className="bg-alabaster/40 backdrop-blur-3xl border border-gray-700 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
       <div className="flex justify-between items-start mb-6">
           <div className="w-16 h-16 rounded-2xl overflow-hidden border border-stone-200">
             <img src={host.avatar} className="w-full h-full object-cover" alt={host.name} />

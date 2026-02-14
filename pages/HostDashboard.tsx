@@ -82,14 +82,14 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     if (!processedApt.priceOverrides) processedApt.priceOverrides = [];
 
     if (processedApt.id) {
-      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? processedApt as Apartment : a));
+      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? { ...a, ...processedApt } as Apartment : a));
     } else {
       const newApt: Apartment = {
         ...processedApt,
         id: `apt-${Date.now()}`,
         hostId: host.id,
         capacity: processedApt.capacity || 2,
-        bedrooms: processedApt.bedrooms || 1,
+        beds: processedApt.beds || 1,
         bathrooms: processedApt.bathrooms || 1,
         pricePerNight: processedApt.pricePerNight || 100,
         title: processedApt.title || 'Untitled sanctuary',
@@ -111,10 +111,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
 
       {activeTab === 'current-bookings' && <CurrentBookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
       {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} host={host} onUpdateBooking={handleUpdateStatus} />}
-      {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingAirbnbIcal} onToggleBlock={toggleManualBlock} />}
+      {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingIcal} onToggleBlock={toggleManualBlock} />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && (
-        <div className="bg-sky-700/50 border border-zinc-800/60 rounded-2xl p-8">
+        <div className="bg-sky-700 border border-zinc-800 rounded-2xl p-8">
           <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
         </div>
       )}

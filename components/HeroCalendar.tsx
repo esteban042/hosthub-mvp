@@ -29,7 +29,7 @@ export const HeroCalendar: React.FC<{
     allBookings.some(
       (b) =>
         b.apartmentId === apartment?.id &&
-        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.REQUESTED || b.status === BookingStatus.PAID) &&
+        (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) &&
         dateStr >= b.startDate && dateStr < b.endDate
     );
 

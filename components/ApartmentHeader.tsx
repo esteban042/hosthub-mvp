@@ -41,8 +41,8 @@ const ApartmentHeader: React.FC<ApartmentHeaderProps> = ({ apartment, onBack }) 
         <div className="absolute bottom-8 left-10 right-10">
           <h1 className="text-4xl md:text-6xl text-white font-serif font-bold mb-2 tracking-tight drop-shadow-2xl">{apartment.title}</h1>
           <div className="flex items-center space-x-2 text-white/80">
-            <div className="text-sky-accent">{CORE_ICONS.Location("w-5 h-5")}</div>
-            <span className="text-base font-medium tracking-wide">{apartment.city}</span>
+            <div className="text-sky-accent text-white">{CORE_ICONS.Location("w-5 h-5")}</div>
+            <span className="text-base font-medium text-white tracking-wide">{apartment.city}</span>
           </div>
         </div>
       </div>

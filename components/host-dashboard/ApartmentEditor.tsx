@@ -89,6 +89,20 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                          <input type="number" required value={apt.pricePerNight || 0} onChange={e => setApt({...apt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
                       </div>
                    </div>
+                   <div className="grid grid-cols-3 gap-4">
+                        <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Beds</label>
+                         <input type="number" value={apt.beds || 1} onChange={e => setApt({...apt, beds: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                      </div>
+                      <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Bathrooms</label>
+                         <input type="number" value={apt.bathrooms || 1} onChange={e => setApt({...apt, bathrooms: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                      </div>
+                       <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Guests</label>
+                         <input type="number" value={apt.capacity || 1} onChange={e => setApt({...apt, capacity: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                      </div>
+                   </div>
                    <div className="grid grid-cols-2 gap-4">
                       <div>
                          <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Minimum Stay</label>
@@ -102,7 +116,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                 </div>
                 <div>
                    <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Description</label>
-                   <textarea value={apt.description || ''} onChange={e => setApt({...apt, description: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal h-[142px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
+                   <textarea value={apt.description || ''} onChange={e => setApt({...apt, description: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal h-[240px] resize-y focus:ring-1 focus:ring-sky-accent outline-none" />
                 </div>
              </div>
 
