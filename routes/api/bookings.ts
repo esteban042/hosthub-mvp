@@ -49,6 +49,12 @@ router.post('/',
         return res.status(404).json({ error: 'Apartment not found' });
       }
       const apartment = keysToCamel(apartmentRes.rows[0]);
+      
+      const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
+      if (nights < apartment.minStayNights) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({ error: `This property requires a minimum stay of ${apartment.minStayNights} nights.` });
+      }
 
       const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.hostId]);
       if (hostRes.rows.length === 0) {
@@ -73,7 +79,6 @@ router.post('/',
         return res.status(409).json({ error: 'The selected dates are not available' });
       }
 
-      const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
       const totalPrice = nights * apartment.pricePerNight;
 
       const bookingRes = await client.query(

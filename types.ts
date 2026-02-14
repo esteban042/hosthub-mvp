@@ -74,6 +74,7 @@ export interface Apartment {
   photos: string[];
   isActive: boolean;
   mapEmbedUrl: string | null;
+  minStayNights: number;
 }
 
 export interface Booking {

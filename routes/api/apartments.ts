@@ -48,7 +48,8 @@ router.post('/',
       amenities = [],
       photos = [],
       isActive = true,
-      mapEmbedUrl = null
+      mapEmbedUrl = null,
+      minStayNights = 1
     } = req.body;
     
     const client = await pool.connect();
@@ -61,8 +62,8 @@ router.post('/',
 
       const result = await client.query(
         `INSERT INTO apartments
-          (host_id, title, description, address, city, capacity, bedrooms, bathrooms, price_per_night, price_overrides, amenities, photos, is_active, map_embed_url)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          (host_id, title, description, address, city, capacity, bedrooms, bathrooms, price_per_night, price_overrides, amenities, photos, is_active, map_embed_url, min_stay_nights)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
         RETURNING *`,
         [
           hostId,
@@ -78,7 +79,8 @@ router.post('/',
           JSON.stringify(amenities),
           JSON.stringify(photos),
           isActive,
-          mapEmbedUrl
+          mapEmbedUrl,
+          minStayNights
         ]
       );
 
@@ -125,7 +127,7 @@ router.put('/',
         const {
             hostId, title, description, address, city, capacity,
             bedrooms, bathrooms, pricePerNight, priceOverrides,
-            amenities, photos, isActive, mapEmbedUrl, id
+            amenities, photos, isActive, mapEmbedUrl, minStayNights, id
         } = apt;
 
         await client.query(
@@ -133,15 +135,15 @@ router.put('/',
             host_id = $1, title = $2, description = $3, address = $4, city = $5,
             capacity = $6, bedrooms = $7, bathrooms = $8, price_per_night = $9,
             price_overrides = $10, amenities = $11, photos = $12, is_active = $13,
-            map_embed_url = $14
-          WHERE id = $15`,
+            map_embed_url = $14, min_stay_nights = $15
+          WHERE id = $16`,
           [
             hostId, title, description, address, city, capacity,
             bedrooms, bathrooms, pricePerNight, 
             JSON.stringify(priceOverrides),
             JSON.stringify(amenities),
             JSON.stringify(photos),
-            isActive, mapEmbedUrl, id
+            isActive, mapEmbedUrl, minStayNights, id
           ]
         );
       }

@@ -89,6 +89,12 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                          <input type="number" required value={apt.pricePerNight || 0} onChange={e => setApt({...apt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
                       </div>
                    </div>
+                   <div className="grid grid-cols-2 gap-4">
+                      <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Minimum Stay</label>
+                         <input type="number" value={apt.minStayNights || 1} onChange={e => setApt({...apt, minStayNights: parseInt(e.target.value)})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white outline-none" />
+                      </div>
+                   </div>
                    <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-[rgb(214,213,213)]  mb-3">Map Embed URL</label>
                       <input type="text" value={apt.mapEmbedUrl || ''} onChange={e => setApt({...apt, mapEmbedUrl: e.target.value})} className="w-full bg-stone-950 border border-stone-600 rounded-2xl p-4 text-sm text-white focus:ring-1 focus:ring-coral-500 transition-all outline-none" />
