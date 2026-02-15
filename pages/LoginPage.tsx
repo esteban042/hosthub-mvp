@@ -28,7 +28,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
   return (
     <div className="min-h-[70vh] flex flex-col border boder-charcoal items-center justify-center p-6 animate-in fade-in duration-1000 font-dm" style={{ backgroundColor: BACKGROUND_COLOR }}>
       <div className="bg-alabaster/40 backdrop-blur-3xl p-12 rounded-[3.5rem] border border-zinc-800 shadow-2xl max-w-md w-full text-center">
-        <div className="w-16 h-16 bg-transparent border rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-sky-cyan-700/20">
+        <div className="w-16 h-16 bg-transparent border border-gray-800 rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-2xl shadow-sky-cyan-700/20">
            <svg className="w-8 h-8 " fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
         </div>
         <h2 className="text-3xl font-black" style={{ color: TEXT_COLOR }}>Sanctum Studio</h2>
@@ -36,7 +36,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
         
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div className="space-y-1.5">
-            <label className="block text-[10px] font-bold uppercase tracking-widest text-charcoal/80 ml-1">Email address</label>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 ml-1">Email address</label>
             <input 
               type="email" 
               value={email} 
@@ -62,7 +62,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
           
           <button 
             type="submit"
-            className="w-full bg-transparent border border-sky-700 text-sky-700 hover:bg-sky-700/50 hover:text-white font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl shadow-sky-accent/30 uppercase text-[10px] tracking-[0.2em] mt-4"
+            className="w-full bg-transparent border border-sky-700 text-sky-700 hover:text-sky-700 font-black py-5 rounded-2xl transition-all active:scale-95 shadow-xl shadow-sky-accent/30 uppercase text-[10px] tracking-[0.2em] mt-4"
           >
             Authenticate
           </button>

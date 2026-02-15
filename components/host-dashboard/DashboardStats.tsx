@@ -35,7 +35,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           <p className="text-[10px] font-bold uppercase tracking-widest mt-1 text-charcoal/60">Completed Stays</p>
         </div>
       </div>
-      <div className="bg-white/50 p-8 border border-gray-700 rounded-2xl flex items-center space-x-5 border border-charcoal/30">
+      <div className="bg-white/50 p-8 border border-gray-400 rounded-2xl flex items-center space-x-5 border border-charcoal/30">
         <div className="text-cyan-700">{CORE_ICONS.Dollar("w-8 h-8")}</div>
         <div>
           <h4 className="text-2xl font-bold text-charcoal leading-none">${stats.revenueYear.toLocaleString()}</h4>

@@ -27,7 +27,7 @@ const HostCard: React.FC<HostCardProps> = ({ host, apartments, bookings, onConfi
   const canceledBookings = bookings.filter(b => hostApts.some(a => a.id === b.apartmentId) && b.status === BookingStatus.CANCELED).length;
 
   return (
-    <div className="bg-alabaster/40 backdrop-blur-3xl border border-gray-700 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
+    <div className="bg-alabaster/40 backdrop-blur-3xl border border-gray-400 rounded-[2.5rem] p-8 flex flex-col shadow-2xl group hover:border-emerald-500/40 transition-all">
       <div className="flex justify-between items-start mb-6">
           <div className="w-16 h-16 rounded-2xl overflow-hidden border border-stone-200">
             <img src={host.avatar} className="w-full h-full object-cover" alt={host.name} />
@@ -77,7 +77,7 @@ const HostCard: React.FC<HostCardProps> = ({ host, apartments, bookings, onConfi
       <div className="flex items-center space-x-3 mt-auto">
         <button 
           onClick={() => onConfigure(host)}
-          className="flex-1 bg-white/50 border border-stone-300 text-charcoal/80 hover:text-charcoal py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+          className="flex-1 bg-white/50 border border-gray-900 text-charcoal/80 hover:text-shite hover:bg-gry-700/30 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
         >
           Configure Host
         </button>

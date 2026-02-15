@@ -142,7 +142,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
           </button>
           {formErrors.dates && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.dates}</p>}
           {isCalendarOpen && (
-            <div className="absolute top-full left-0 right-0 z-[100] mt-4 bg-white p-4 rounded-3xl shadow-2xl border border-stone-200">
+            <div className="absolute top-full left-1/2 -translate-x-1/2 w-[calc(100%+2rem)] z-[100] mt-4 bg-white p-4 rounded-3xl shadow-2xl border border-stone-200">
               <HeroCalendar
                 apartment={apartment}
                 startDate={startDate}
@@ -170,7 +170,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
             >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M20 12H4" /></svg>
             </button>
-            <span className="text-l font-black text-charcoal">{numGuests}</span>
+            <span className="text-ml font-black text-charcoal">{numGuests}</span>
             <button
               type="button"
               onClick={() => setNumGuests(prev => Math.min(apartment.capacity || 10, prev + 1))}
@@ -225,7 +225,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
 
         <button
           disabled={isBooking}
-          className="w-full bg-sky-700/80 text-white disabled:bg-transparent disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
+          className="w-full bg-sky-700/80 text-white disabled:bg-alabaster/70 disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
         >
           {isBooking ? 'Booking...' : 'Book now'}
         </button>

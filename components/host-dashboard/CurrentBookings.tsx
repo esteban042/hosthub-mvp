@@ -45,9 +45,9 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
   return (
     <div>
       <div className="flex items-center px-1 space-x-2">
-        <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-sky-700/50 text-white border-charcoal-border' : 'bg-transparent border border-zinc-800 text-charcoal-border'}`}>Current Stays</button>
-        <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-sky-700/50 text-white border-charcoal-border' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-ins Today</button>
-        <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-sky-700/50 text-white border-charcoal-border' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-outs Today</button>
+        <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-border'}`}>Current Stays</button>
+        <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-ins Today</button>
+        <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-outs Today</button>
       </div>
 
       {currentTabFilter === 'current' && (

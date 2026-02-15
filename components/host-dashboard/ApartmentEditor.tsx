@@ -73,52 +73,55 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
           <h3 className="text-3xl font-bold text-charcoal leading-none tracking-tight">Unit Configuration</h3>
 
           <form onSubmit={handleSave} className="space-y-12">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                <div className="space-y-6">
-                   <div>
+             <div className="grid grid-cols-2 md:grid-cols-2 gap-8">
+                <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Unit Title</label>
                       <input type="text" required value={apt.title || ''} onChange={e => setApt({...apt, title: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
-                   </div>
+                </div>
+                <div>
+                      <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">City</label>
+                      <input type="text" required value={apt.city || ''} onChange={e => setApt({...apt, city: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                </div>
+              </div>
+                <div className="grid grid-cols-3 gap-4">
+                     <div>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Beds</label>
+                        <input type="number" value={apt.beds || 1} onChange={e => setApt({...apt, beds: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                     </div>
+                     <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Bathrooms</label>
+                         <input type="number" value={apt.bathrooms || 1} onChange={e => setApt({...apt, bathrooms: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                     </div>
+                     <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Guests</label>
+                         <input type="number" value={apt.capacity || 1} onChange={e => setApt({...apt, capacity: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                     </div>
+                 </div>
+
                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">City</label>
-                         <input type="text" required value={apt.city || ''} onChange={e => setApt({...apt, city: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
-                      </div>
-                      <div>
+                   <div>
                          <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Base Price</label>
                          <input type="number" required value={apt.pricePerNight || 0} onChange={e => setApt({...apt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
                       </div>
-                   </div>
-                   <div className="grid grid-cols-3 gap-4">
-                        <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Beds</label>
-                         <input type="number" value={apt.beds || 1} onChange={e => setApt({...apt, beds: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
-                      </div>
                       <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Bathrooms</label>
-                         <input type="number" value={apt.bathrooms || 1} onChange={e => setApt({...apt, bathrooms: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
-                      </div>
-                       <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Guests</label>
-                         <input type="number" value={apt.capacity || 1} onChange={e => setApt({...apt, capacity: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
-                      </div>
-                   </div>
-                   <div className="grid grid-cols-2 gap-4">
-                      <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Minimum Stay</label>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Minimum Stay (in days)</label>
                          <input type="number" value={apt.minStayNights || 1} onChange={e => setApt({...apt, minStayNights: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
                       </div>
-                   </div>
-                   <div>
+                </div>
+                <div className="grid grid-cols-1 gap-4">
+                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Map Embed URL</label>
                       <input type="text" value={apt.mapEmbedUrl || ''} onChange={e => setApt({...apt, mapEmbedUrl: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
-                   </div>
-                </div>
-                <div>
+                     </div>
+
+               </div>
+                <div className="grid grid-cols-1 gap-4">
+
+                  <div>
                    <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Description</label>
                    <textarea value={apt.description || ''} onChange={e => setApt({...apt, description: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal h-[240px] resize-y focus:ring-1 focus:ring-sky-accent outline-none" />
-                </div>
-             </div>
+                  </div>
+               </div>
 
              <div className="pt-10 border-t border-stone-200">
                <div className="flex items-center justify-between mb-8">
@@ -236,7 +239,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
 
              <div className="flex space-x-4 pt-6 border-t border-stone-200">
                 <button type="button" onClick={onClose} className="flex-1 font-bold py-5 rounded-full border border-stone-300 text-[10px] uppercase tracking-widest text-charcoal hover:bg-stone-100 transition-all">Discard</button>
-                <button type="submit" style={{ backgroundColor: SKY_ACCENT }} className="flex-1 border border-transparent text-white font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest active:scale-95">Save Unit</button>
+                <button type="submit" className="flex-1 border border-cyan-700 text-cyan-700 bg-transparent hover:bg-cyan-700 hover:text-white font-bold py-5 rounded-full transition-all text-[10px] uppercase tracking-widest active:scale-95">Save Unit</button>
              </div>
           </form>
        </div>

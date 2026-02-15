@@ -21,7 +21,7 @@ const DashboardNav: React.FC<DashboardNavProps> = ({ activeTab, onTabChange }) =
         <button 
           key={tab.id} 
           onClick={() => onTabChange(tab.id as any)} 
-          className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m font-bold transition-all uppercase ${activeTab === tab.id ? 'bg-sky-accent text-alabaster shadow-lg' : 'text-charcoal/60 hover:bg-black/5'}`}
+          className={`flex items-center space-x-3 px-8 py-4 rounded-lg text-m font-bold transition-all uppercase border border-gray-300 ${activeTab === tab.id ? 'bg-sky-accent text-alabaster shadow-lg' : 'text-charcoal/60 hover:bg-black/5'}`}
         >
           {tab.icon}
           <span>{tab.label}</span>

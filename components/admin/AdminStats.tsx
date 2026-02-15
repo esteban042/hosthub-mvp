@@ -36,7 +36,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-      <div className="bg-gray-200/50 p-8 rounded-[2rem] border border-gray-700 shadow-xl flex items-center space-x-5">
+      <div className="bg-white/50 p-8 rounded-[2rem] border border-gray-700 shadow-xl flex items-center space-x-5">
         <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
           <CreditCard className="w-6 h-6" />
         </div>
@@ -46,7 +46,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) 
 
         </div>
         </div>
-      <div className="bg-gray-200/50 p-8 rounded-[2rem] border border-gray-800 shadow-xl flex items-center space-x-5">
+      <div className="bg-zinc-100 p-8 rounded-[2rem] border border-gray-800 shadow-xl flex items-center space-x-5">
         <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
           <Percent className="w-6 h-6" />
         </div> 
@@ -55,7 +55,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) 
           <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Platform Commission</p>
         </div>
       </div>
-      <div className="bg-gray-200/50 p-8 rounded-[2rem] border border-stone-200 shadow-xl flex items-center space-x-5">
+      <div className="bg-zinc-100 p-8 rounded-[2rem] border border-stone-200 shadow-xl flex items-center space-x-5">
         <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
           <Globe className="w-6 h-6" />
         </div>

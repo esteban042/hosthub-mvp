@@ -101,7 +101,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
             onClick={() => setStatusFilter(filter.value as any)}
             className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
               statusFilter === filter.value
-                ? 'bg-sky-700/30 text-white shadow-l border border-zinc-800'
+                ? 'bg-sky-700/50 text-white shadow-l border border-zinc-800'
                 : 'bg-transparent border border-zinc-800'
             }`}
           >

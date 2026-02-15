@@ -63,12 +63,12 @@ export const Layout: React.FC<LayoutProps> = ({
             {user ? (
                <div className="flex items-center space-x-3">
                  <button onClick={onLogout} 
-                className="bg-transparent border border-sky-accent text-sky-accent hover:bg-sky-accent hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20">Logout</button>
+                className="bg-transparent border border-cyan-700 text-cyan-700 hover:bg-cyan-700 hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20">Logout</button>
                </div>
             ) : (
               <button 
                 onClick={onSignIn}
-                className="bg-transparent border border-sky-accent text-sky-accent hover:bg-sky-accent hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20"
+                className="bg-transparent border border-700 text-cyan-700 hover:bg-cyan-700/30 hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                 <span>Log In</span>
