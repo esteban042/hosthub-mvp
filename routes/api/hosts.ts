@@ -1,4 +1,3 @@
-
 import { Router } from 'express';
 import { body } from 'express-validator';
 import { pool, keysToCamel } from '../../db';
@@ -48,6 +47,9 @@ router.post('/',
     body('checkInTime').optional({ checkFalsy: true }).trim().escape(),
     body('checkOutTime').optional({ checkFalsy: true }).trim().escape(),
     body('checkInInfo').optional({ checkFalsy: true }).trim().escape(),
+    body('checkInMessage').optional({ checkFalsy: true }).trim().escape(),
+    body('welcomeMessage').optional({ checkFalsy: true }).trim().escape(),
+    body('checkoutMessage').optional({ checkFalsy: true }).trim().escape(),
   ],
   validate,
   async (req: Request, res, next) => {
@@ -76,14 +78,17 @@ router.post('/',
         checkInTime = null,
         checkOutTime = null,
         checkInInfo = null,
+        checkInMessage = null, 
+        welcomeMessage = null, 
+        checkoutMessage = null,
     } = req.body;
 
     const client = await pool.connect();
     try {
         const result = await client.query(
         `INSERT INTO hosts
-            (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+            (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23)
         RETURNING *`,
         [
             name,
@@ -106,6 +111,9 @@ router.post('/',
             checkInTime,
             checkOutTime,
             checkInInfo,
+            checkInMessage,
+            welcomeMessage,
+            checkoutMessage,
         ]
         );
         res.status(201).json(keysToCamel(result.rows[0]));
@@ -119,64 +127,54 @@ router.post('/',
     }
 });
 
-router.put('/:hostId',
-    protect,
-    validate,
-    async (req: Request, res, next) => {
-        const { hostId } = req.params;
-        const updatedHost = req.body;
-        const client = await pool.connect();
-        const isAdmin = req.user?.role === 'admin';
-        const userId = req.user?.id;
+router.put('/:hostId', protect, validate, async (req, res, next) => {
+  const { hostId } = req.params;
+  const updatedFields = req.body;
 
-        try {
-            const hostRes = await client.query('SELECT user_id FROM hosts WHERE id = $1', [hostId]);
+  const client = await pool.connect();
 
-            if (hostRes.rows.length === 0) {
-                return res.status(404).json({ error: `Host with id ${hostId} not found.` });
-            }
+  try {
+    const hostRes = await client.query('SELECT user_id FROM hosts WHERE id = $1', [hostId]);
+    if (hostRes.rows.length === 0) {
+      return res.status(404).json({ error: `Host with id ${hostId} not found.` });
+    }
 
-            const dbHost = hostRes.rows[0];
-            if (!isAdmin && String(dbHost.user_id) !== String(userId)) {
-                return res.status(403).json({ error: 'You are not authorized to update this host.' });
-            }
+    const dbHost = hostRes.rows[0];
+    // @ts-ignore
+    if (req.user?.role !== 'admin' && String(dbHost.user_id) !== String(req.user?.id)) {
+      return res.status(403).json({ error: 'You are not authorized to update this host.' });
+    }
 
-            const {
-                name, slug, bio, avatar, subscriptionType, commissionRate,
-                businessName, contactEmail, physicalAddress, country, phoneNumber,
-                landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions, id,
-                vat, businessId, checkInTime, checkOutTime, checkInInfo
-            } = updatedHost;
+    const queryParts: string[] = [];
+    const queryValues: any[] = [];
+    let queryIndex = 1;
 
-            await client.query('BEGIN');
+    for (const key in updatedFields) {
+      if (Object.prototype.hasOwnProperty.call(updatedFields, key) && key !== 'id') {
+        const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+        queryParts.push(`${snakeKey} = $${queryIndex++}`);
+        queryValues.push(updatedFields[key]);
+      }
+    }
 
-            const result = await client.query(
-                `UPDATE hosts SET
-                    name = $1, slug = $2, bio = $3, avatar = $4, subscription_type = $5,
-                    commission_rate = $6, business_name = $7, contact_email = $8,
-                    physical_address = $9, country = $10, phone_number = $11,
-                    landing_page_picture = $12, airbnb_calendar_link =_calendar_link = $13,
-                    premium_config = $14, payment_instructions = $15, vat = $16, business_id = $17,
-                    check_in_time = $18, check_out_time = $19, check_in_info = $20
-                WHERE id = $21
-                RETURNING *`,
-                [
-                    name, slug, bio, avatar, subscriptionType, commissionRate,
-                    businessName, contactEmail, physicalAddress, country, phoneNumber,
-                    landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions,
-                    vat, businessId, checkInTime, checkOutTime, checkInInfo, hostId
-                ]
-            );
+    if (queryParts.length === 0) {
+      return res.status(400).json({ error: 'No fields to update.' });
+    }
 
-            await client.query('COMMIT');
-            res.status(200).json(keysToCamel(result.rows[0]));
+    const queryString = `UPDATE hosts SET ${queryParts.join(', ')} WHERE id = $${queryIndex} RETURNING *`;
+    queryValues.push(hostId);
 
-        } catch (err) {
-            await client.query('ROLLBACK');
-            next(err);
-        } finally {
-            client.release();
-        }
-    });
+    await client.query('BEGIN');
+    const result = await client.query(queryString, queryValues);
+    await client.query('COMMIT');
+
+    res.status(200).json(keysToCamel(result.rows[0]));
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+});
 
 export default router;

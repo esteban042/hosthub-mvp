@@ -71,22 +71,34 @@ export const sanctumApi = {
 
   getApartmentAvailability: (apartmentId: string) => fetchApi<{ bookings: Booking[], blockedDates: BlockedDate[] }>(`/api/v1/availability?apartmentId=${apartmentId}`),
 
-  getPublicHosts: () => fetchApi<Pick<Host, 'slug' | 'name'>[]>('/api/v1/public-hosts'),
+  getPublicHosts: () => fetchApi<Pick<Host, 'slug' | 'name'>[]>('/api/v1/hosts/public'),
 
   createBooking: (data: Partial<Booking>) => fetchApi<Booking>('/api/v1/bookings', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
 
-  updateHost: (data: Host) => fetchApi<Host>(`/api/v1/hosts/${data.id}` , {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  updateHost: (data: Host) => {
+    if (!data.id) {
+        console.error("Attempted to update a host without an ID.", data);
+        throw new Error("Cannot update host without a valid ID.");
+    }
+    return fetchApi<Host>(`/api/v1/hosts/${data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+  },
 
-  updateHosts: (data: Host[]) => fetchApi<Host[]>('/api/v1/hosts', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  updateHosts: (data: Host[]) => {
+    if (data.length === 1 && data[0].id) {
+      return fetchApi<Host>(`/api/v1/hosts/${data[0].id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data[0]),
+      }).then(host => [host] as Host[]);
+    }
+    console.error("updateHosts called with multiple hosts or without an ID, which is not supported.", data);
+    return Promise.reject(new Error("Bulk host updates are not supported or host ID is missing."));
+  },
 
   updateApartments: (data: Apartment[]) => fetchApi<Apartment[]>('/api/v1/apartments', {
     method: 'PUT',
@@ -100,6 +112,18 @@ export const sanctumApi = {
 
   sendMessage: (bookingId: string, message: string) => {
     return sanctumApi.post('/api/v1/messages', { bookingId, message });
+  },
+
+  sendCheckInMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/check-in`, {});
+  },
+
+  sendWelcomeMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/welcome`, {});
+  },
+
+  sendCheckoutMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/checkout`, {});
   },
 
   cancelBooking: (bookingId: string) => {

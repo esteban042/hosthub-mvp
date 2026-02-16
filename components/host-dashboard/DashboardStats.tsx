@@ -28,14 +28,14 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
           <p className="text-[10px] font-bold uppercase tracking-widest mt-1 text-charcoal/60">Upcoming Stays</p>
         </div>
       </div>
-      <div className="bg-white/50 p-8 rounded-2xl flex items-center space-x-5 border border-charcoal/30">
+      <div className="bg-white/50 p-8 rounded-2xl flex items-center space-x-5 border border-charcoal/70">
         <div style={{ color: SKY_ACCENT }}><History className="w-8 h-8" strokeWidth={1.5} /></div>
         <div>
           <h4 className="text-2xl font-bold text-charcoal leading-none">{stats.past}</h4>
           <p className="text-[10px] font-bold uppercase tracking-widest mt-1 text-charcoal/60">Completed Stays</p>
         </div>
       </div>
-      <div className="bg-white/50 p-8 border border-gray-400 rounded-2xl flex items-center space-x-5 border border-charcoal/30">
+      <div className="bg-white/50 p-8 border border-gray-200 rounded-2xl flex items-center space-x-5 border border-charcoal/30">
         <div className="text-cyan-700">{CORE_ICONS.Dollar("w-8 h-8")}</div>
         <div>
           <h4 className="text-2xl font-bold text-charcoal leading-none">${stats.revenueYear.toLocaleString()}</h4>

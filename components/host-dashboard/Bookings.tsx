@@ -39,6 +39,30 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
     }
   };
 
+  const handleSendCheckInMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendCheckInMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send check-in message:", error);
+    }
+  };
+
+  const handleSendWelcomeMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendWelcomeMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send welcome message:", error);
+    }
+  };
+
+  const handleSendCheckoutMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendCheckoutMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send checkout message:", error);
+    }
+  };
+
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     if (status === BookingStatus.CANCELED) {
         try {
@@ -123,6 +147,9 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
                   apartmentTitle={title} 
                   onUpdateStatus={handleUpdateStatus}
                   onSendMessage={handleOpenModal}
+                  onSendCheckInMessage={handleSendCheckInMessage}
+                  onSendWelcomeMessage={handleSendWelcomeMessage}
+                  onSendCheckoutMessage={handleSendCheckoutMessage}
                   statusFilter={statusFilter}
                 />
               ))}

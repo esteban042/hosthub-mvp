@@ -48,7 +48,7 @@ const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Boo
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {monthlyStats.map(stat => (
-          <div key={stat.aptId} className="bg-white/50 border border-gray-700 rounded-xl p-6">
+          <div key={stat.aptId} className="bg-white/50 border border-gray-400 rounded-xl p-6">
             <h5 className="text-lg font-bold text-charcoal mb-4">{stat.aptTitle}</h5>
             <div className="flex justify-between items-center">
               <div>

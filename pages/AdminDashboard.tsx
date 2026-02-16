@@ -88,7 +88,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
         <button 
           onClick={() => { setEditingHost({ premiumConfig: { isEnabled: false, images: [], sections: [] } }); setShowHostModal(true); }}
-          className="bg-transparent px-10 py-5 rounded-2xl text-[12px] text-cyan-700 tracking-widest transition-all flex items-center space-x-3 active:scale-95 shadow-lg shadow-cyan-700/30 border border-cyan-700/30"
+          className="bg-transparent px-10 py-5 rounded-2xl text-[12px] text-cyan-700 hover:text-white hover:bg-cyan-700 tracking-widest transition-all flex items-center space-x-3 active:scale-95 shadow-lg shadow-cyan-700/30 border border-cyan-700/30"
         >
           <Plus className="w-4 h-4" strokeWidth={3} />
           <span>Onboard Host</span>

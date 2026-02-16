@@ -60,6 +60,9 @@ export interface Host {
   checkInTime?: string;
   checkOutTime?: string;
   checkInInfo?: string;
+  welcomeMessage?: string;
+  checkoutMessage?: string;
+  checkInMessage?: string;
 }
 
 export interface Apartment {

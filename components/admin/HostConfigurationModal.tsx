@@ -367,7 +367,7 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
 
           <div className="flex space-x-4 pt-12 border-t border-stone-200/60">
             <button type="button" onClick={onClose} className="flex-1 font-black py-6 rounded-2xl border border-charcoal-darker text-[10px] uppercase tracking-widest text-stone-500 hover:text-charcoal transition-all">Discard Changes</button>
-            <button type="submit" className="flex-1 text-cyan-700 bg-transparent border border-cyan-700 hover:bg-cyan-700 hover-text-white font-bold py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-sky-cyan-700/30">
+            <button type="submit" className="flex-1 text-cyan-700 bg-transparent border border-cyan-700 hover:bg-cyan-700 hover:text-white font-bold py-6 rounded-2xl transition-all text-[10px] uppercase tracking-widest active:scale-95 shadow-2xl shadow-sky-cyan-700/30">
               {isSaved ? 'SAVED!' : 'SAVE'}
             </button>
           </div>

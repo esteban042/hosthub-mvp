@@ -18,7 +18,7 @@ const ApartmentsList: React.FC<ApartmentsListProps> = ({ apartments, onConfigure
             <p className="text-[10px] font-bold tracking-widest mb-10 text-charcoal/60 uppercase">{apt.city}</p>
             <div className="flex justify-between items-center pt-6 border-t border-charcoal/10">
               <p className="text-xl font-bold text-coral-500">${apt.pricePerNight}<span className="text-[10px] text-charcoal/60 ml-2 font-bold">Base</span></p>
-              <button onClick={() => onConfigure(apt)} className="px-6 py-2 rounded-xl bg-transparent border border-charcoal-border text-charcoal-darker text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
+              <button onClick={() => onConfigure(apt)} className="px-6 py-2 rounded-xl bg-transparent border border-gray-600 text-charcoal-darker hover:text-white hover:bg-charcoal-darker text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
             </div>
           </div>
         </div>

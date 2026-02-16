@@ -8,6 +8,9 @@ import {
   BookingCancellationTemplate,
   DirectMessageTemplate,
   ServerCrashTemplate,
+  CheckInMessageTemplate,
+  WelcomeMessageTemplate,
+  CheckoutMessageTemplate
 } from '../components/EmailTemplates.js';
 
 export function getSmtpPassword() {
@@ -27,6 +30,9 @@ export async function sendEmail(toEmail: string, subject: string, templateName: 
       BookingCancellation: BookingCancellationTemplate,
       DirectMessage: DirectMessageTemplate,
       ServerCrash: ServerCrashTemplate,
+      CheckInMessage: CheckInMessageTemplate,
+      WelcomeMessage: WelcomeMessageTemplate,
+      CheckoutMessage: CheckoutMessageTemplate,
     }[templateName];
 
     if (!TemplateComponent) {

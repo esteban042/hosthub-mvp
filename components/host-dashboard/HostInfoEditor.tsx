@@ -21,7 +21,7 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
     e.preventDefault();
     setIsSaving(true);
     try {
-      await sanctumApi.updateHost(editingHost as Host);
+      await sanctumApi.updateHosts([editingHost as Host]);
       onHostUpdate(editingHost as Host);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
@@ -113,6 +113,21 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
         </div>
       </div>
       <div className="space-y-8 pt-8 border-t border-stone-200/60">
+        <h2 className="text-xl font-bold font-serif text-charcoal">Guest Communication</h2>
+        <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Check-in Message</label>
+            <textarea value={editingHost.checkInMessage || ''} onChange={e => setEditingHost({...editingHost, checkInMessage: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
+        </div>
+        <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Welcome Message</label>
+            <textarea value={editingHost.welcomeMessage || ''} onChange={e => setEditingHost({...editingHost, welcomeMessage: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-ne" />
+        </div>
+        <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Checkout Message</label>
+            <textarea value={editingHost.checkoutMessage || ''} onChange={e => setEditingHost({...editingHost, checkoutMessage: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
+        </div>
+      </div>
+      <div className="space-y-8 pt-8 border-t border-stone-200/60">
         <h2 className="text-xl font-bold font-serif text-charcoal">Policies & Instructions</h2>
         <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Payment Instructions</label>
@@ -151,7 +166,10 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
       </div>
 
       <div className="flex justify-end pt-8 border-t border-stone-200/60">
-        <button type="submit" disabled={isSaving} className="bg-sky-700/80 text-white disabled:bg-alabaster/70 disabled:text-stone-400 disabled:cursor-not-allowed py-4 px-8 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase shadow-2xl shadow-sky-700/30 active:scale-[0.98]">
+        <a href={`/${host.slug}`} target="_blank" rel="noopener noreferrer" className="mr-4 hover:bg-sky-700/80 hover:text-white border border-sky-700/80 text-sky-700/80 py-4 px-8 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase shadow-2xl shadow-sky-700/30 active:scale-[0.98]">
+          Preview Landing Page
+        </a>
+        <button type="submit" disabled={isSaving} className="hover:bg-sky-700/80 hover:text-white border border-sky-700/80 text-sky-700/80 disabled:bg-alabaster/70 disabled:text-stone-400 disabled:cursor-not-allowed py-4 px-8 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase shadow-2xl shadow-sky-700/30 active:scale-[0.98]">
           {isSaving ? 'Saving...' : isSaved ? 'Saved!' : 'Save Changes'}
         </button>
       </div>

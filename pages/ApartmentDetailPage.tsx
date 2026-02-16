@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate } from '../types';
-import { sanctumApi } from '../services/api';
+import { Apartment, Host, Booking } from '../types';
 import { BookingConfirmationCard } from '../components/BookingConfirmationCard';
 import ApartmentHeader from '../components/ApartmentHeader';
 import ApartmentStats from '../components/ApartmentStats';
 import ApartmentInfo from '../components/ApartmentInfo';
-import BookingForm from '../components/BookingForm';
-import CheckInInfo from '../components/CheckInInfo';
+import BookingSection from '../components/BookingSection';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
@@ -24,22 +22,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   onNewBooking
 }) => {
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    const fetchAvailability = async () => {
-      try {
-        const { bookings, blockedDates } = await sanctumApi.getApartmentAvailability(apartment.id);
-        setBookings(bookings.map(b => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] })));
-        setBlockedDates(blockedDates.map(d => ({ ...d, date: d.date.split('T')[0] })));
-      } catch (error) {
-        console.error("Failed to fetch apartment availability:", error);
-      }
-    };
-    fetchAvailability();
-  }, [apartment.id]);
+  }, []);
 
   const handleNewBooking = (booking: Booking) => {
     onNewBooking(booking);
@@ -51,16 +37,12 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       <ApartmentHeader apartment={apartment} onBack={onBack} />
       <ApartmentStats apartment={apartment} />
       <ApartmentInfo apartment={apartment} />
-      <BookingForm 
+      <BookingSection 
         apartment={apartment} 
-        host={host}
+        host={host} 
         airbnbCalendarDates={airbnbCalendarDates} 
-        bookings={bookings} 
-        blockedDates={blockedDates}
-        onNewBooking={handleNewBooking}
+        onNewBooking={handleNewBooking} 
       />
-
-      <CheckInInfo host={host} />
 
       {confirmedBooking && (
         <BookingConfirmationCard

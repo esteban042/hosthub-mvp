@@ -1,10 +1,10 @@
-
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Booking, BookingStatus } from '../types';
-import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer } from 'lucide-react';
+import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer, KeySquare, LogIn, LogOut } from 'lucide-react';
 import { formatBookingRange } from '../utils/formatBookingRange';
 import { getGuestDisplayName } from '../utils/bookingUtils';
+import MessageMenu from './MessageMenu';
 
 const getStatusBadgeStyle = (status: BookingStatus) => {
   switch (status) {
@@ -29,9 +29,13 @@ const BookingCard: React.FC<{
   apartmentTitle: string;
   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
   onSendMessage: (booking: Booking) => void;
+  onSendCheckInMessage: (booking: Booking) => void;
+  onSendWelcomeMessage: (booking: Booking) => void;
+  onSendCheckoutMessage: (booking: Booking) => void;
   statusFilter: string;
   showButtons?: boolean;
-}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, statusFilter, showButtons = true }) => {
+}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, onSendCheckInMessage, onSendWelcomeMessage, onSendCheckoutMessage, statusFilter, showButtons = true }) => {
+  const [isMessageMenuOpen, setIsMessageMenuOpen] = useState(false);
   const guestDisplayName = getGuestDisplayName(b.guestName, b.guestEmail);
 
   return (
@@ -66,14 +70,24 @@ const BookingCard: React.FC<{
       </div>
       {showButtons && (
         <div className="border-t border-charcoal/10 p-4 flex items-center justify-center space-x-2">
-            {statusFilter !== 'past' && b.status !== BookingStatus.CANCELED && (
-                <button 
-                onClick={() => onSendMessage(b)} 
-                className="flex-shrink-0 bg-transparent border border-sky-600 text-sky-600 p-3 rounded-xl hover:bg-sky-600/10 hover:text-white transition-all"
-                >
-                <MessageSquare className="w-4 h-4" />
-                </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsMessageMenuOpen(!isMessageMenuOpen)} 
+              className="flex-shrink-0 bg-transparent border border-sky-600 text-sky-600 p-3 rounded-xl hover:bg-sky-600/10 hover:text-white transition-all"
+            >
+              <MessageSquare className="w-4 h-4" />
+            </button>
+            {isMessageMenuOpen && (
+              <MessageMenu
+                booking={b}
+                onSendMessage={onSendMessage}
+                onSendWelcomeMessage={onSendWelcomeMessage}
+                onSendCheckInMessage={onSendCheckInMessage}
+                onSendCheckoutMessage={onSendCheckoutMessage}
+                onClose={() => setIsMessageMenuOpen(false)}
+              />
             )}
+            </div>
             <div className="flex-grow flex items-center justify-center space-x-2">
                 {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                     <>
