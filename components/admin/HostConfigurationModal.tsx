@@ -177,6 +177,10 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                     </div>
                 </div>
                 <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Business ID</label>
+                  <input type="text" value={editingHost.businessId || ''} onChange={e => setEditingHost({ ...editingHost, businessId: e.target.value })} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
+                </div>
+                <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Airbnb iCal Link</label>
                   <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />
                 </div>

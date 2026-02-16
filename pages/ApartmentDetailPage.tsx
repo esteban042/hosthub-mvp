@@ -6,6 +6,7 @@ import ApartmentHeader from '../components/ApartmentHeader';
 import ApartmentStats from '../components/ApartmentStats';
 import ApartmentInfo from '../components/ApartmentInfo';
 import BookingForm from '../components/BookingForm';
+import CheckInInfo from '../components/CheckInInfo';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
@@ -58,6 +59,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
         blockedDates={blockedDates}
         onNewBooking={handleNewBooking}
       />
+
+      <CheckInInfo host={host} />
 
       {confirmedBooking && (
         <BookingConfirmationCard

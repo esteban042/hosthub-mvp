@@ -13,7 +13,7 @@ const BookingListItem: React.FC<{
   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
 }> = ({ booking: b, apartmentTitle, statusFilter, onUpdateStatus: handleUpdateStatus }) => {
   return (
-    <div key={b.id} className="w-full bg-[#1c1a19] rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
+    <div key={b.id} className="w-full rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
       <div className="space-y-4 flex-1 text-left">
         <div className="flex items-center space-x-4">
           <h4 className="text-2xl font-serif text-charcoal-darker">{b.guestName || 'Guest'}</h4>

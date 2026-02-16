@@ -76,6 +76,11 @@ export const sanctumApi = {
     body: JSON.stringify(data),
   }),
 
+  updateHost: (data: Host) => fetchApi<Host>(`/api/v1/hosts/${data.id}` , {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
   updateHosts: (data: Host[]) => fetchApi<Host[]>('/api/v1/hosts', {
     method: 'PUT',
     body: JSON.stringify(data),

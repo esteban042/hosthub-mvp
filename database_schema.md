@@ -19,6 +19,7 @@ This document provides an overview of the database tables and their fields.
 - `is_active`: boolean
 - `map_embed_url`: text
 - `min_stay_nights`: integer
+- `max_stay_nights`: integer
 
 ## `public.blocked_dates`
 - `id`: text (Primary Key)
@@ -67,6 +68,10 @@ This document provides an overview of the database tables and their fields.
 - `conditions`: text
 - `faq`: text
 - `social_media_links`: jsonb
+- `business_id`: text
+- `check_in_time`: text
+- `check_out_time`: text
+- `check_in_info`: text
 
 ## `public.profiles`
 - `id`: uuid (Primary Key, Foreign Key to `auth.users`)
@@ -103,6 +108,7 @@ CREATE TABLE public.apartments (
   is_active boolean DEFAULT true,
   map_embed_url text,
   min_stay_nights integer,
+  max_stay_nights integer,
   CONSTRAINT apartments_pkey PRIMARY KEY (id),
   CONSTRAINT apartments_host_id_fkey FOREIGN KEY (host_id) REFERENCES public.hosts(id)
 );
@@ -156,6 +162,10 @@ CREATE TABLE public.hosts (
   conditions text,
   faq text,
   social_media_links jsonb DEFAULT '{}'::jsonb,
+  business_id text,
+  check_in_time text,
+  check_out_time text,
+  check_in_info text,
   CONSTRAINT hosts_pkey PRIMARY KEY (id),
   CONSTRAINT fk_hosts_users FOREIGN KEY (user_id) REFERENCES public.users(id)
 );

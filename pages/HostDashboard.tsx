@@ -11,6 +11,7 @@ import ApartmentsList from '../components/host-dashboard/ApartmentsList';
 import Bookings from '../components/host-dashboard/Bookings';
 import CurrentBookings from '../components/host-dashboard/CurrentBookings';
 import Calendar from '../components/host-dashboard/Calendar';
+import HostInfoEditor from '../components/host-dashboard/HostInfoEditor';
 
 interface HostDashboardProps {
   host: Host;
@@ -20,14 +21,15 @@ interface HostDashboardProps {
   onUpdateBookings: (bookings: Booking[]) => void;
   onBlockedDatesChange: () => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
+  onHostUpdate: (updatedHost: Host) => void;
   airbnbCalendarDates: string[]; 
   loadingAirbnbIcal: boolean; 
 }
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
+  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
-  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics'>('current-bookings');
+  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics' | 'general-info'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
 
@@ -114,8 +116,13 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       {activeTab === 'calendar' && <Calendar />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && (
-        <div className="bg-zinc-100 border border-zinc-800 rounded-2xl p-8">
+        <div className="border border-gray-800 rounded-2xl p-8">
           <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
+        </div>
+      )}
+      {activeTab === 'general-info' && (
+        <div className="border border-zinc-800 rounded-2xl p-8">
+            <HostInfoEditor host={host} onHostUpdate={onHostUpdate} />
         </div>
       )}
 

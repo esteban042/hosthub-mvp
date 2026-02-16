@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
 import { sanctumApi } from '../services/api';
 import { formatDate } from '../utils/dates';
 import HeroCalendar from './HeroCalendar';
 import { CORE_ICONS, COUNTRIES } from '../constants';
+import Modal from './Modal'; // Import the Modal component
 
 interface BookingFormProps {
   apartment: Apartment;
@@ -26,6 +27,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: '', message: '' });
 
   const totalPrice = useMemo(() => {
     if (!startDate || !endDate) return 0;
@@ -40,6 +43,29 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
       current.setDate(current.getDate() + 1);
     }
     return total;
+  }, [startDate, endDate, apartment]);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      const nights = (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24);
+      if (apartment.minStayNights && nights < apartment.minStayNights) {
+        setModalContent({
+          title: 'Minimum Stay Requirement',
+          message: `This property requires a minimum stay of ${apartment.minStayNights} nights.`
+        });
+        setIsModalOpen(true);
+        setStartDate('');
+        setEndDate('');
+      } else if (apartment.maxStayNights && nights > apartment.maxStayNights) {
+        setModalContent({
+          title: 'Maximum Stay Exceeded',
+          message: `This property allows a maximum stay of ${apartment.maxStayNights} nights.`
+        });
+        setIsModalOpen(true);
+        setStartDate('');
+        setEndDate('');
+      }
+    }
   }, [startDate, endDate, apartment]);
 
   const validateForm = () => {
@@ -104,8 +130,17 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
   };
 
   return (
-    <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
-      <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
+    <>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalContent.title}
+      >
+        <p>{modalContent.message}</p>
+      </Modal>
+      <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
+        {/* ... rest of the form ... */}
+              <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
         <div>
           <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Estimated total</span>
           <span className="text-5xl font-black text-charcoal">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
@@ -231,7 +266,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         </button>
         <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6 text-charcoal">Book with instant confirmation</p>
       </form>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -43,12 +43,12 @@ const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Boo
     <div>
       <div className="flex items-center justify-between mb-8">
         <button onClick={goToPreviousMonth} className="text-charcoal/60 hover:text-charcoal transition-colors"><ChevronLeft className="w-5 h-5" /></button>
-        <h4 className="text-charcoal font-serif text-lg font-bold">{currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}</h4>
+        <h4 className="text-charcoal text-2xl font-serif font-bold">{currentMonth.toLocaleString('en-US', { month: 'long', year: 'numeric' })}</h4>
         <button onClick={goToNextMonth} className="text-charcoal/60 hover:text-charcoal transition-colors"><ChevronRight className="w-5 h-5" /></button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {monthlyStats.map(stat => (
-          <div key={stat.aptId} className="bg-alabaster border border-stone-200 rounded-xl p-6">
+          <div key={stat.aptId} className="bg-white/50 border border-gray-700 rounded-xl p-6">
             <h5 className="text-lg font-bold text-charcoal mb-4">{stat.aptTitle}</h5>
             <div className="flex justify-between items-center">
               <div>

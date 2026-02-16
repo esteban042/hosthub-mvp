@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Apartment, PriceRule } from '../../types';
-import { ALL_AMENITIES, SKY_ACCENT } from '../../constants';
 import { Tag, Trash2, Info, X, Plus } from 'lucide-react';
 import DatePicker from '../DatePicker';
+import AmenitySelector from '../AmenitySelector';
 
 interface ApartmentEditorProps {
   editingApt: Partial<Apartment> | null;
@@ -58,11 +58,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
     setApt({ ...apt, photos: currentPhotos.filter((_, i) => i !== index) });
   };
 
-  const handleToggleAmenity = (amenity: string) => {
-    const currentAmenities = apt.amenities || [];
-    const newAmenities = currentAmenities.includes(amenity)
-        ? currentAmenities.filter(a => a !== amenity)
-        : [...currentAmenities, amenity];
+  const handleAmenitiesChange = (newAmenities: string[]) => {
     setApt({ ...apt, amenities: newAmenities });
   };
 
@@ -98,14 +94,18 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                      </div>
                  </div>
 
-                   <div className="grid grid-cols-2 gap-4">
+                   <div className="grid grid-cols-3 gap-4">
                    <div>
                          <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Base Price</label>
                          <input type="number" required value={apt.pricePerNight || 0} onChange={e => setApt({...apt, pricePerNight: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
                       </div>
                       <div>
-                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Minimum Stay (in days)</label>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Min Stay (Nights)</label>
                          <input type="number" value={apt.minStayNights || 1} onChange={e => setApt({...apt, minStayNights: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
+                      </div>
+                      <div>
+                         <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Max Stay (Nights)</label>
+                         <input type="number" value={apt.maxStayNights || 30} onChange={e => setApt({...apt, maxStayNights: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal outline-none" />
                       </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4">
@@ -129,7 +129,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                      <Tag className="w-5 h-5 text-emerald-400" />
                      <h4 className="text-xl font-bold text-charcoal tracking-tight">Seasonal Pricing Overrides</h4>
                   </div>
-                  <button type="button" onClick={addPriceOverride} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center space-x-2">
+                  <button type="button" onClick={addPriceOverride} className="text-[10px] font-black uppercase tracking-widest bg-cyan-600/10 text-cyan-700 border border-cyan-700/40 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center space-x-2">
                     <Plus className="w-4 h-4" strokeWidth={3} /> 
                     <span>Add Rate Rule</span>
                   </button>
@@ -139,7 +139,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                   {apt.priceOverrides?.map((rule) => (
                     <div key={rule.id} className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/50 p-6 rounded-[1.8rem] border border-stone-200 items-end animate-in slide-in-from-bottom-2">
                        <div>
-                          <label className="block text-[10px] font-black uppercase text-charcoal/60 mb-2">From Date</label>
+                          <label className="block bg-white/50 text-[10px] font-black uppercase text-charcoal/60 mb-2">From Date</label>
                           <DatePicker
                           selectedDate={rule.startDate}
                           onSelect={(date) => updatePriceRule(rule.id, { startDate: date })}
@@ -177,7 +177,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                         <Tag className="w-5 h-5 text-emerald-400" />
                         <h4 className="text-xl font-bold text-charcoal tracking-tight">Unit Photos</h4>
                     </div>
-                    <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center space-x-2">
+                    <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-cyan-600/10 text-cyan-700 border border-cyan-700/40 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center space-x-2">
                       <Plus className="w-4 h-4" strokeWidth={3} />
                       <span>Add Photo URL</span>
                     </button>
@@ -215,26 +215,10 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                     <Tag className="w-5 h-5 text-emerald-400" />
                     <h4 className="text-xl font-bold text-charcoal tracking-tight">Amenities</h4>
                 </div>
-                <div className="flex flex-wrap gap-4">
-                    {ALL_AMENITIES.map(amenity => {
-                        const isSelected = apt.amenities?.includes(amenity.label);
-                        return (
-                            <button
-                                type="button"
-                                key={amenity.label}
-                                onClick={() => handleToggleAmenity(amenity.label)}
-                                className={`flex items-center space-x-3 px-6 py-4 rounded-2xl border transition-all text-sm font-medium ${
-                                    isSelected
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
-                                        : 'bg-white/50 border-stone-300 text-charcoal hover:border-stone-400'
-                                }`}
-                            >
-                                {amenity.icon}
-                                <span>{amenity.label}</span>
-                            </button>
-                        );
-                    })}
-                </div>
+                <AmenitySelector
+                  selectedAmenities={apt.amenities || []}
+                  onChange={handleAmenitiesChange}
+                />
               </div>
 
              <div className="flex space-x-4 pt-6 border-t border-stone-200">

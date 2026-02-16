@@ -1,4 +1,3 @@
-
 export enum UserRole {
   GUEST = 'guest',
   HOST = 'host',
@@ -42,6 +41,7 @@ export interface Host {
   airbnbCalendarLink: string | null;
   paymentInstructions: string | null;
   businessName: string | null;
+  businessId: string | null;
   landingPagePicture: string | null;
   premiumConfig: {
     images: string[];
@@ -57,6 +57,9 @@ export interface Host {
     facebook?: string;
   };
   vat?: number;
+  checkInTime?: string;
+  checkOutTime?: string;
+  checkInInfo?: string;
 }
 
 export interface Apartment {
@@ -76,6 +79,7 @@ export interface Apartment {
   isActive: boolean;
   mapEmbedUrl: string | null;
   minStayNights: number;
+  maxStayNights: number;
 }
 
 export interface Booking {
