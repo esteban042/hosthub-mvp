@@ -43,6 +43,7 @@ router.post('/',
     body('slug').not().isEmpty().trim().escape(),
     body('subscriptionType').isIn(Object.values(SubscriptionType)),
     body('commissionRate').isFloat({ gt: 0 }),
+    body('vat').isFloat({ gte: 0 }).optional(),
   ],
   validate,
   async (req: Request, res, next) => {
@@ -65,15 +66,16 @@ router.post('/',
         landingPagePicture = null,
         airbnbCalendarLink = null,
         paymentInstructions = null,
-        premiumConfig = { isEnabled: false, images: [], sections: [] }
+        premiumConfig = { isEnabled: false, images: [], sections: [] },
+        vat = 0
     } = req.body;
 
     const client = await pool.connect();
     try {
         const result = await client.query(
         `INSERT INTO hosts
-            (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+            (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
         RETURNING *`,
         [
             name,
@@ -90,7 +92,8 @@ router.post('/',
             landingPagePicture,
             airbnbCalendarLink,
             JSON.stringify(premiumConfig),
-            paymentInstructions
+            paymentInstructions,
+            vat
         ]
         );
         res.status(201).json(keysToCamel(result.rows[0]));
@@ -138,7 +141,8 @@ router.put('/',
         const {
           name, slug, bio, avatar, subscriptionType, commissionRate,
           businessName, contactEmail, physicalAddress, country, phoneNumber,
-          landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions, id
+          landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions, id,
+          vat
         } = host;
 
         await client.query(
@@ -147,12 +151,13 @@ router.put('/',
             commission_rate = $6, business_name = $7, contact_email = $8,
             physical_address = $9, country = $10, phone_number = $11,
             landing_page_picture = $12, airbnb_calendar_link = $13,
-            premium_config = $14, payment_instructions = $15
-          WHERE id = $16`,
+            premium_config = $14, payment_instructions = $15, vat = $16
+          WHERE id = $17`,
           [
             name, slug, bio, avatar, subscriptionType, commissionRate,
             businessName, contactEmail, physicalAddress, country, phoneNumber,
-            landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions, id
+            landingPagePicture, airbnbCalendarLink, premiumConfig, paymentInstructions,
+            vat, id
           ]
         );
       }

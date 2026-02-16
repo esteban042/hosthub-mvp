@@ -170,6 +170,12 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                     <input type="number" required value={editingHost.commissionRate || 3} onChange={e => setEditingHost({...editingHost, commissionRate: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
                   </div>
                 </div>
+                <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">VAT (%)</label>
+                        <input type="number" value={editingHost.vat || 0} onChange={e => setEditingHost({...editingHost, vat: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
+                    </div>
+                </div>
                 <div>
                   <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Airbnb iCal Link</label>
                   <input type="url" value={editingHost.airbnbCalendarLink || ''} onChange={e => setEditingHost({...editingHost, airbnbCalendarLink: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" placeholder="https://www.airbnb.com/calendar/ical/..." />

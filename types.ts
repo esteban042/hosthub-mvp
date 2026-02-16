@@ -56,6 +56,7 @@ export interface Host {
     instagram?: string;
     facebook?: string;
   };
+  vat?: number;
 }
 
 export interface Apartment {
