@@ -17,7 +17,7 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
     today.setHours(0, 0, 0, 0);
 
     const hostAptIds = apartments.map(a => a.id);
-    const relevantBookings = bookings.filter(b => hostAptIds.includes(b.apartmentId));
+    const relevantBookings = bookings.filter(b => hostAptIds.includes(b.apartmentId) && b.status !== BookingStatus.CANCELED);
     
     const guestsCurrentlyIn = relevantBookings.filter(b => {
         const startDate = new Date(b.startDate);

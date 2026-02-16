@@ -43,7 +43,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
       const isSelected = dateStr === selectedDate;
       const dayClass = isSelected
         ? 'bg-emerald-500 text-white'
-        : 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white';
+        : 'border-stone-700 text-stone-200 hover:text-white';
 
       days.push(
         <button
@@ -60,7 +60,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
     }
 
     return (
-      <div className="p-4 bg-[#1c1a19] rounded-2xl border border-stone-800">
+      <div className="p-4 rounded-2xl border border-stone-800">
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
@@ -95,7 +95,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
         readOnly
         value={selectedDate}
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none cursor-pointer"
+        className="w-full border border-stone-800 rounded-xl p-3 text-xs text-white outline-none cursor-pointer"
       />
       {isOpen && (
         <div className="absolute top-full left-0 mt-2 z-10">

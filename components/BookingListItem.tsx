@@ -1,6 +1,7 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Booking, BookingStatus } from '../types';
-import { CalendarDays, Users, Mail, Phone } from 'lucide-react';
+import { CalendarDays, Users, Mail, Phone, Printer } from 'lucide-react';
 import { formatBookingRange } from '../utils/formatBookingRange.tsx';
 import { CARD_BORDER } from '../constants.tsx';
 
@@ -53,6 +54,9 @@ const BookingListItem: React.FC<{
           )}
         </div>
       </div>
+        <Link to={`/booking/print/${b.id}`} target="_blank" className="text-stone-400 hover:text-sky-700 transition-colors p-4 bg-white/10 rounded-full">
+            <Printer className="w-6 h-6" />
+        </Link>
     </div>
   );
 };

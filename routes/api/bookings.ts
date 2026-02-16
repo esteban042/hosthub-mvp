@@ -127,23 +127,15 @@ router.get('/:id',
     try {
       const result = await client.query(
         `SELECT
-          b.id AS booking_id,
-          b.start_date,
-          b.end_date,
-          b.total_price,
-          b.status,
-          b.guest_name, 
-          b.guest_email, 
-          b.guest_country, 
-          b.guest_phone, 
-          b.num_guests, 
-          b.guest_message,
-          a.id AS apartment_id,
-          a.name AS apartment_name,
-          a.description AS apartment_description,
-          a.location AS apartment_location,
-          h.id AS host_id,
-          u.id as host_user_id
+          b.*,
+          a.title AS apartment_title,
+          a.city AS apartment_city,
+          a.photos AS apartment_photos,
+          a.price_per_night,
+          h.name AS host_name,
+          h.contact_email AS host_email,
+          h.phone_number AS host_phone,
+          u.id AS host_user_id
         FROM
           bookings b
         JOIN
@@ -163,7 +155,7 @@ router.get('/:id',
 
       const booking = result.rows[0];
 
-      if (!req.user || booking.host_user_id !== req.user.id) {
+      if (!req.user || (req.user.role !== 'admin' && booking.host_user_id !== req.user.id)) {
         return res.status(403).json({ error: 'You are not authorized to view this booking' });
       }
 

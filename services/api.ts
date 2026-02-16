@@ -65,6 +65,8 @@ export const sanctumApi = {
 
   getAllBookings: () => fetchApi<Booking[]>('/api/v1/bookings'),
 
+  getBookingById: (bookingId: string) => fetchApi<Booking>(`/api/v1/bookings/${bookingId}`),
+
   getAllBlockedDates: () => fetchApi<BlockedDate[]>('/api/v1/blocked-dates'),
 
   getApartmentAvailability: (apartmentId: string) => fetchApi<{ bookings: Booking[], blockedDates: BlockedDate[] }>(`/api/v1/availability?apartmentId=${apartmentId}`),

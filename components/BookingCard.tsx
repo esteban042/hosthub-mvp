@@ -1,7 +1,8 @@
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Booking, BookingStatus } from '../types';
-import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare } from 'lucide-react';
+import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer } from 'lucide-react';
 import { formatBookingRange } from '../utils/formatBookingRange';
 import { getGuestDisplayName } from '../utils/bookingUtils';
 
@@ -38,9 +39,14 @@ const BookingCard: React.FC<{
       <div className="p-6 flex-grow">
         <div className="flex items-start justify-between mb-4">
           <h4 className="text-xl font-bold text-charcoal leading-tight">{guestDisplayName}</h4>
-          <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${getStatusBadgeStyle(b.status)}`}>
-            {b.status}
-          </span>
+          <div className="flex items-center space-x-2">
+            <Link to={`/booking/print/${b.id}`} target="_blank" className="text-stone-400 hover:text-sky-700 transition-colors">
+                <Printer className="w-5 h-5" />
+            </Link>
+            <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${getStatusBadgeStyle(b.status)}`}>
+                {b.status}
+            </span>
+          </div>
         </div>
 
         {!showButtons && (
