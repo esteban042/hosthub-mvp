@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Apartment } from '../types';
-import { AMENITY_ICONS } from '../constants';
+import { Apartment, Host } from '../../types';
+import { AMENITY_ICONS } from '../../constants';
+import Faq from './Faq';
+import CheckInInfo from './CheckInInfo';
 
 interface ApartmentInfoProps {
   apartment: Apartment;
+  host: Host;
 }
 
-const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment }) => {
+const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment, host }) => {
   const [isMapEnlarged, setIsMapEnlarged] = useState(false);
   const aboutColRef = useRef<HTMLDivElement>(null);
   const [mapContainerHeight, setMapContainerHeight] = useState<number>(400);
@@ -60,6 +63,8 @@ const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment }) => {
               ))}
             </div>
           </div>
+          <CheckInInfo host={host} />
+          <Faq faq={host.faq} />
         </div>
 
         <div className="lg:col-span-1">

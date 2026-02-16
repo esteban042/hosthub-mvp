@@ -1,5 +1,5 @@
 import React from 'react';
-import { ALL_AMENITIES } from '../utils/amenities.tsx';
+import { ALL_AMENITIES } from '../../utils/amenities.tsx';
 import { CircleHelp } from 'lucide-react';
 
 interface AmenityListProps {

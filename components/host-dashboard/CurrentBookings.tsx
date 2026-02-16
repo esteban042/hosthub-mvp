@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Booking, Apartment, BookingStatus } from '../../types';
-import BookingCard from '../BookingCard';
-import BookingListItem from '../BookingListItem';
+import BookingCard from '../booking/BookingCard';
+import BookingListItem from '../booking/BookingListItem';
 
 interface CurrentBookingsProps {
   bookings: Booking[];

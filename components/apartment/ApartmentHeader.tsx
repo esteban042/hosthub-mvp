@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Apartment } from '../types';
-import { CORE_ICONS } from '../constants';
+import { Apartment } from '../../types';
+import { CORE_ICONS } from '../../constants';
 
 interface ApartmentHeaderProps {
   apartment: Apartment;

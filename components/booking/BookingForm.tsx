@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../types';
-import { sanctumApi } from '../services/api';
-import { formatDate } from '../utils/dates';
-import HeroCalendar from './HeroCalendar';
-import { CORE_ICONS, COUNTRIES } from '../constants';
-import Modal from './Modal'; // Import the Modal component
+import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../../types';
+import { sanctumApi } from '../../services/api';
+import { formatDate } from '../../utils/dates';
+import HeroCalendar from '../HeroCalendar';
+import { CORE_ICONS, COUNTRIES } from '../../constants';
+import Modal from '../Modal'; // Import the Modal component
 
 interface BookingFormProps {
   apartment: Apartment;
@@ -149,7 +149,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         </div>
       </div>
 
-      <form onSubmit={handleBooking} className="space-y-6">
+      <form noValidate onSubmit={handleBooking} className="space-y-6">
         <div className="space-y-2">
           <label className="block text-sm text-charcoal font-medium ml-1">Guest name</label>
           <input

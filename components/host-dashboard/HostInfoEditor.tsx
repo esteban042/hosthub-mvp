@@ -21,7 +21,7 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
     e.preventDefault();
     setIsSaving(true);
     try {
-      await sanctumApi.updateHosts([editingHost as Host]);
+      await sanctumApi.updateHost(editingHost as Host);
       onHostUpdate(editingHost as Host);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Booking, BookingStatus } from '../types';
+import { Booking, BookingStatus } from '../../types';
 import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer, KeySquare, LogIn, LogOut } from 'lucide-react';
-import { formatBookingRange } from '../utils/formatBookingRange';
-import { getGuestDisplayName } from '../utils/bookingUtils';
-import MessageMenu from './MessageMenu';
+import { formatBookingRange } from '../../utils/formatBookingRange';
+import { getGuestDisplayName } from '../../utils/bookingUtils';
+import MessageMenu from '../MessageMenu';
 
 const getStatusBadgeStyle = (status: BookingStatus) => {
   switch (status) {

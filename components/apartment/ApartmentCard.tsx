@@ -1,6 +1,6 @@
 import React from 'react';
-import { Apartment } from '../types';
-import { CORE_ICONS } from '../constants';
+import { Apartment } from '../../types';
+import { CORE_ICONS } from '../../constants';
 
 interface ApartmentCardProps {
   apartment: Apartment;

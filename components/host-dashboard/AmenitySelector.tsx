@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ALL_AMENITIES } from '../utils/amenities.tsx';
+import { ALL_AMENITIES } from '../../utils/amenities.js';
 
 interface AmenitySelectorProps {
   selectedAmenities: string[];

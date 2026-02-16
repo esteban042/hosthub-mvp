@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Apartment, PriceRule } from '../../types';
 import { Tag, Trash2, Info, X, Plus } from 'lucide-react';
 import DatePicker from '../DatePicker';
-import AmenitySelector from '../AmenitySelector';
+import AmenitySelector from './AmenitySelector';
 
 interface ApartmentEditorProps {
   editingApt: Partial<Apartment> | null;

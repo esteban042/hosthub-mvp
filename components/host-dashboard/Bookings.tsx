@@ -1,6 +1,6 @@
 import React from 'react';
 import { Booking, BookingStatus, Host, Apartment } from '../../types';
-import BookingCard from '../BookingCard';
+import BookingCard from '../booking/BookingCard';
 import { CalendarDays, History, X } from 'lucide-react';
 import MessageModal from './MessageModal';
 import { sanctumApi } from '../../services/api';

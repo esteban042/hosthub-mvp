@@ -1,5 +1,5 @@
 import React from 'react';
-import { Host } from '../types';
+import { Host } from '../../types';
 
 interface CheckInInfoProps {
   host: Host;

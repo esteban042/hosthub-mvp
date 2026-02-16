@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate } from '../types';
-import { sanctumApi } from '../services/api';
+import { Apartment, Host, Booking, BlockedDate } from '../../types';
+import { sanctumApi } from '../../services/api';
 import BookingForm from './BookingForm';
-import CheckInInfo from './CheckInInfo';
-import Faq from './Faq';
+import CheckInInfo from '../apartment/CheckInInfo';
 
 interface BookingSectionProps {
   apartment: Apartment;
@@ -41,9 +40,6 @@ const BookingSection: React.FC<BookingSectionProps> = ({ apartment, host, airbnb
       />
       <div className="mt-12">
         <CheckInInfo host={host} />
-      </div>
-      <div className="mt-12">
-        <Faq faq={host.faq} />
       </div>
     </div>
   );

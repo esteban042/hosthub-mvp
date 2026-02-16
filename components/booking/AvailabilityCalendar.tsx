@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Booking, BlockedDate, BookingStatus } from '../types';
-import { CARD_BORDER } from '../constants.tsx';
+import { Booking, BlockedDate, BookingStatus } from '../../types';
+import { CARD_BORDER } from '../../constants.tsx';
 
 const AvailabilityCalendar: React.FC<{ 
   aptId: string, 

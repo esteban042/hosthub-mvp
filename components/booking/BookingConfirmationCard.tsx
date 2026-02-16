@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard } from 'lucide-react';
 import { Booking, Apartment, Host } from '../types';
-import { BACKGROUND_COLOR, TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../constants';
+import { BACKGROUND_COLOR, TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../../constants';
 
 interface BookingConfirmationCardProps {
   booking: Booking;
