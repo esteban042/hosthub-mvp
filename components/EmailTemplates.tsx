@@ -232,6 +232,9 @@ export const BookingConfirmationTemplate: React.FC<TemplateProps> = ({ host, apa
                 />
                 <InfoRow icon={Users} label="Guests" value={booking.numGuests} />
                 <InfoRow icon={DollarSign} label="Total Price" value={`$${booking.totalPrice.toFixed(2)}`} />
+                {booking.depositAmount && booking.depositAmount > 0 && (
+                  <InfoRow icon={DollarSign} label="Deposit Amount" value={`$${booking.depositAmount.toFixed(2)}`} />
+                )}
             </div>
 
             <SpecialInfoBlock 

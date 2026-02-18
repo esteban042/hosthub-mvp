@@ -7,6 +7,7 @@ import blockedDatesRouter from './blocked-dates';
 import availabilityRouter from './availability';
 import messagesRouter from './messages';
 import miscRouter from './misc';
+import viewsRouter from './views';
 
 const router = Router();
 
@@ -16,6 +17,7 @@ router.use('/hosts', hostsRouter);
 router.use('/users', usersRouter);
 router.use('/availability', availabilityRouter);
 router.use('/messages', messagesRouter);
+router.use('/views', viewsRouter);
 router.use('/', blockedDatesRouter);
 router.use('/', miscRouter);
 

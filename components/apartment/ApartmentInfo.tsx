@@ -63,8 +63,6 @@ const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment, host }) => {
               ))}
             </div>
           </div>
-          <CheckInInfo host={host} />
-          <Faq faq={host.faq} />
         </div>
 
         <div className="lg:col-span-1">

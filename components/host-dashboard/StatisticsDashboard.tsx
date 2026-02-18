@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Apartment, Booking, BookingStatus } from '../types';
+import { Apartment, Booking, BookingStatus } from '../../types.js';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 

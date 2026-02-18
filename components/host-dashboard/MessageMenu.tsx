@@ -1,5 +1,5 @@
 import React from 'react';
-import { Booking } from '../types';
+import { Booking } from '../../types.js';
 import { MessageSquare, LogIn, KeySquare, LogOut } from 'lucide-react';
 
 interface MessageMenuProps {

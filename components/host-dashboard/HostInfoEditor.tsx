@@ -130,6 +130,10 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
       <div className="space-y-8 pt-8 border-t border-stone-200/60">
         <h2 className="text-xl font-bold font-serif text-charcoal">Policies & Instructions</h2>
         <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Deposit Percentage (%)</label>
+            <input type="number" value={editingHost.depositPercentage || ''} onChange={e => setEditingHost({ ...editingHost, depositPercentage: e.target.value ? Number(e.target.value) : undefined })} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
+        </div>
+        <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Payment Instructions</label>
             <textarea value={editingHost.paymentInstructions || ''} onChange={e => setEditingHost({...editingHost, paymentInstructions: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
         </div>

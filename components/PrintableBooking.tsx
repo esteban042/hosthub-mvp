@@ -90,6 +90,18 @@ const PrintableBooking: React.FC = () => {
             <p className="text-xl font-bold text-green-600">${booking.totalPrice.toLocaleString()}</p>
         </div>
 
+        {booking.depositAmount && booking.depositAmount > 0 && (
+            <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg mt-4">
+                <p className="text-lg font-semibold text-gray-700">Deposit Paid</p>
+                <p className="text-lg font-semibold text-gray-700">-${booking.depositAmount.toLocaleString()}</p>
+            </div>
+        )}
+
+        <div className="flex justify-between items-center bg-gray-300 p-4 rounded-lg mt-4">
+            <p className="text-xl font-bold text-gray-800">Balance Due</p>
+            <p className="text-xl font-bold text-green-600">${(booking.totalPrice - (booking.depositAmount || 0)).toLocaleString()}</p>
+        </div>
+
         <footer className="text-center mt-10 text-gray-500">
             <p>Thank you for your business!</p>
         </footer>

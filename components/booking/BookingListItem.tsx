@@ -37,7 +37,7 @@ const BookingListItem: React.FC<{
             <span className="text-s font-mono opacity-60">#{b.customBookingId}</span>
             </div>
           <div className="flex items-center space-x-2">
-             <span className="text-ml">${b.totalPrice.toLocaleString()} Total</span>
+             <span className="text-ml font-black ">${b.totalPrice.toLocaleString()} Total</span>
           </div>
         </div>
 

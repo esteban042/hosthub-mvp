@@ -45,6 +45,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     return total;
   }, [startDate, endDate, apartment]);
 
+  const depositAmount = useMemo(() => {
+    if (!totalPrice || !host.depositPercentage) return 0;
+    return totalPrice * (host.depositPercentage / 100);
+  }, [totalPrice, host.depositPercentage]);
+
   useEffect(() => {
     if (startDate && endDate) {
       const nights = (new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 3600 * 24);
@@ -109,14 +114,13 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
       guestName: name,
       guestEmail: email,
       guestCountry: guestCountry,
-      guestPhone: phone,
       numGuests: numGuests,
       startDate: startDate,
       endDate: endDate,
       status: BookingStatus.CONFIRMED,
       totalPrice: totalPrice,
-      isDepositPaid: false,
-      guestMessage: message
+      notes: message,
+      depositAmount: depositAmount
     };
 
     try {
@@ -146,6 +150,12 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
           <span className="text-5xl font-black text-charcoal">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
         </div>
         <div className="text-right">
+          {depositAmount > 0 && (
+            <div>
+              <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Deposit due</span>
+              <span className="text-3xl font-black text-charcoal">${depositAmount.toLocaleString()}</span>
+            </div>
+          )}
         </div>
       </div>
 

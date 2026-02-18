@@ -20,6 +20,7 @@ This document provides an overview of the database tables and their fields.
 - `map_embed_url`: text
 - `min_stay_nights`: integer
 - `max_stay_nights`: integer
+- `page_views`: integer
 
 ## `public.blocked_dates`
 - `id`: text (Primary Key)
@@ -109,6 +110,7 @@ CREATE TABLE public.apartments (
   map_embed_url text,
   min_stay_nights integer,
   max_stay_nights integer,
+  page_views integer DEFAULT 0,
   CONSTRAINT apartments_pkey PRIMARY KEY (id),
   CONSTRAINT apartments_host_id_fkey FOREIGN KEY (host_id) REFERENCES public.hosts(id)
 );

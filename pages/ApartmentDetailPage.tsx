@@ -28,6 +28,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   useEffect(() => {
     window.scrollTo(0, 0);
 
+    if (apartment.id) {
+      sanctumApi.trackApartmentView(apartment.id);
+    }
+
     const fetchHostDetails = async () => {
       if (!initialHost?.slug) {
         return;
@@ -43,7 +47,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     };
 
     fetchHostDetails();
-  }, [initialHost]);
+  }, [initialHost, apartment.id]);
 
   const handleNewBooking = (booking: Booking) => {
     onNewBooking(booking);
@@ -51,20 +55,18 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   }
 
   return (
-    <div className="pt-24 md:pt-32 pb-24 w-full max-w-7xl mx-auto px-6 text-left animate-in fade-in duration-700 font-dm">
+    <div className="pt-24 md:pt-32 pb-24 w-full max-w-4xl mx-auto px-6 text-left animate-in fade-in duration-700 font-dm">
       <ApartmentHeader apartment={apartment} onBack={onBack} />
       <ApartmentStats apartment={apartment} />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-12">
-        <div className="md:col-span-2">
-          <ApartmentInfo apartment={apartment} host={host} />
-        </div>
-        <div className="md:col-span-1">
-          <BookingSection 
-            apartment={apartment} 
-            host={host} 
-            airbnbCalendarDates={airbnbCalendarDates} 
-            onNewBooking={handleNewBooking} 
-          />
+      <div className="mt-12">
+        <ApartmentInfo apartment={apartment} host={host} />
+        <div className='mt-12'>
+        <BookingSection 
+          apartment={apartment} 
+          host={host} 
+          airbnbCalendarDates={airbnbCalendarDates} 
+          onNewBooking={handleNewBooking} 
+        />
         </div>
       </div>
 

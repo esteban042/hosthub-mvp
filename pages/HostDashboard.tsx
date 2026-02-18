@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types';
 import { fetchApi } from '../services/api';
-import StatisticsDashboard from '../components/StatisticsDashboard';
+import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard';
 
 import DashboardHeader from '../components/host-dashboard/DashboardHeader';
 import DashboardStats from '../components/host-dashboard/DashboardStats';
@@ -52,7 +52,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     const revenueYear = myBookings
         .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
         .reduce((sum, b) => sum + b.totalPrice, 0);
-    return { activeUnits, active, past: pastCount, revenueYear };
+    const totalPageViews = myApartments.reduce((sum, apt) => sum + (apt.pageViews || 0), 0);
+    return { activeUnits, active, past: pastCount, revenueYear, totalPageViews };
   }, [myBookings, myApartments, todayStr]);
 
   const toggleManualBlock = async (aptId: string, date: string) => {

@@ -197,7 +197,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 )}
 
                 <button 
-                  className="bg-transparent border border-sky-700 text-sky-700 font-black py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-sky-700/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0">
+                  className="bg-transparent border border-sky-700 text-sky-700 font-black hover:bg-sky-700 hover:text-white py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-sky-700/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0">
                    {CORE_ICONS.Search("w-6 h-6")}
                    <span className="uppercase text-[12px] tracking-widest">Search</span>
                 </button>

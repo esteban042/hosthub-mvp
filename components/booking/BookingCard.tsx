@@ -4,7 +4,7 @@ import { Booking, BookingStatus } from '../../types';
 import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer, KeySquare, LogIn, LogOut } from 'lucide-react';
 import { formatBookingRange } from '../../utils/formatBookingRange';
 import { getGuestDisplayName } from '../../utils/bookingUtils';
-import MessageMenu from '../MessageMenu';
+import MessageMenu from '../host-dashboard/MessageMenu';
 
 const getStatusBadgeStyle = (status: BookingStatus) => {
   switch (status) {

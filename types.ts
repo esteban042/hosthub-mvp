@@ -63,6 +63,7 @@ export interface Host {
   welcomeMessage?: string;
   checkoutMessage?: string;
   checkInMessage?: string;
+  depositPercentage?: number;
 }
 
 export interface Apartment {
@@ -83,6 +84,7 @@ export interface Apartment {
   mapEmbedUrl: string | null;
   minStayNights: number;
   maxStayNights: number;
+  pageViews?: number;
 }
 
 export interface Booking {
@@ -98,6 +100,7 @@ export interface Booking {
   totalPrice: number;
   status: BookingStatus;
   notes: string | null;
+  depositAmount?: number;
 }
 
 export interface BlockedDate {

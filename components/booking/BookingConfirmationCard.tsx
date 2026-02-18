@@ -67,6 +67,9 @@ export const BookingConfirmationCard: React.FC<BookingConfirmationCardProps> = (
             </div>
             <InfoRow icon={Users} label="Number of Guests" value={booking.numGuests} />
             <InfoRow icon={DollarSign} label="Total Price" value={`$${booking.totalPrice.toFixed(2)}`} />
+            {booking.depositAmount && booking.depositAmount > 0 && (
+              <InfoRow icon={DollarSign} label="Deposit Amount" value={`$${booking.depositAmount.toFixed(2)}`} />
+            )}
           </div>
 
           <InfoBlock 
