@@ -132,8 +132,8 @@ const App: React.FC = () => {
         }
 
         if (selectedAptId && currentHost) {
-        const apt = apartments.find(a => a.id === selectedAptId);
-        if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
+          const apt = apartments.find(a => a.id === selectedAptId);
+          if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
         }
 
         if (currentHost) {

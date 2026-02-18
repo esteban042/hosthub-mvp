@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import { body, query } from 'express-validator';
-import { pool, keysToCamel } from '../../db';
+import { pool } from '../../db';
+import { keysToCamel } from '../../dputils';
 import { validate } from '../../middleware/validation';
 import { protect, Request } from '../../middleware/auth';
 import { v4 as uuidv4 } from 'uuid';
+import { UserRole } from '../../types';
 
 const router = Router();
 
@@ -114,7 +116,7 @@ router.post('/blocked-dates',
   async (req: Request, res, next) => {
     const blockedDates = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === UserRole.Admin;
     const userId = req.user?.id;
 
     try {
@@ -167,7 +169,7 @@ router.delete('/blocked-dates',
   async (req: Request, res, next) => {
     const blockedDatesToDelete = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === 'admin';
+    const isAdmin = req.user?.role === UserRole.Admin;
     const userId = req.user?.id;
 
     try {

@@ -10,6 +10,12 @@ export enum SubscriptionType {
   ENTERPRISE = 'enterprise',
 }
 
+export const SUBSCRIPTION_PRICES = {
+  [SubscriptionType.BASIC]: 50,
+  [SubscriptionType.PRO]: 100,
+  [SubscriptionType.ENTERPRISE]: 250,
+};
+
 export enum BookingStatus {
     CONFIRMED = 'confirmed',
     PAID = 'paid',

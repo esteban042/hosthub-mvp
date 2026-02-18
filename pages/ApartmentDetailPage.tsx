@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Apartment, Host, Booking } from '../types';
+import { Apartment, Host, Booking, BlockedDate } from '../types';
 import { BookingConfirmationCard } from '../components/booking/BookingConfirmationCard';
 import ApartmentHeader from '../components/apartment/ApartmentHeader';
 import ApartmentStats from '../components/apartment/ApartmentStats';
@@ -10,6 +10,8 @@ import { sanctumApi } from '../services/api';
 interface ApartmentDetailPageProps {
   apartment: Apartment;
   host: Host;
+  bookings: Booking[];
+  blockedDates: BlockedDate[];
   airbnbCalendarDates: string[];
   onBack: () => void;
   onNewBooking: (booking: Booking) => void;
@@ -18,6 +20,8 @@ interface ApartmentDetailPageProps {
 const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   apartment,
   host: initialHost,
+  bookings,
+  blockedDates,
   airbnbCalendarDates,
   onBack,
   onNewBooking
@@ -64,6 +68,8 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
         <BookingSection 
           apartment={apartment} 
           host={host} 
+          bookings={bookings}
+          blockedDates={blockedDates}
           airbnbCalendarDates={airbnbCalendarDates} 
           onNewBooking={handleNewBooking} 
         />

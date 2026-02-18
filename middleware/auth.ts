@@ -1,4 +1,3 @@
-
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import { pool } from '../db';
@@ -12,24 +11,28 @@ export interface Request extends Express.Request {
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
   let token;
 
-  if (req.cookies.token) {
-    try {
-      token = req.cookies.token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies.token) {
+    token = req.cookies.token;
+  }
 
-      const decoded = jwt.verify(token, config.jwtSecret) as jwt.JwtPayload;
+  if (!token) {
+    return res.status(401).json({ error: 'Not authorized, no token provided' });
+  }
 
-      const result = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [decoded.id]);
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret) as jwt.JwtPayload;
+    const result = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [decoded.id]);
 
-      if (result.rows.length === 0) {
-        return res.status(401).json({ error: 'Not authorized, user not found' });
-      }
-
-      req.user = result.rows[0];
-      next();
-    } catch (error) {
-      return res.status(401).json({ error: 'Not authorized, token failed' });
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Not authorized, user not found' });
     }
-  } else {
-    return res.status(401).json({ error: 'Not authorized, no token' });
+
+    req.user = result.rows[0];
+    next();
+  } catch (err) {
+    console.error('Token verification or user fetch failed:', err);
+    return res.status(401).json({ error: 'Not authorized, token failed' });
   }
 };

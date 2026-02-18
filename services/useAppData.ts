@@ -28,14 +28,10 @@ export const useAppData = () => {
 
       if (sessionUser) {
         if (sessionUser.role === UserRole.ADMIN) {
-          const [allHosts, allApartments, allBookings] = await Promise.all([
-            sanctumApi.getAllHosts(),
-            sanctumApi.getAllApartments(),
-            sanctumApi.getAllBookings(),
-          ]);
-          setHosts(allHosts);
-          setApartments(allApartments);
-          setBookings(allBookings);
+          const adminData = await sanctumApi.getAdminDashboardData();
+          setHosts(adminData.hosts || []);
+          setApartments(adminData.apartments || []);
+          setBookings(adminData.bookings || []);
         } else if (sessionUser.role === UserRole.HOST) {
           const hostData = await sanctumApi.getHostDashboardData();
           if (hostData && hostData.host) {

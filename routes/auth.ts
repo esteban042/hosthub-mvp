@@ -2,7 +2,8 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { pool, keysToCamel } from '../db';
+import { pool } from '../db';
+import { keysToCamel } from '../dputils';
 import { validate } from '../middleware/validation';
 import { protect, Request } from '../middleware/auth';
 import { config, isProduction } from '../config';
@@ -30,6 +31,7 @@ router.post('/login',
         return res.status(401).json({ error: 'Invalid credentials' });
       }
 
+      console.log('Signing token with secret:', config.jwtSecret);
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, config.jwtSecret, { expiresIn: '1h' });
 
       res.cookie('token', token, { 

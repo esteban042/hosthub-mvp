@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body, query } from 'express-validator';
-import { pool, keysToCamel } from '../../db';
+import { pool } from '../../db';
+import { keysToCamel } from '../../dputils';
 import { validate } from '../../middleware/validation';
 import { protect, Request } from '../../middleware/auth';
 import { sendEmail } from '../../services/email';

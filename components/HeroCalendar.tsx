@@ -106,17 +106,21 @@ const HeroCalendar: React.FC<HeroCalendarProps> = ({ apartment, startDate, endDa
                     onMouseLeave={() => setHoveredDate(null)}
                     onClick={() => !isDisabled && handleDayClick(dateStr)}
                     className={`
-                        relative text-center text-sm rounded-full aspect-square flex items-center justify-center
+                        relative text-center text-sm rounded-full aspect-square flex flex-col items-center justify-center p-1
                         ${!isDisabled ? 'cursor-pointer hover:bg-stone-200' : ''}
                         ${isSelected ? 'bg-sky-accent text-white' : ''}
                         ${isInRange || isHovering ? 'bg-sky-100' : ''}
-                        ${isDisabled ? 'text-stone-300 line-through' : 'text-charcoal'}
+                        ${isDisabled ? 'text-stone-300' : 'text-charcoal'}
                         ${dateStr === startDate ? 'rounded-r-none' : ''}
                         ${dateStr === endDate ? 'rounded-l-none' : ''}
                     `}
                 >
-                    <div className='p-2'>{i}</div>
-                    {apartment && !isDisabled && <div className="absolute bottom-1 text-xs font-semibold text-stone-500">${getPriceForDate(dateStr)}</div>}
+                    <span className={`${isDisabled ? 'line-through' : ''}`}>{i}</span>
+                    {apartment && !isDisabled && (
+                        <span className={`text-[10px] font-bold mt-[-2px] ${isSelected ? 'text-white/70' : 'text-stone-500'}`}>
+                            ${getPriceForDate(dateStr)}
+                        </span>
+                    )}
                 </div>
             );
         }

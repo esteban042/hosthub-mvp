@@ -1,255 +1,99 @@
 import { Router } from 'express';
 import { body, param } from 'express-validator';
-import { pool, keysToCamel } from '../../db';
 import { validate } from '../../middleware/validation';
 import { protect, Request } from '../../middleware/auth';
-import { sendEmail } from '../../services/email';
+import { 
+    getAllBookings, 
+    createBooking, 
+    getBookingDetailsById, 
+    updateBookings 
+} from '../../services/booking.service';
+import { UserRole } from '../../types';
 
 const router = Router();
 
-// Route for admins to get all bookings
-router.get('/', protect, async (req: Request, res, next) => {
-  if (req.user?.role !== 'admin') {
-    return res.status(403).json({ error: 'You are not authorized to view this information.' });
-  }
-  try {
-    const client = await pool.connect();
-    const result = await client.query('SELECT * FROM bookings');
-    client.release();
-    res.json(keysToCamel(result.rows));
-  } catch (err) {
-    next(err);
-  }
-});
+router.get('/', 
+    protect, 
+    async (req: Request, res, next) => {
+        if (req.user?.role !== UserRole.Admin) {
+            return res.status(403).json({ error: 'You are not authorized to view this information.' });
+        }
+        try {
+            const bookings = await getAllBookings();
+            res.json(bookings);
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 
 router.post('/', 
-  body('apartmentId').isString().notEmpty(),
-  body('startDate').isISO8601(),
-  body('endDate').isISO8601(),
-  body('guestEmail').isEmail().normalizeEmail(),
-  body('guestName').not().isEmpty().trim().escape(),
-  body('guestCountry').not().isEmpty().trim().escape(),
-  body('guestPhone').optional().trim().escape(),
-  body('numGuests').isInt({ gt: 0 }),
-  body('guestMessage').optional().trim().escape(),
-  validate,
-  async (req: Request, res, next) => {
-    const {
-      apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage
-    } = req.body;
-    const client = await pool.connect();
-
-    try {
-      await client.query('BEGIN');
-
-      const apartmentRes = await client.query('SELECT * FROM apartments WHERE id = $1 FOR UPDATE', [apartmentId]);
-
-      if (apartmentRes.rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(404).json({ error: 'Apartment not found' });
-      }
-      const apartment = keysToCamel(apartmentRes.rows[0]);
-      
-      const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
-      if (nights < apartment.minStayNights) {
-        await client.query('ROLLBACK');
-        return res.status(400).json({ error: `This property requires a minimum stay of ${apartment.minStayNights} nights.` });
-      }
-
-      const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.hostId]);
-      if (hostRes.rows.length === 0) {
-        await client.query('ROLLBACK');
-        return res.status(404).json({ error: 'Host for this apartment not found' });
-      }
-      const host = keysToCamel(hostRes.rows[0]);
-
-      const bookingCountRes = await client.query('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
-      const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
-
-      const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
-      const customBookingId = `${hostInitials}${String(bookingCount + 1).padStart(7, '0')}`;
-
-      const overlappingBookingsRes = await client.query(
-        `SELECT 1 FROM bookings WHERE apartment_id = $1 AND status != 'cancelled' AND (start_date, end_date) OVERLAPS ($2, $3)`,
-        [apartmentId, startDate, endDate]
-      );
-
-      if (overlappingBookingsRes.rows.length > 0) {
-        await client.query('ROLLBACK');
-        return res.status(409).json({ error: 'The selected dates are not available' });
-      }
-
-      const totalPrice = nights * apartment.pricePerNight;
-
-      const bookingRes = await client.query(
-        `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
-         VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-        [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
-      );
-      const newBooking = keysToCamel(bookingRes.rows[0]);
-
-      await client.query('COMMIT');
-
-      res.status(201).json(newBooking);
-
-      // TODO: Add a feature flag to enable/disable this feature
-      try {
-        await sendEmail(
-          newBooking.guestEmail,
-          'Your Booking Confirmation',
-          'BookingConfirmation',
-          {
-            booking: newBooking,
-            apartment,
-            host
-          }
-        );
-      } catch (emailError) {
-        console.error('Failed to send confirmation email:', emailError);
-      }
-
-    } catch (err) {
-      await client.query('ROLLBACK');
-      next(err);
-    } finally {
-      client.release();
+    body('apartmentId').isString().notEmpty(),
+    body('startDate').isISO8601(),
+    body('endDate').isISO8601(),
+    body('guestEmail').isEmail().normalizeEmail(),
+    body('guestName').not().isEmpty().trim().escape(),
+    body('guestCountry').not().isEmpty().trim().escape(),
+    body('guestPhone').optional().trim().escape(),
+    body('numGuests').isInt({ gt: 0 }),
+    body('guestMessage').optional().trim().escape(),
+    validate,
+    async (req: Request, res, next) => {
+        try {
+            const newBooking = await createBooking(req.body);
+            res.status(201).json(newBooking);
+        } catch (err: any) {
+            if (err.message.includes('not available')) {
+                return res.status(409).json({ error: err.message });
+            } else if (err.message.includes('minimum stay')) {
+                return res.status(400).json({ error: err.message });
+            }
+            next(err);
+        }
     }
-});
+);
 
 router.get('/:id', 
-  protect,
-  param('id').isString().notEmpty(),
-  validate,
-  async (req: Request, res, next) => {
-    const { id } = req.params;
-    const userId = req.user?.id;
-    const client = await pool.connect();
-    try {
-      const result = await client.query(
-        `SELECT
-          b.*,
-          a.title AS apartment_title,
-          a.city AS apartment_city,
-          a.photos AS apartment_photos,
-          a.price_per_night,
-          h.name AS host_name,
-          h.contact_email AS host_email,
-          h.phone_number AS host_phone,
-          u.id AS host_user_id
-        FROM
-          bookings b
-        JOIN
-          apartments a ON b.apartment_id = a.id
-        JOIN
-          hosts h ON a.host_id = h.id
-        LEFT JOIN
-          users u ON h.user_id = u.id
-        WHERE
-          b.id = $1`,
-        [id]
-      );
+    protect,
+    param('id').isString().notEmpty(),
+    validate,
+    async (req: Request, res, next) => {
+        const { id } = req.params;
+        try {
+            const booking = await getBookingDetailsById(id);
+            if (!booking) {
+                return res.status(404).json({ error: 'Booking not found' });
+            }
 
-      if (result.rows.length === 0) {
-        return res.status(404).json({ error: 'Booking not found' });
-      }
+            if (req.user?.role !== UserRole.Admin && String(booking.hostUserId) !== String(req.user?.id)) {
+                return res.status(403).json({ error: 'You are not authorized to view this booking' });
+            }
 
-      const booking = result.rows[0];
-
-      if (!req.user || (req.user.role !== 'admin' && booking.host_user_id !== req.user.id)) {
-        return res.status(403).json({ error: 'You are not authorized to view this booking' });
-      }
-
-      res.json(keysToCamel(booking));
-    } catch (err) {
-      next(err);
-    } finally {
-      client.release();
+            res.json(booking);
+        } catch (err) {
+            next(err);
+        }
     }
-});
+);
 
 router.put('/', 
-  protect,
-  body().isArray(),
-  validate,
-  async (req: Request, res, next) => {
-    const updatedBookings = req.body;
-    const client = await pool.connect();
-    const isAdmin = req.user?.role === 'admin';
-    const userId = req.user?.id;
-
-    try {
-      if (!isAdmin) {
-        const hostRes = await client.query('SELECT id FROM hosts WHERE user_id = $1', [userId]);
-        if (hostRes.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have a host profile and cannot update bookings.' });
+    protect,
+    body().isArray(),
+    validate,
+    async (req: Request, res, next) => {
+        const updatedBookingsData = req.body;
+        try {
+            const result = await updateBookings(updatedBookingsData, req.user!);
+            res.status(200).json(result);
+        } catch (err: any) {
+            if (err.message.includes('not authorized') || err.message.includes('do not have a host profile')) {
+                return res.status(403).json({ error: err.message });
+            } else if (err.message.includes('not found')) {
+                return res.status(404).json({ error: err.message });
+            }
+            next(err);
         }
-        const userHostId = hostRes.rows[0].id;
-
-        for (const booking of updatedBookings) {
-          const bookingRes = await client.query('SELECT apartment_id FROM bookings WHERE id = $1', [booking.id]);
-          if (bookingRes.rows.length === 0) {
-            return res.status(404).json({ error: `Booking with id ${booking.id} not found.` });
-          }
-          const apartmentId = bookingRes.rows[0].apartment_id;
-          const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [apartmentId]);
-          if (aptRes.rows.length === 0) {
-            return res.status(404).json({ error: `Apartment with id ${apartmentId} not found.` });
-          }
-          if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
-            return res.status(403).json({ error: `You are not authorized to update booking with id ${booking.id}.` });
-          }
-        }
-      }
-
-      await client.query('BEGIN');
-
-      const resultBookings = [];
-      for (const booking of updatedBookings) {
-        const {
-            guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id
-        } = booking;
-
-        const originalBookingRes = await client.query('SELECT * FROM bookings WHERE id = $1', [id]);
-        const originalBooking = originalBookingRes.rows[0];
-
-        const updateRes = await client.query(
-          `UPDATE bookings SET
-            guest_name = $1, guest_email = $2, guest_country = $3, num_guests = $4,
-            start_date = $5, end_date = $6, total_price = $7, status = $8
-          WHERE id = $9 RETURNING *`,
-          [guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id]
-        );
-        const updatedBooking = keysToCamel(updateRes.rows[0]);
-        resultBookings.push(updatedBooking);
-
-        if (updatedBooking.status === 'canceled' && originalBooking.status !== 'canceled') {
-            const apartmentRes = await client.query('SELECT * FROM apartments WHERE id = $1', [originalBooking.apartment_id]);
-            const apartment = apartmentRes.rows[0];
-            const hostRes = await client.query('SELECT * FROM hosts WHERE id = $1', [apartment.host_id]);
-            const host = hostRes.rows[0];
-
-            await sendEmail(
-                updatedBooking.guestEmail,
-                `Your Booking for ${keysToCamel(apartment).title} has been Canceled`,
-                'BookingCancellation',
-                {
-                  booking: updatedBooking,
-                  apartment: keysToCamel(apartment),
-                  host: keysToCamel(host)
-                }
-            );
-        }
-      }
-
-      await client.query('COMMIT');
-      res.status(200).json(resultBookings);
-
-    } catch (err) {
-      await client.query('ROLLBACK');
-      next(err);
-    } finally {
-      client.release();
     }
-});
+);
 
 export default router;

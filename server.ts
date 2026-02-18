@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -5,7 +6,7 @@ import path from 'path';
 import fs from 'fs';
 
 import { config, isProduction } from './config';
-import { pool } from './db';
+import { query } from './dputils';
 import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security';
 import authRoutes from './routes/auth';
 import apiRoutes from './routes/api';
@@ -26,9 +27,7 @@ app.use(httpsRedirect);
 
 app.get('/health', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await pool.connect();
-    await client.query('SELECT NOW()');
-    client.release();
+    await query('SELECT NOW()');
     res.status(200).send('OK');
   } catch (err) {
     next(err);
@@ -59,7 +58,7 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
     if (err) {
       return next(err);
     }
-    data = data.replace(/<script/g, `<script nonce="${nonce}"`);
+    data = data.replace(/<script/g, `<script nonce="${res.locals.nonce}"`);
     res.send(data);
   });
 });

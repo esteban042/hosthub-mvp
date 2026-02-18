@@ -19,6 +19,7 @@ const BookingSection: React.FC<BookingSectionProps> = ({ apartment, host, airbnb
     const fetchAvailability = async () => {
       try {
         const { bookings, blockedDates } = await sanctumApi.getApartmentAvailability(apartment.id);
+        console.log("Fetched blocked dates:", blockedDates);
         setBookings(bookings.map(b => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] })));
         setBlockedDates(blockedDates.map(d => ({ ...d, date: d.date.split('T')[0] })));
       } catch (error) {

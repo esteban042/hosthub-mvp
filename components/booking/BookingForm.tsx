@@ -126,12 +126,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     try {
       const newConfirmedBooking = await sanctumApi.createBooking(bookingDetails);
       onNewBooking(newConfirmedBooking);
+      // Reset form state after successful booking to prevent race condition
+      setName('');
+      setEmail('');
+      setPhone('');
+      setGuestCountry('');
+      setNumGuests(1);
+      setStartDate('');
+      setEndDate('');
+      setMessage('');
+      setFormErrors({});
+      setModalContent({ title: 'Booking Confirmed', message: 'Your booking has been successfully processed.' });
+      setIsModalOpen(true);
     } catch (error) {
       console.error("Failed to create booking:", error);
+      setModalContent({ title: 'Booking Failed', message: 'There was an error processing your booking. Please try again.' });
+      setIsModalOpen(true);
     } finally {
       setIsBooking(false);
     }
   };
+
 
   return (
     <>

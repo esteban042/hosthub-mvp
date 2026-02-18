@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Host, Apartment, Booking, SubscriptionType, BookingStatus } from '../../types';
+import { Host, Apartment, Booking, SubscriptionType, BookingStatus, SUBSCRIPTION_PRICES } from '../../types';
 import { CreditCard, Percent, Globe, Layers } from 'lucide-react';
 import { SKY_ACCENT, TEXT_COLOR } from '../../constants';
 
@@ -9,12 +9,6 @@ interface AdminStatsProps {
   apartments: Apartment[];
   bookings: Booking[];
 }
-
-const SUBSCRIPTION_PRICES = {
-  [SubscriptionType.BASIC]: 20,
-  [SubscriptionType.PRO]: 50,
-  [SubscriptionType.ENTERPRISE]: 100
-};
 
 const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) => {
   const stats = useMemo(() => {
