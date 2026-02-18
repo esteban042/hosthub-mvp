@@ -28,7 +28,8 @@ export const MOCK_HOSTS: Host[] = [
         { title: 'The Alpine Philosophy', content: 'Our collection is built on the belief that a true mountain retreat should be a sensory experience. From the scent of dried cedar in our chalets to the crisp morning air on our panoramic terraces, we curate spaces that ground you in nature while elevating your comfort.' },
         { title: 'Local Craftsmanship', content: 'We work exclusively with local Swiss artisans to furnish our properties. Every blanket is hand-woven in the valley, and every table is crafted from fallen timber, ensuring your stay directly supports the heritage of our mountain community.' }
       ]
-    }
+    },
+    vat: 7.7
   },
   {
     id: 'host-2',
@@ -44,7 +45,8 @@ export const MOCK_HOSTS: Host[] = [
     phoneNumber: '+81 90 9876 5432',
     notes: 'Focus on high-tech amenities and modern design. Exploring expansion to Osaka.',
     airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/67890.ics?s=c8f2a1e7d9b4c0a5f1e6b3a2',
-    paymentInstructions: 'A deposit of 25% is required. Please use the following link to pay via Stripe: [link]. The balance can be paid in cash (JPY) or via credit card upon check-in.'
+    paymentInstructions: 'A deposit of 25% is required. Please use the following link to pay via Stripe: [link]. The balance can be paid in cash (JPY) or via credit card upon check-in.',
+    vat: 10
   },
   {
     id: 'host-3',
@@ -60,7 +62,8 @@ export const MOCK_HOSTS: Host[] = [
     phoneNumber: '+39 333 1122334',
     notes: 'Manages several high-end villas. Looking to add more properties in Umbria next year.',
     airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/11223.ics?s=a9b8c7d6e5f4a3b2c1d0e9f8',
-    paymentInstructions: 'Payment details will be sent in a separate email. We accept wire transfers and all major credit cards. A 30% deposit is required within 48 hours of booking confirmation.'
+    paymentInstructions: 'Payment details will be sent in a separate email. We accept wire transfers and all major credit cards. A 30% deposit is required within 48 hours of booking confirmation.',
+    vat: 22
   },
   {
     id: 'host-4',
@@ -76,7 +79,8 @@ export const MOCK_HOSTS: Host[] = [
     phoneNumber: '+1 305 555 1234',
     notes: 'Specializes in luxury beach houses. Considers offering additional services like private chef.',
     airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/44556.ics?s=f0e1d2c3b4a5f6e7d8c9b0a1',
-    paymentInstructions: 'To finalize your booking, a 50% deposit is required. You can pay via Zelle using the email address maya.singh@coastal.com or by credit card through the link we will send you. Please mention your Booking ID.'
+    paymentInstructions: 'To finalize your booking, a 50% deposit is required. You can pay via Zelle using the email address maya.singh@coastal.com or by credit card through the link we will send you. Please mention your Booking ID.',
+    vat: 0
   }
 ];
 
@@ -112,7 +116,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     isActive: true,
     amenities: ['Wifi', 'Coffee Maker', 'Fireplace', 'Washer'],
     photos: ['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800&h=600'],
-    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2sus'
+    mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us'
   },
   {
     id: 'apt-3',

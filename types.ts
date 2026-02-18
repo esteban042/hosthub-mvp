@@ -10,6 +10,12 @@ export enum SubscriptionType {
   ENTERPRISE = 'enterprise',
 }
 
+export const SUBSCRIPTION_PRICES = {
+  [SubscriptionType.BASIC]: 50,
+  [SubscriptionType.PRO]: 100,
+  [SubscriptionType.ENTERPRISE]: 250,
+};
+
 export enum BookingStatus {
     CONFIRMED = 'confirmed',
     PAID = 'paid',
@@ -41,6 +47,7 @@ export interface Host {
   airbnbCalendarLink: string | null;
   paymentInstructions: string | null;
   businessName: string | null;
+  businessId: string | null;
   landingPagePicture: string | null;
   premiumConfig: {
     images: string[];
@@ -50,6 +57,19 @@ export interface Host {
   terms: string | null;
   conditions: string | null;
   faq: string | null;
+  socialMediaLinks?: {
+    twitter?: string;
+    instagram?: string;
+    facebook?: string;
+  };
+  vat?: number;
+  checkInTime?: string;
+  checkOutTime?: string;
+  checkInInfo?: string;
+  welcomeMessage?: string;
+  checkoutMessage?: string;
+  checkInMessage?: string;
+  depositPercentage?: number;
 }
 
 export interface Apartment {
@@ -68,6 +88,9 @@ export interface Apartment {
   photos: string[];
   isActive: boolean;
   mapEmbedUrl: string | null;
+  minStayNights: number;
+  maxStayNights: number;
+  pageViews?: number;
 }
 
 export interface Booking {
@@ -83,6 +106,7 @@ export interface Booking {
   totalPrice: number;
   status: BookingStatus;
   notes: string | null;
+  depositAmount?: number;
 }
 
 export interface BlockedDate {

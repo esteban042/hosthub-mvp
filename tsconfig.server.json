@@ -1,18 +1,17 @@
-
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "CommonJS",
+    "module": "NodeNext",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./dist",
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true
   },
-  "include": ["server.ts", "types.ts", "services/api.ts", "services/db.ts", "mockData.ts"],
-  "exclude": ["node_modules", "src"]
+  "include": ["server.ts", "types.ts", "dputils.ts", "services/**/*.ts", "routes/**/*.ts", "middleware/**/*.ts"],
+  "exclude": ["node_modules"]
 }

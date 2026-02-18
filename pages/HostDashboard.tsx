@@ -1,8 +1,7 @@
-
 import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types';
 import { fetchApi } from '../services/api';
-import StatisticsDashboard from '../components/StatisticsDashboard';
+import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard';
 
 import DashboardHeader from '../components/host-dashboard/DashboardHeader';
 import DashboardStats from '../components/host-dashboard/DashboardStats';
@@ -12,6 +11,7 @@ import ApartmentsList from '../components/host-dashboard/ApartmentsList';
 import Bookings from '../components/host-dashboard/Bookings';
 import CurrentBookings from '../components/host-dashboard/CurrentBookings';
 import Calendar from '../components/host-dashboard/Calendar';
+import HostInfoEditor from '../components/host-dashboard/HostInfoEditor';
 
 interface HostDashboardProps {
   host: Host;
@@ -21,14 +21,15 @@ interface HostDashboardProps {
   onUpdateBookings: (bookings: Booking[]) => void;
   onBlockedDatesChange: () => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
+  onHostUpdate: (updatedHost: Host) => void;
   airbnbCalendarDates: string[]; 
   loadingAirbnbIcal: boolean; 
 }
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, airbnbCalendarDates, loadingAirbnbIcal
+  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, airbnbCalendarDates, loadingAirbnbIcal
 }) => {
-  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics'>('current-bookings');
+  const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics' | 'general-info'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
 
@@ -51,7 +52,8 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     const revenueYear = myBookings
         .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
         .reduce((sum, b) => sum + b.totalPrice, 0);
-    return { activeUnits, active, past: pastCount, revenueYear };
+    const totalPageViews = myApartments.reduce((sum, apt) => sum + (apt.pageViews || 0), 0);
+    return { activeUnits, active, past: pastCount, revenueYear, totalPageViews };
   }, [myBookings, myApartments, todayStr]);
 
   const toggleManualBlock = async (aptId: string, date: string) => {
@@ -83,14 +85,14 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     if (!processedApt.priceOverrides) processedApt.priceOverrides = [];
 
     if (processedApt.id) {
-      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? processedApt as Apartment : a));
+      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? { ...a, ...processedApt } as Apartment : a));
     } else {
       const newApt: Apartment = {
         ...processedApt,
         id: `apt-${Date.now()}`,
         hostId: host.id,
         capacity: processedApt.capacity || 2,
-        bedrooms: processedApt.bedrooms || 1,
+        beds: processedApt.beds || 1,
         bathrooms: processedApt.bathrooms || 1,
         pricePerNight: processedApt.pricePerNight || 100,
         title: processedApt.title || 'Untitled sanctuary',
@@ -111,12 +113,17 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {activeTab === 'current-bookings' && <CurrentBookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
-      {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
-      {activeTab === 'calendar' && <Calendar apartments={myApartments} bookings={bookings} blockedDates={blockedDates} airbnbCalendarDates={airbnbCalendarDates} loadingIcal={loadingAirbnbIcal} onToggleBlock={toggleManualBlock} />}
+      {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} host={host} onUpdateBooking={handleUpdateStatus} />}
+      {activeTab === 'calendar' && <Calendar />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && (
-        <div className="bg-[#1c1a19] border border-stone-800 rounded-2xl p-8">
+        <div className="border border-gray-800 rounded-2xl p-8">
           <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
+        </div>
+      )}
+      {activeTab === 'general-info' && (
+        <div className="border border-zinc-800 rounded-2xl p-8">
+            <HostInfoEditor host={host} onHostUpdate={onHostUpdate} />
         </div>
       )}
 

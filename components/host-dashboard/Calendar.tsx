@@ -11,7 +11,7 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold text-white mb-4">Booking Calendar</h1>
+      <h1 className="text-2xl font-serif font-bold mb-4">Booking Calendar</h1>
       <TimelineCalendar 
         apartments={apartments} 
         bookings={bookings} 

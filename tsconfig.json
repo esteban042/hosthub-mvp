@@ -26,7 +26,7 @@
     "services/**/*.ts",
     "App.tsx",
     "index.tsx"
-  ],
+, "db.ts"  ],
   "exclude": [
     "node_modules",
     "**/*.spec.ts"

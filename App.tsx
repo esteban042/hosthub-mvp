@@ -1,11 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import { UserRole } from './types';
 import { useAppData } from './services/useAppData';
 import { GuestLandingPage } from './pages/GuestLandingPage';
 import HostDashboard from './pages/HostDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import ApartmentDetailPage from './pages/ApartmentDetailPage';
+import PrintableBooking from './components/PrintableBooking';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
@@ -68,18 +70,13 @@ const App: React.FC = () => {
     return bookings.map(b => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] }));
   }, [bookings]);
 
-
-  if (loading && !user && !currentHost && hosts.length === 0) {
-    return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Sanctum Cluster...</p></div>;
-  }
-
   const renderInitialSetup = () => {
     if (user || currentHost || loading) return null;
     const params = new URLSearchParams(window.location.search);
     if (params.get('host')) return null;
 
     if (hosts.length > 0) {
-      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} />;
+      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} onSignIn={() => setShowLogin(true)} />;
     }
 
     return (
@@ -96,46 +93,71 @@ const App: React.FC = () => {
     );
   };
 
-  const initialSetup = renderInitialSetup();
-  if (initialSetup) return initialSetup;
-
-  const renderContent = () => {
-    if (showLogin) return <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />;
-
-    if (user) {
-      switch (user.role) {
-        case UserRole.ADMIN:
-          return <AdminDashboard hosts={hosts} apartments={apartments} bookings={bookings} onUpdateHosts={handleUpdateHosts} onUpdateApartments={handleUpdateApartments} />;
-        case UserRole.HOST:
-          if (loading) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Loading Host Dashboard...</p></div>;
-          if (error && !currentHost) {
-            return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm">
-              <div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10"><AlertTriangle className="w-10 h-10 text-rose-400" /></div>
-              <h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight">Host Data Unavailable</h2>
-              <p className="text-stone-500 max-w-md mx-auto mb-12">{error}</p>
-              <button onClick={onLogout} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Logout</button>
-            </div>;
-          }
-          if (currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
-          return null;
-        default:
-          return <p>Unknown user role.</p>;
-      }
+  const AppContent = () => {
+    const initialSetup = renderInitialSetup();
+    if (initialSetup) {
+        if (showLogin) {
+            return (
+                <>
+                    {initialSetup}
+                    <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />
+                </>
+            )
+        }
+        return initialSetup;
     }
 
-    if (selectedAptId && currentHost) {
-      const apt = apartments.find(a => a.id === selectedAptId);
-      if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
+    const renderContent = () => {
+        if (showLogin) return <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />;
+
+        if (user) {
+        switch (user.role) {
+            case UserRole.ADMIN:
+            return <AdminDashboard hosts={hosts} apartments={apartments} bookings={bookings} onUpdateHosts={handleUpdateHosts} onUpdateApartments={handleUpdateApartments} />;
+            case UserRole.HOST:
+            if (loading) return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Loading Host Dashboard...</p></div>;
+            if (error && !currentHost) {
+                return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center px-6 text-center font-dm">
+                <div className="w-24 h-24 bg-stone-900 border border-stone-800 rounded-[2rem] flex items-center justify-center mb-10"><AlertTriangle className="w-10 h-10 text-rose-400" /></div>
+                <h2 className="text-4xl font-serif font-bold text-white mb-4 tracking-tight">Host Data Unavailable</h2>
+                <p className="text-stone-500 max-w-md mx-auto mb-12">{error}</p>
+                <button onClick={onLogout} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Logout</button>
+                </div>;
+            }
+            if (currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} onHostUpdate={(updatedHost) => handleUpdateHosts(hosts.map(h => h.id === updatedHost.id ? updatedHost : h))} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
+            return null;
+            default:
+            return <p>Unknown user role.</p>;
+        }
+        }
+
+        if (selectedAptId && currentHost) {
+          const apt = apartments.find(a => a.id === selectedAptId);
+          if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
+        }
+
+        if (currentHost) {
+        return <GuestLandingPage host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id) => setSelectedAptId(id)} onNewBooking={handleNewBooking}/>;
+        }
+
+        return null;
+    };
+
+    return <Layout role={user?.role || UserRole.GUEST} onSignIn={() => setShowLogin(true)} currentHost={currentHost} allHosts={hosts} onHostChange={handleHostChange} user={user} onLogout={onLogout}>{renderContent()}</Layout>;
     }
 
-    if (currentHost) {
-      return <GuestLandingPage host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id) => setSelectedAptId(id)} onNewBooking={handleNewBooking}/>;
-    }
+  if (loading && !user && !currentHost && hosts.length === 0) {
+    return <div className="min-h-screen bg-stone-950 flex flex-col items-center justify-center space-y-4"><div className="w-12 h-12 border-4 border-emerald-500/10 border-t-emerald-500 rounded-full animate-spin"></div><p className="text-stone-300 text-[10px] font-black uppercase tracking-[0.4em] animate-pulse">Syncing Sanctum Cluster...</p></div>;
+  }
 
-    return null;
-  };
 
-  return <Layout role={user?.role || UserRole.GUEST} onSignIn={() => setShowLogin(true)} currentHost={currentHost} allHosts={hosts} onHostChange={handleHostChange} user={user} onLogout={onLogout}>{renderContent()}</Layout>;
-};
+  return (
+    <Routes>
+      <Route path="/booking/print/:bookingId" element={<PrintableBooking />} />
+      <Route path="/*" element={<AppContent />} />
+    </Routes>
+  )
+
+}
 
 export default App;

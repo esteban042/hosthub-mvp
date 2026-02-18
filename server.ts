@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -5,10 +6,11 @@ import path from 'path';
 import fs from 'fs';
 
 import { config, isProduction } from './config';
-import { pool } from './db';
+import { query } from './dputils';
 import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security';
 import authRoutes from './routes/auth';
 import apiRoutes from './routes/api';
+import { sendEmail } from './services/email';
 
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist');
@@ -25,14 +27,19 @@ app.use(httpsRedirect);
 
 app.get('/health', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const client = await pool.connect();
-    await client.query('SELECT NOW()');
-    client.release();
+    await query('SELECT NOW()');
     res.status(200).send('OK');
   } catch (err) {
     next(err);
   }
 });
+
+// Add a test route to simulate a server crash
+if (!isProduction) {
+    app.get('/test-crash', (req, res, next) => {
+        throw new Error('This is a test crash!');
+    });
+  }
 
 // Register auth routes separately
 app.use('/auth', authRoutes);
@@ -51,7 +58,7 @@ app.get('*', (req: Request, res: Response, next: NextFunction) => {
     if (err) {
       return next(err);
     }
-    data = data.replace(/<script/g, `<script nonce="${nonce}"`);
+    data = data.replace(/<script/g, `<script nonce="${res.locals.nonce}"`);
     res.send(data);
   });
 });
@@ -63,6 +70,30 @@ app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   } else {
     res.status(500).json({ error: err.message, stack: err.stack });
   }
+});
+
+// Global error handling for server crashes
+const adminEmail = config.adminEmail;
+
+process.on('uncaughtException', (error: Error) => {
+  console.error('Unhandled Exception:', error);
+  sendEmail(adminEmail, 'Server Crash Report', 'ServerCrash', { error })
+    .then(() => process.exit(1))
+    .catch(err => {
+      console.error('Failed to send crash report email:', err);
+      process.exit(1);
+    });
+});
+
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  const error = new Error(reason.stack || reason);
+  sendEmail(adminEmail, 'Server Crash Report', 'ServerCrash', { error })
+    .then(() => process.exit(1))
+    .catch(err => {
+      console.error('Failed to send crash report email:', err);
+      process.exit(1);
+    });
 });
 
 app.listen(config.port, '0.0.0.0', () => {

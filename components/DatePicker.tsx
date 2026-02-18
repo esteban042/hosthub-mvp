@@ -9,7 +9,9 @@ interface DatePickerProps {
 
 const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  // Initialize with selectedDate's month or today's
+  const initialDate = selectedDate ? new Date(selectedDate) : new Date();
+  const [currentMonth, setCurrentMonth] = useState(new Date(initialDate.getFullYear(), initialDate.getMonth(), 1));
   const datePickerRef = useRef<HTMLDivElement>(null);
 
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -24,6 +26,20 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+  
+  // When picker opens, set the month to the selected date's month
+  useEffect(() => {
+    if (isOpen && selectedDate) {
+      const selected = new Date(selectedDate);
+      if (!isNaN(selected.getTime())) {
+        setCurrentMonth(new Date(selected.getFullYear(), selected.getMonth(), 1));
+      }
+    } else if (isOpen) {
+        // if no date is selected, show current month
+        const today = new Date();
+        setCurrentMonth(new Date(today.getFullYear(), today.getMonth(), 1));
+    }
+  }, [isOpen, selectedDate]);
 
   const renderMonth = (monthDate: Date) => {
     const days = [];
@@ -39,20 +55,21 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
       const month = (dateObj.getMonth() + 1).toString().padStart(2, '0');
       const day = dateObj.getDate().toString().padStart(2, '0');
       const dateStr = `${year}-${month}-${day}`;
-
+      
       const isSelected = dateStr === selectedDate;
       const dayClass = isSelected
-        ? 'bg-emerald-500 text-white'
-        : 'bg-stone-900 border-stone-700 text-stone-200 hover:text-white';
+        ? 'bg-cyan-600 text-white'
+        : 'hover:bg-stone-100 text-charcoal';
 
       days.push(
         <button
+          type="button"
           key={dateStr}
           onClick={() => {
             onSelect(dateStr);
             setIsOpen(false);
           }}
-          className={`h-10 flex items-center justify-center text-sm font-bold rounded-lg border transition-all ${dayClass}`}
+          className={`h-9 w-9 flex items-center justify-center text-sm font-medium rounded-full transition-all ${dayClass}`}
         >
           {d}
         </button>
@@ -60,45 +77,56 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
     }
 
     return (
-      <div className="p-4 bg-[#1c1a19] rounded-2xl border border-stone-800">
+      <div className="p-4 bg-white rounded-2xl border border-stone-200 shadow-xl">
         <div className="flex items-center justify-between mb-4">
           <button
             type="button"
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
-            className="text-stone-500 hover:text-white transition-colors"
+            className="text-stone-400 hover:text-charcoal transition-colors p-1 rounded-full hover:bg-stone-100"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h4 className="text-white font-serif text-base font-bold">{monthName}</h4>
+          <h4 className="text-charcoal font-bold text-sm">{monthName}</h4>
           <button
             type="button"
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
-            className="text-stone-500 hover:text-white transition-colors"
+            className="text-stone-400 hover:text-charcoal transition-colors p-1 rounded-full hover:bg-stone-100"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
-        <div className="grid grid-cols-7 gap-1 mb-2 text-xs font-black uppercase tracking-widest text-stone-400 text-center">
+        <div className="grid grid-cols-7 gap-1 mb-2 text-xs font-bold uppercase tracking-widest text-stone-400 text-center">
           {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-            <div key={d} className="capitalize">{d}</div>
+            <div key={d} className="py-2">{d}</div>
           ))}
         </div>
-        <div className="grid grid-cols-7 gap-1">{days}</div>
+        <div className="grid grid-cols-7 gap-1 place-items-center">{days}</div>
       </div>
     );
   };
 
+  const handleClear = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onSelect('');
+  }
+
   return (
     <div className="relative" ref={datePickerRef}>
-      <input
-        type="text"
-        readOnly
-        value={selectedDate}
-        onClick={() => setIsOpen(!isOpen)}
-        className="w-full bg-stone-900 border border-stone-800 rounded-xl p-3 text-xs text-white outline-none cursor-pointer"
-      />
+        <input
+            type="text"
+            readOnly
+            value={selectedDate}
+            onClick={() => setIsOpen(!isOpen)}
+            placeholder="YYYY-MM-DD"
+            className="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs text-charcoal outline-none cursor-pointer focus:ring-1 focus:ring-sky-accent transition-all"
+        />
+        {selectedDate && (
+            <button type="button" onClick={handleClear} className="absolute top-1/2 right-3 -translate-y-1/2 text-stone-400 hover:text-stone-600">
+                <X className="w-4 h-4"/>
+            </button>
+        )}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 z-10">
+        <div className="absolute top-full left-0 mt-2 z-10 w-[320px]">
           {renderMonth(currentMonth)}
         </div>
       )}

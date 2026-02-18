@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { body, query } from 'express-validator';
-import { pool, keysToCamel } from '../../db';
+import { pool } from '../../db';
+import { keysToCamel } from '../../dputils';
 import { validate } from '../../middleware/validation';
 import { protect, Request } from '../../middleware/auth';
 import { sendEmail } from '../../services/email';
@@ -10,7 +11,7 @@ const router = Router();
 router.post('/send-email', 
   body('toEmail').isEmail().normalizeEmail(),
   body('subject').not().isEmpty().trim().escape(),
-  body('templateName').isIn(['BookingConfirmation', 'BookingCancellation']),
+  body('templateName').isIn(['BookingConfirmation', 'BookingCancellation', 'DirectMessage']),
   body('booking').isObject(),
   body('apartment').isObject(),
   body('host').isObject(),
@@ -24,6 +25,46 @@ router.post('/send-email',
       next(error);
     }
 });
+
+router.post('/send-message',
+  protect,
+  body('booking').isObject(),
+  body('message').not().isEmpty().trim().escape(),
+  validate,
+  async (req: Request, res, next) => {
+    const { booking, message } = req.body;
+    const hostId = req.user.id;
+
+    try {
+      const client = await pool.connect();
+      const hostResult = await client.query('SELECT * FROM hosts WHERE id = $1', [hostId]);
+      const host = hostResult.rows[0];
+
+      if (!host) {
+        client.release();
+        return res.status(404).json({ error: 'Host not found' });
+      }
+
+      const apartmentResult = await client.query('SELECT * FROM apartments WHERE id = $1', [booking.apartmentId]);
+      const apartment = apartmentResult.rows[0];
+      client.release();
+
+      if (!apartment) {
+        return res.status(404).json({ error: 'Apartment not found' });
+      }
+
+      const result = await sendEmail(
+        booking.guestEmail,
+        `Message from ${host.name} regarding your booking`,
+        'DirectMessage',
+        { booking, message, host, apartment }
+      );
+      res.status(200).json(result);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
 
 router.get('/public-hosts', 
   async (req, res, next) => {

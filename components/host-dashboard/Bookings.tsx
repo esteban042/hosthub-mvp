@@ -1,17 +1,80 @@
 import React from 'react';
-import { Booking, BookingStatus } from '../../types';
-import BookingCard from '../BookingCard';
+import { Booking, BookingStatus, Host, Apartment } from '../../types';
+import BookingCard from '../booking/BookingCard';
 import { CalendarDays, History, X } from 'lucide-react';
+import MessageModal from './MessageModal';
+import { sanctumApi } from '../../services/api';
 
 interface BookingsProps {
   bookings: Booking[];
-  apartments: any[];
-  onUpdateStatus: (booking: Booking, status: BookingStatus) => void;
+  apartments: Apartment[];
+  host: Host;
+  onUpdateBooking: (booking: Booking, status: BookingStatus) => void;
 }
 
-const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatus }) => {
+const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdateBooking }) => {
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
   const todayStr = new Date().toISOString().split('T')[0];
+
+  const handleOpenModal = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedBooking(null);
+    setIsModalOpen(false);
+  };
+
+  const handleSendMessage = async (message: string) => {
+    if (selectedBooking) {
+      try {
+        await sanctumApi.sendMessage(selectedBooking.id, message);
+        handleCloseModal();
+      } catch (error) {
+        console.error("Failed to send message:", error);
+      }
+    }
+  };
+
+  const handleSendCheckInMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendCheckInMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send check-in message:", error);
+    }
+  };
+
+  const handleSendWelcomeMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendWelcomeMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send welcome message:", error);
+    }
+  };
+
+  const handleSendCheckoutMessage = async (booking: Booking) => {
+    try {
+      await sanctumApi.sendCheckoutMessage(booking.id);
+    } catch (error) {
+      console.error("Failed to send checkout message:", error);
+    }
+  };
+
+  const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
+    if (status === BookingStatus.CANCELED) {
+        try {
+            await sanctumApi.cancelBooking(booking.id);
+            onUpdateBooking(booking, status); // To update the UI
+        } catch (error) {
+            console.error("Failed to cancel booking:", error);
+        }
+    } else {
+        onUpdateBooking(booking, status);
+    }
+  };
 
   const groupedAndSortedBookings = React.useMemo(() => {
     const thirtyDaysFromNow = new Date();
@@ -62,8 +125,8 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
             onClick={() => setStatusFilter(filter.value as any)}
             className={`px-6 py-3 rounded-xl text-[11px] font-black uppercase tracking-[0.2em] transition-all flex items-center ${
               statusFilter === filter.value
-                ? 'bg-emerald-900/50 text-white shadow-l border border-[rgb(214,213,213)]'
-                : 'bg-stone-900/50 border border-stone-600 text-[rgb(214,213,213)]'
+                ? 'bg-sky-700/50 text-white shadow-l border border-zinc-800'
+                : 'bg-transparent border border-zinc-800'
             }`}
           >
             {filter.icon}
@@ -75,14 +138,18 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
       {groupedAndSortedBookings.length > 0 ? (
         groupedAndSortedBookings.map(([title, bks]) => (
           <div key={title} className="mb-12">
-            <h3 className="text-2xl font-serif font-bold text-white px-2 tracking-tight mb-6">{title}</h3>
+            <h3 className="text-2xl font-serif font-bold px-2 tracking-tight mb-6">{title}</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {bks.map(b => (
                 <BookingCard 
                   key={b.id} 
                   booking={b} 
                   apartmentTitle={title} 
-                  onUpdateStatus={onUpdateStatus}
+                  onUpdateStatus={handleUpdateStatus}
+                  onSendMessage={handleOpenModal}
+                  onSendCheckInMessage={handleSendCheckInMessage}
+                  onSendWelcomeMessage={handleSendWelcomeMessage}
+                  onSendCheckoutMessage={handleSendCheckoutMessage}
                   statusFilter={statusFilter}
                 />
               ))}
@@ -94,6 +161,13 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, onUpdateStatu
           <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
         </div>
       )}
+
+      <MessageModal 
+        booking={selectedBooking}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSend={handleSendMessage}
+      />
     </div>
   );
 };

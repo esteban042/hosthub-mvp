@@ -1,4 +1,3 @@
-
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
@@ -7,6 +6,11 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Define the base URL for the API. In a real-world scenario, this would
+// likely come from an environment variable. For this fix, we are hardcoding it
+// to ensure the frontend can communicate with the backend server.
+const API_BASE_URL = 'http://localhost:8081';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -24,7 +28,12 @@ export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
 };
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const response = await fetch(endpoint, {
+  // Construct the full URL by prepending the base URL to the endpoint.
+  // This ensures that all API calls are directed to the correct backend server,
+  // bypassing any potential issues with development server proxies.
+  const fullUrl = `${API_BASE_URL}${endpoint}`;
+
+  const response = await fetch(fullUrl, {
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -60,27 +69,50 @@ export const sanctumApi = {
     return fetchApi('/api/v1/host-dashboard');
   },
 
+  getAdminDashboardData() {
+    return fetchApi('/api/v1/admin-dashboard');
+  },
+
   getAllHosts: () => fetchApi<Host[]>('/api/v1/hosts'),
 
   getAllApartments: () => fetchApi<Apartment[]>('/api/v1/apartments'),
 
   getAllBookings: () => fetchApi<Booking[]>('/api/v1/bookings'),
 
+  getBookingById: (bookingId: string) => fetchApi<Booking>(`/api/v1/bookings/${bookingId}`),
+
   getAllBlockedDates: () => fetchApi<BlockedDate[]>('/api/v1/blocked-dates'),
 
   getApartmentAvailability: (apartmentId: string) => fetchApi<{ bookings: Booking[], blockedDates: BlockedDate[] }>(`/api/v1/availability?apartmentId=${apartmentId}`),
 
-  getPublicHosts: () => fetchApi<Pick<Host, 'slug' | 'name'>[]>('/api/v1/public-hosts'),
+  getPublicHosts: () => fetchApi<Pick<Host, 'slug' | 'name'>[]>('/api/v1/hosts/public'),
 
   createBooking: (data: Partial<Booking>) => fetchApi<Booking>('/api/v1/bookings', {
     method: 'POST',
     body: JSON.stringify(data),
   }),
 
-  updateHosts: (data: Host[]) => fetchApi<Host[]>('/api/v1/hosts', {
-    method: 'PUT',
-    body: JSON.stringify(data),
-  }),
+  updateHost: (data: Host) => {
+    if (!data.id) {
+        console.error("Attempted to update a host without an ID.", data);
+        throw new Error("Cannot update host without a valid ID.");
+    }
+    return fetchApi<Host>(`/api/v1/hosts/${data.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data),
+    });
+  },
+
+  updateHosts: (data: Host[]) => {
+    if (data.length === 1 && data[0].id) {
+      return fetchApi<Host>(`/api/v1/hosts/${data[0].id}`, {
+        method: 'PUT',
+        body: JSON.stringify(data[0]),
+      }).then(host => [host] as Host[]);
+    }
+    console.error("updateHosts called with multiple hosts or without an ID, which is not supported.", data);
+    return Promise.reject(new Error("Bulk host updates are not supported or host ID is missing."));
+  },
 
   updateApartments: (data: Apartment[]) => fetchApi<Apartment[]>('/api/v1/apartments', {
     method: 'PUT',
@@ -92,23 +124,24 @@ export const sanctumApi = {
     body: JSON.stringify(data),
   }),
 
-  sendEmail: (toEmail: string, subject: string, templateName: string, booking: Booking, apartment: Apartment, host: Host) => {
-      return fetchApi('/api/v1/send-email', {
-          method: 'POST',
-          body: JSON.stringify({ toEmail, subject, templateName, booking, apartment, host }),
-      }).catch(error => {
-        console.warn('Email dispatch failed, falling back to console simulation.');
-        sanctumApi.simulateEmail(toEmail, subject, templateName, booking);
-      });
+  sendMessage: (bookingId: string, message: string) => {
+    return sanctumApi.post('/api/v1/messages', { bookingId, message });
   },
-  
-  simulateEmail(to: string, subject: string, template: string, booking: any) {
-    console.group('%c [MOCK EMAIL DISPATCHED] ', 'background: #e97c62; color: #fff; font-weight: bold;');
-    console.log('To:', to);
-    console.log('Subject:', subject);
-    console.log('Template:', template);
-    console.log('Booking Info:', booking);
-    console.groupEnd();
+
+  sendCheckInMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/check-in`, {});
+  },
+
+  sendWelcomeMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/welcome`, {});
+  },
+
+  sendCheckoutMessage: (bookingId: string) => {
+    return sanctumApi.post(`/api/v1/messages/${bookingId}/checkout`, {});
+  },
+
+  cancelBooking: (bookingId: string) => {
+    return sanctumApi.put(`/api/v1/bookings/${bookingId}/cancel`, {});
   },
 
   async createBlockedDate(blockedDate: BlockedDate): Promise<BlockedDate> {
@@ -133,6 +166,11 @@ export const sanctumApi = {
     await supabase.from('bookings').upsert(MOCK_BOOKINGS);
     console.log("Database seeding complete.");
   },
+
+  trackApartmentView: (apartmentId: string) => {
+    return fetchApi(`/api/v1/views/${apartmentId}`, { method: 'POST' });
+  },
+
 
   // Generic methods for API calls
   post: (endpoint: string, body: any) => fetchApi(endpoint, {
