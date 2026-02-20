@@ -21,6 +21,7 @@ export enum BookingStatus {
     PAID = 'paid',
     CANCELED = 'canceled',
     REQUESTED = 'requested',
+    PENDING_PAYMENT = 'pending_payment',
 }
 
 export interface User {
@@ -70,6 +71,8 @@ export interface Host {
   checkoutMessage?: string;
   checkInMessage?: string;
   depositPercentage?: number;
+  stripeAccountId?: string;
+  stripeActive?: boolean;
 }
 
 export interface Apartment {
@@ -107,6 +110,8 @@ export interface Booking {
   status: BookingStatus;
   notes: string | null;
   depositAmount?: number;
+  stripeSessionId?: string;
+  stripeSessionUrl?: string;
 }
 
 export interface BlockedDate {

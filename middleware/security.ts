@@ -14,12 +14,12 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     contentSecurityPolicy: {
       directives: {
         ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        'script-src': ['\'self\'', `\'nonce-${res.locals.nonce}\'`],
+        'script-src': ['\'self\'', `\'nonce-${res.locals.nonce}\'`, 'https://js.stripe.com'],
         'style-src': ['\'self\'', '\'unsafe-inline\'', 'https://fonts.googleapis.com'],
         'font-src': ['\'self\'', 'https://fonts.gstatic.com'],
-        'connect-src': ['\'self\'', 'https://dmldmpdflblwwoppbvkv.supabase.co'],
-        'img-src': ['\'self\'', 'data:', 'https://images.unsplash.com', 'https://api.dicebear.com'],
-        'frame-src': ['\'self\'', 'https://*.supabase.co', 'https://www.google.com/'],
+        'connect-src': ['\'self\'', 'https://dmldmpdflblwwoppbvkv.supabase.co', 'https://api.stripe.com'],
+        'img-src': ['\'self\'', 'data:', '*'],
+        'frame-src': ['\'self\'', 'https://*.supabase.co', 'https://www.google.com/', 'https://js.stripe.com', 'https://hooks.stripe.com'],
       },
     },
     frameguard: { action: 'deny' },

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
 import { sanctumApi } from './api';
@@ -104,6 +103,19 @@ export const useAppData = () => {
     }
   }, [blockedDates, loadApplicationData]);
 
+  const handleNewBooking = async (bookingData: any) => {
+    try {
+      const newBooking = await sanctumApi.createBooking(bookingData);
+      if (newBooking.stripeSessionUrl) {
+        window.location.href = newBooking.stripeSessionUrl;
+      } else {
+        await loadApplicationData(false);
+      }
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   const handleAuth = async (email: string, pass: string): Promise<string | null> => {
     const { user, error } = await signInWithEmail(email, pass);
     if (error) {
@@ -151,7 +163,7 @@ export const useAppData = () => {
     handleAuth,
     handleLogout,
     handleHostChange,
-    handleNewBooking: createApiHandler(sanctumApi.createBooking),
+    handleNewBooking,
     handleUpdateBookings: createApiHandler(sanctumApi.updateBookings, { silent: true }),
     handleUpdateApartments: createApiHandler(sanctumApi.updateApartments, { silent: true }),
     handleUpdateHosts: createApiHandler(sanctumApi.updateHosts),

@@ -104,7 +104,7 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-stone-900/50 backdrop-blur-lg flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-stone-900/50 backdrop-blur-lg flex items-center justify-center p-6 animate-in fade-in duration-300 overflow-y-auto">
       <div className="bg-[#F7F5F0] text-charcoal border border-stone-200 w-full max-w-5xl rounded-[3rem] p-10 shadow-2xl relative my-12 text-left font-dm">
         <button onClick={onClose} className="absolute top-10 right-10 text-stone-400 hover:text-stone-800 transition-colors"><X className="w-8 h-8" /></button>
         

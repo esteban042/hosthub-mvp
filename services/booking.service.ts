@@ -1,6 +1,11 @@
 import { query, execute } from '../dputils';
 import { sendEmail } from './email';
-import { Booking, Apartment, Host, User, UserRole } from '../types';
+import { Booking, Apartment, Host, User, UserRole, BookingStatus } from '../types';
+import Stripe from 'stripe';
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16',
+});
 
 /**
  * Fetches an apartment by its ID. Can lock the row for updates.
@@ -69,24 +74,52 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         
         const totalPrice = nights * apartment.pricePerNight;
         
+        const status = host.stripeAccountId ? BookingStatus.PENDING_PAYMENT : BookingStatus.CONFIRMED;
+
         const bookingRes = await query<Booking>(
             `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
-             VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-            [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+            [apartmentId, startDate, endDate, totalPrice, status, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
         );
-        const newBooking = bookingRes[0];
+        let newBooking = bookingRes[0];
+
+        if (host.stripeAccountId) {
+            const session = await stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{
+                    price_data: {
+                        currency: 'usd',
+                        product_data: {
+                            name: `Booking for ${apartment.title}`,
+                        },
+                        unit_amount: totalPrice * 100,
+                    },
+                    quantity: 1,
+                }],
+                mode: 'payment',
+                success_url: `${process.env.APP_URL}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${process.env.APP_URL}/booking/cancel?booking_id=${newBooking.id}`,
+                metadata: {
+                    bookingId: newBooking.id,
+                },
+            });
+            newBooking.stripeSessionId = session.id;
+            newBooking.stripeSessionUrl = session.url;
+        }
         
         await execute('COMMIT');
         
-        try {
-            await sendEmail(
-                newBooking.guestEmail,
-                'Your Booking Confirmation',
-                'BookingConfirmation',
-                { booking: newBooking, apartment, host }
-            );
-        } catch (emailError) {
-            console.error('Failed to send confirmation email:', emailError);
+        if (newBooking.status === BookingStatus.CONFIRMED) {
+          try {
+              await sendEmail(
+                  newBooking.guestEmail,
+                  'Your Booking Confirmation',
+                  'BookingConfirmation',
+                  { booking: newBooking, apartment, host }
+              );
+          } catch (emailError) {
+              console.error('Failed to send confirmation email:', emailError);
+          }
         }
         
         return newBooking;

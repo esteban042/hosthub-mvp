@@ -10,6 +10,8 @@ import ApartmentDetailPage from './pages/ApartmentDetailPage';
 import PrintableBooking from './components/PrintableBooking';
 import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
+import BookingSuccessPage from './pages/BookingSuccessPage';
+import BookingCancelPage from './pages/BookingCancelPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
 import GenericLandingPage from './components/GenericLandingPage';
 
@@ -153,6 +155,8 @@ const App: React.FC = () => {
 
   return (
     <Routes>
+      <Route path="/booking/success" element={<BookingSuccessPage />} />
+      <Route path="/booking/cancel" element={<BookingCancelPage />} />
       <Route path="/booking/print/:bookingId" element={<PrintableBooking />} />
       <Route path="/*" element={<AppContent />} />
     </Routes>

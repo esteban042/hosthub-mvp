@@ -1,6 +1,7 @@
-import { Host, SubscriptionPlan } from "../../types";
+import { Host, SubscriptionType } from "../../types";
 import { SKY_ACCENT } from "../../constants";
 import { X, Plus } from 'lucide-react';
+import { sanctumApi } from "../../services/api";
 
 interface HostConfigurationModalProps {
   isOpen: boolean;
@@ -13,17 +14,21 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({ isOpen,
   
   if (!isOpen || !host) return null;
 
+  const handleStripeConnect = async () => {
+    try {
+      const { url } = await sanctumApi.createStripeConnectLink();
+      window.location.href = url;
+    } catch (error) {
+      console.error('Error creating Stripe connect link:', error);
+    }
+  };
+
   const handleUpdate = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
-    const subscriptionPlan = formData.get('subscriptionPlan') as SubscriptionPlan;
+    const subscriptionType = formData.get('subscriptionType') as SubscriptionType;
     const updatedHostData: Partial<Host> = {
-      subscriptionPlan,
-      features: {
-        ...host.features,
-        booking: formData.get('booking') === 'on',
-        googleMaps: formData.get('googleMaps') === 'on',
-      }
+      subscriptionType,
     };
     onUpdate(updatedHostData);
   };
@@ -36,14 +41,14 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({ isOpen,
         
         <form onSubmit={handleUpdate} className="space-y-8">
           <div>
-            <label htmlFor="subscriptionPlan" className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Subscription Plan</label>
+            <label htmlFor="subscriptionType" className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Subscription Plan</label>
             <select 
-              id="subscriptionPlan" 
-              name="subscriptionPlan"
-              defaultValue={host.subscriptionPlan} 
+              id="subscriptionType" 
+              name="subscriptionType"
+              defaultValue={host.subscriptionType} 
               className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal focus:ring-1 focus:ring-sky-accent transition-all outline-none"
             >
-              {Object.values(SubscriptionPlan).map(plan => 
+              {Object.values(SubscriptionType).map(plan => 
                 <option key={plan} value={plan}>{plan}</option>
               )}
             </select>
@@ -51,18 +56,28 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({ isOpen,
 
           <div className="pt-8 border-t border-stone-200">
             <div className="flex items-center space-x-3 mb-6">
-              <h4 className="text-xl font-bold text-charcoal tracking-tight">Feature Flags</h4>
+              <h4 className="text-xl font-bold text-charcoal tracking-tight">Stripe Onboarding</h4>
             </div>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between bg-white/50 p-4 rounded-2xl border border-stone-300">
-                <label htmlFor="booking" className="text-sm font-medium text-charcoal">Enable Booking</label>
-                <input type="checkbox" id="booking" name="booking" defaultChecked={host.features.booking} className="h-6 w-6 rounded-lg text-sky-500 focus:ring-sky-500" />
+            {host.stripeAccountId ? (
+              <div className="p-5 bg-white/50 border border-stone-300 rounded-2xl">
+                <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Stripe Status</label>
+                <div className="flex items-center mt-2">
+                  <div className={`w-3 h-3 rounded-full mr-3 ${host.stripeActive ? 'bg-emerald-accent' : 'bg-red-500'}`}></div>
+                  <p className="text-sm">{host.stripeActive ? 'Your account is active and ready to receive payments.' : 'Your account is not yet active. Please complete the onboarding process.'}</p>
+                </div>
               </div>
-              <div className="flex items-center justify-between bg-white/50 p-4 rounded-2xl border border-stone-300">
-                <label htmlFor="googleMaps" className="text-sm font-medium text-charcoal">Enable Google Maps</label>
-                <input type="checkbox" id="googleMaps" name="googleMaps" defaultChecked={host.features.googleMaps} className="h-6 w-6 rounded-lg text-sky-500 focus:ring-sky-500" />
+            ) : (
+              <div>
+                <p className="mb-4 text-sm">Connect your Stripe account to start accepting payments directly from your guests.</p>
+                <button
+                  type="button"
+                  onClick={handleStripeConnect}
+                  className="bg-sky-accent text-white font-bold py-3 px-6 rounded-lg hover:bg-opacity-90 transition-colors"
+                >
+                  Connect with Stripe
+                </button>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="pt-8 border-t border-stone-200">

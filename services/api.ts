@@ -171,6 +171,9 @@ export const sanctumApi = {
     return fetchApi(`/api/v1/views/${apartmentId}`, { method: 'POST' });
   },
 
+  createStripeConnectLink: () => {
+    return fetchApi<{ url: string }>('/api/v1/stripe/connect', { method: 'POST' });
+  },
 
   // Generic methods for API calls
   post: (endpoint: string, body: any) => fetchApi(endpoint, {

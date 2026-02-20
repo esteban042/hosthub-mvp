@@ -99,6 +99,16 @@ export async function getHostById(hostId: string): Promise<Host | null> {
 }
 
 /**
+ * Fetches a single host by its user ID.
+ * @param userId The user ID of the host to fetch.
+ * @returns A promise that resolves to a Host object, or null if not found.
+ */
+export async function getHostByUserId(userId: string): Promise<Host | null> {
+    const result = await query<Host>('SELECT * FROM hosts WHERE user_id = $1', [userId]);
+    return result.length > 0 ? result[0] : null;
+}
+
+/**
  * Updates a host in the database.
  * @param hostId The ID of the host to update.
  * @param updatedFields An object containing the fields to update.

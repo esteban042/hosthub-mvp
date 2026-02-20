@@ -17,6 +17,8 @@ import availabilityRouter from './availability';
 import messagesRouter from './messages';
 import viewsRouter from './views';
 import adminRouter from './admin';
+import stripeRouter from './stripe';
+import stripeWebhookRouter from './stripe-webhooks';
 
 const router = Router();
 
@@ -29,6 +31,8 @@ router.use('/availability', availabilityRouter);
 router.use('/messages', messagesRouter);
 router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
+router.use('/stripe', stripeRouter);
+router.use('/stripe-webhooks', stripeWebhookRouter);
 
 // --- Routes originally from misc.ts ---
 
