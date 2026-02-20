@@ -44,6 +44,7 @@ This document provides an overview of the database tables and their fields.
 - `guest_name`: text
 - `guest_country`: text
 - `custom_booking_id`: text
+- `stripe_session_id`: text
 
 ## `public.hosts`
 - `id`: text (Primary Key)
@@ -73,6 +74,9 @@ This document provides an overview of the database tables and their fields.
 - `check_in_time`: text
 - `check_out_time`: text
 - `check_in_info`: text
+- `stripe_account_id`: text
+- `stripe_deposit_percentage`: integer
+- `stripe_active`: boolean
 
 ## `public.profiles`
 - `id`: uuid (Primary Key, Foreign Key to `auth.users`)
@@ -137,6 +141,7 @@ CREATE TABLE public.bookings (
   guest_name text,
   guest_country text,
   custom_booking_id text,
+  stripe_session_id text,
   CONSTRAINT bookings_pkey PRIMARY KEY (id),
   CONSTRAINT bookings_apartment_id_fkey FOREIGN KEY (apartment_id) REFERENCES public.apartments(id)
 );
@@ -168,6 +173,9 @@ CREATE TABLE public.hosts (
   check_in_time text,
   check_out_time text,
   check_in_info text,
+  stripe_account_id text,
+  stripe_deposit_percentage integer,
+  stripe_active boolean DEFAULT false,
   CONSTRAINT hosts_pkey PRIMARY KEY (id),
   CONSTRAINT fk_hosts_users FOREIGN KEY (user_id) REFERENCES public.users(id)
 );

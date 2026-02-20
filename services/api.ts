@@ -92,6 +92,11 @@ export const sanctumApi = {
     body: JSON.stringify(data),
   }),
 
+  createCheckoutSession: (data: any) => fetchApi<any>('/api/v1/stripe/create-checkout-session', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
   updateHost: (data: Host) => {
     if (!data.id) {
         console.error("Attempted to update a host without an ID.", data);

@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Host, SubscriptionType } from '../../types';
-import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText, Link } from 'lucide-react';
+import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText, Link, CreditCard } from 'lucide-react';
 import { COUNTRIES } from '../../utils/countries';
-import { TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../../constants';
 
 interface HostConfigurationModalProps {
   isOpen: boolean;
@@ -16,7 +15,7 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
   isOpen, onClose, onSave, initialHost, monthlyStats 
 }) => {
   const [editingHost, setEditingHost] = useState<Partial<Host> | null>(initialHost);
-  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'legal' | 'statistics'>('basics');
+  const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'legal' | 'statistics' | 'stripe'>('basics');
   const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
@@ -113,38 +112,47 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
           <p className="text-[10px] font-bold text-charcoal/60 uppercase tracking-widest">Update network privileges and landing data</p>
         </div>
 
-        <div className="flex bg-white/50 border border-stone-200 p-2 rounded-2xl w-fit mb-12">
-          <button 
-            onClick={() => setActiveModalTab('basics')} 
-            className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'basics' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
-          >
-            <ShieldCheck className="w-4 h-4" />
-            <span>Basics</span>
-          </button>
-          <button 
-            onClick={() => setActiveModalTab('content')} 
-            className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'content' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
-          >
-            <Layout className="w-4 h-4" />
-            <span>Premium Content</span>
-          </button>
-          <button 
-            onClick={() => setActiveModalTab('legal')} 
-            className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'legal' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Legal</span>
-          </button>
-          <button 
-            onClick={() => setActiveModalTab('statistics')} 
-            className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'statistics' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
-          >
-            <BarChart className="w-4 h-4" />
-            <span>Statistics</span>
-          </button>
+        <div style={{ position: 'sticky', top: 0, zIndex: 1, background: '#F7F5F0'}} className="-mx-10 px-10 pt-4">
+          <div className="flex bg-white/50 border border-stone-200 p-2 rounded-2xl w-fit mb-12">
+            <button 
+              onClick={() => setActiveModalTab('basics')} 
+              className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'basics' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
+            >
+              <ShieldCheck className="w-4 h-4" />
+              <span>Basics</span>
+            </button>
+            <button 
+              onClick={() => setActiveModalTab('content')} 
+              className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'content' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
+            >
+              <Layout className="w-4 h-4" />
+              <span>Premium Content</span>
+            </button>
+            <button 
+              onClick={() => setActiveModalTab('legal')} 
+              className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'legal' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
+            >
+              <FileText className="w-4 h-4" />
+              <span>Legal</span>
+            </button>
+            <button 
+              onClick={() => setActiveModalTab('statistics')} 
+              className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'statistics' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
+            >
+              <BarChart className="w-4 h-4" />
+              <span>Statistics</span>
+            </button>
+            <button 
+              onClick={() => setActiveModalTab('stripe')} 
+              className={`px-8 py-4 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center space-x-2 ${activeModalTab === 'stripe' ? 'bg-white text-charcoal' : 'text-stone-500 hover:text-charcoal'}`}
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Stripe</span>
+            </button>
+          </div>
         </div>
 
-        <form onSubmit={handleSave} className="space-y-12">
+        <form onSubmit={handleSave} className="space-y-12 max-h-[60vh] overflow-y-auto -mx-10 px-10 pb-10">
           {activeModalTab === 'basics' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               <div className="space-y-6">
@@ -362,6 +370,33 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                   </tbody>
                 </table>
               </div>
+            </div>
+          )}
+
+          {activeModalTab === 'stripe' && (
+            <div className="space-y-6 animate-in fade-in duration-500">
+              <div className="flex items-center justify-between p-6 bg-white/50 border border-stone-200 rounded-3xl">
+                  <div className="flex items-center space-x-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${editingHost.stripeActive ? 'bg-emerald-500/10 text-emerald-400' : 'bg-stone-200 text-stone-500'}`}>
+                        <CreditCard className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <p className="font-bold">Stripe Payments</p>
+                        <p className="text-xs text-charcoal/70">Enable credit card payments via Stripe</p>
+                      </div>
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setEditingHost({...editingHost, stripeActive: !editingHost.stripeActive})}
+                    className={`w-16 h-8 rounded-full transition-all relative ${editingHost.stripeActive ? 'bg-emerald-500' : 'bg-stone-300'}`}
+                  >
+                      <div className={`absolute top-1 bottom-1 w-6 bg-white rounded-full transition-all shadow-md ${editingHost.stripeActive ? 'right-1' : 'left-1'}`} />
+                  </button>
+                </div>
+                 <div>
+                  <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Stripe Account ID</label>
+                  <input type="text" value={editingHost.stripeAccountId || ''} onChange={e => setEditingHost({ ...editingHost, stripeAccountId: e.target.value })} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
+                </div>
             </div>
           )}
 

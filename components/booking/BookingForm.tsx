@@ -3,7 +3,8 @@ import { Apartment, Host, Booking, BlockedDate, BookingStatus } from '../../type
 import { sanctumApi } from '../../services/api';
 import { formatDate } from '../../utils/dates';
 import HeroCalendar from '../HeroCalendar';
-import { CORE_ICONS, COUNTRIES } from '../../constants';
+import { CORE_ICONS } from '../../constants';
+import { COUNTRIES } from '../../utils/countries';
 import Modal from '../Modal'; // Import the Modal component
 
 interface BookingFormProps {
@@ -109,44 +110,45 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
 
     setIsBooking(true);
 
-    const bookingDetails: Partial<Booking> = {
-      apartmentId: apartment.id,
-      guestName: name,
-      guestEmail: email,
-      guestCountry: guestCountry,
-      numGuests: numGuests,
-      startDate: startDate,
-      endDate: endDate,
-      status: BookingStatus.CONFIRMED,
-      totalPrice: totalPrice,
-      notes: message,
-      depositAmount: depositAmount
+    const bookingDetails = {
+        apartmentId: apartment.id,
+        startDate,
+        endDate,
+        guestName: name,
+        guestEmail: email,
+        guestCountry,
+        guestPhone: phone,
+        numGuests,
+        guestMessage: message,
     };
 
     try {
-      const newConfirmedBooking = await sanctumApi.createBooking(bookingDetails);
-      onNewBooking(newConfirmedBooking);
-      // Reset form state after successful booking to prevent race condition
-      setName('');
-      setEmail('');
-      setPhone('');
-      setGuestCountry('');
-      setNumGuests(1);
-      setStartDate('');
-      setEndDate('');
-      setMessage('');
-      setFormErrors({});
-      setModalContent({ title: 'Booking Confirmed', message: 'Your booking has been successfully processed.' });
-      setIsModalOpen(true);
+        const response = await sanctumApi.createCheckoutSession(bookingDetails);
+
+        if (response.paymentUrl) {
+            window.location.href = response.paymentUrl;
+        } else if (response.booking) {
+            onNewBooking(response.booking);
+            setName('');
+            setEmail('');
+            setPhone('');
+            setGuestCountry('');
+            setNumGuests(1);
+            setStartDate('');
+            setEndDate('');
+            setMessage('');
+            setFormErrors({});
+            setModalContent({ title: 'Booking Confirmed', message: 'Your booking has been successfully processed.' });
+            setIsModalOpen(true);
+        }
     } catch (error) {
-      console.error("Failed to create booking:", error);
-      setModalContent({ title: 'Booking Failed', message: 'There was an error processing your booking. Please try again.' });
-      setIsModalOpen(true);
+        console.error("Booking process failed:", error);
+        setModalContent({ title: 'Booking Failed', message: 'There was an error processing your booking. Please try again.' });
+        setIsModalOpen(true);
     } finally {
-      setIsBooking(false);
+        setIsBooking(false);
     }
   };
-
 
   return (
     <>
@@ -158,8 +160,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         <p>{modalContent.message}</p>
       </Modal>
       <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
-        {/* ... rest of the form ... */}
-              <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
+      <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
         <div>
           <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Estimated total</span>
           <span className="text-5xl font-black text-charcoal">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
@@ -258,7 +259,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               className="w-full bg-white/50 border border-stone-300 rounded-2xl py-5 px-6 text-sm font-medium text-charcoal focus:ring-1 focus:ring-sky-accent outline-none placeholder:text-charcoal/50 appearance-none"
             >
               <option value="">Select a country</option>
-              {COUNTRIES.map(c => <option key={c} value={c}>{c}</option>)}
+              {COUNTRIES.map(c => <option key={c.code} value={c.name}>{c.name}</option>)}
             </select>
             {formErrors.guestCountry && <p className="text-rose-500 text-xs mt-1 ml-1">{formErrors.guestCountry}</p>}
           </div>
@@ -284,10 +285,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         </div>
 
         <button
+          type="submit"
           disabled={isBooking}
           className="w-full bg-sky-700/80 text-white disabled:bg-alabaster/70 disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
         >
-          {isBooking ? 'Booking...' : 'Book now'}
+          {isBooking ? 'Processing...' : 'Book now'}
         </button>
         <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6 text-charcoal">Book with instant confirmation</p>
       </form>

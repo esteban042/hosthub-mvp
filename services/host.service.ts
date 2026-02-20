@@ -110,12 +110,16 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     let queryIndex = 1;
 
     for (const key in updatedFields) {
-        // Ensure the key is a property of the object and not 'id'
         if (Object.prototype.hasOwnProperty.call(updatedFields, key) && key !== 'id') {
             const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
             queryParts.push(`${snakeKey} = $${queryIndex++}`);
-            // @ts-ignore
-            queryValues.push(updatedFields[key]);
+            
+            let value = (updatedFields as any)[key];
+            if (key === 'premiumConfig' || key === 'socialMediaLinks') {
+                value = JSON.stringify(value);
+            }
+            
+            queryValues.push(value);
         }
     }
 
@@ -126,7 +130,6 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     const queryString = `UPDATE hosts SET ${queryParts.join(', ')} WHERE id = $${queryIndex} RETURNING *`;
     queryValues.push(hostId);
 
-    // Using a transaction for the update
     await execute('BEGIN');
     try {
         const result = await query<Host>(queryString, queryValues);

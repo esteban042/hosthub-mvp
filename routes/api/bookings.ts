@@ -6,11 +6,28 @@ import {
     getAllBookings, 
     createBooking, 
     getBookingDetailsById, 
-    updateBookings 
+    updateBookings, getBookingBySessionId
 } from '../../services/booking.service';
 import { UserRole } from '../../types';
 
 const router = Router();
+
+router.get('/session/:sessionId', 
+    param('sessionId').isString().notEmpty(),
+    validate,
+    async (req: Request, res, next) => {
+        const { sessionId } = req.params;
+        try {
+            const booking = await getBookingBySessionId(sessionId);
+            if (!booking) {
+                return res.status(404).json({ error: 'Booking not found for this session' });
+            }
+            res.json(booking);
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 
 router.get('/', 
     protect, 

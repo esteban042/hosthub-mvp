@@ -12,6 +12,7 @@ import { Layout } from './components/Layout';
 import LoginPage from './pages/LoginPage';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
 import GenericLandingPage from './components/GenericLandingPage';
+import BookingSuccessPage from './components/stripe/success';
 
 document.title = "Sanctum";
 
@@ -154,6 +155,7 @@ const App: React.FC = () => {
   return (
     <Routes>
       <Route path="/booking/print/:bookingId" element={<PrintableBooking />} />
+      <Route path="/booking/success" element={<BookingSuccessPage />} />
       <Route path="/*" element={<AppContent />} />
     </Routes>
   )

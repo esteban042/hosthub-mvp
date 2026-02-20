@@ -1,29 +1,8 @@
 import { query, execute } from '../dputils';
 import { sendEmail } from './email';
-import { Booking, Apartment, Host, User, UserRole } from '../types';
-
-/**
- * Fetches an apartment by its ID. Can lock the row for updates.
- */
-async function getApartmentById(apartmentId: string, forUpdate: boolean = false): Promise<Apartment> {
-    const sql = `SELECT * FROM apartments WHERE id = $1 ${forUpdate ? 'FOR UPDATE' : ''}`;
-    const result = await query<Apartment>(sql, [apartmentId]);
-    if (result.length === 0) {
-        throw new Error('Apartment not found');
-    }
-    return result[0];
-}
-
-/**
- * Fetches a host by its ID.
- */
-async function getHostById(hostId: string): Promise<Host> {
-    const result = await query<Host>('SELECT * FROM hosts WHERE id = $1', [hostId]);
-    if (result.length === 0) {
-        throw new Error('Host not found');
-    }
-    return result[0];
-}
+import { Booking, User, UserRole } from '../types';
+import { getApartmentById, getHostById } from './apartment.service';
+import { getHostById } from './host.service';
 
 /**
  * Fetches all bookings from the database. For admin use.
@@ -35,9 +14,9 @@ export async function getAllBookings(): Promise<Booking[]> {
 /**
  * Creates a new booking in a transaction.
  */
-export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBookingId' | 'totalPrice' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Booking> {
+export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBookingId' | 'totalPrice' | 'createdAt' | 'updatedAt'>): Promise<Booking> {
     const {
-        apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage
+        apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage, status
     } = bookingData;
     
     await execute('BEGIN');
@@ -71,22 +50,24 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         
         const bookingRes = await query<Booking>(
             `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
-             VALUES ($1, $2, $3, $4, 'confirmed', $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
-            [apartmentId, startDate, endDate, totalPrice, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
+            [apartmentId, startDate, endDate, totalPrice, status || 'confirmed', guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
         );
         const newBooking = bookingRes[0];
         
         await execute('COMMIT');
         
-        try {
-            await sendEmail(
-                newBooking.guestEmail,
-                'Your Booking Confirmation',
-                'BookingConfirmation',
-                { booking: newBooking, apartment, host }
-            );
-        } catch (emailError) {
-            console.error('Failed to send confirmation email:', emailError);
+        if (newBooking.status !== 'pending_payment') {
+            try {
+                await sendEmail(
+                    newBooking.guestEmail,
+                    'Your Booking Confirmation',
+                    'BookingConfirmation',
+                    { booking: newBooking, apartment, host }
+                );
+            } catch (emailError) {
+                console.error('Failed to send confirmation email:', emailError);
+            }
         }
         
         return newBooking;
@@ -94,6 +75,27 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
     } catch (error) {
         await execute('ROLLBACK');
         throw error;
+    }
+}
+
+export async function addStripeSessionIdToBooking(bookingId: string, sessionId: string): Promise<void> {
+    await query('UPDATE bookings SET stripe_session_id = $1 WHERE id = $2', [sessionId, bookingId]);
+}
+
+export async function updateBookingStatus(bookingId: string, status: string): Promise<void> {
+    await query('UPDATE bookings SET status = $1 WHERE id = $2', [status, bookingId]);
+    if (status === 'paid') {
+        const bookingDetails = await getBookingDetailsById(bookingId);
+        if (bookingDetails) {
+            const apartment = await getApartmentById(bookingDetails.apartmentId);
+            const host = await getHostById(apartment.hostId);
+            await sendEmail(
+                bookingDetails.guestEmail,
+                'Your Booking Confirmation',
+                'BookingConfirmation',
+                { booking: bookingDetails, apartment, host }
+            );
+        }
     }
 }
 
@@ -123,6 +125,34 @@ export async function getBookingDetailsById(bookingId: string): Promise<any | nu
         WHERE
           b.id = $1`,
         [bookingId]
+    );
+
+    return result.length > 0 ? result[0] : null;
+}
+
+export async function getBookingBySessionId(sessionId: string): Promise<any | null> {
+    const result = await query<any>(
+        `SELECT
+          b.*,
+          a.title AS apartment_title,
+          a.city AS apartment_city,
+          a.photos AS apartment_photos,
+          a.price_per_night,
+          h.name AS host_name,
+          h.contact_email AS host_email,
+          h.phone_number AS host_phone,
+          u.id AS host_user_id
+        FROM
+          bookings b
+        JOIN
+          apartments a ON b.apartment_id = a.id
+        JOIN
+          hosts h ON a.host_id = h.id
+        LEFT JOIN
+          users u ON h.user_id = u.id
+        WHERE
+          b.stripe_session_id = $1`,
+        [sessionId]
     );
 
     return result.length > 0 ? result[0] : null;

@@ -108,8 +108,8 @@ const HeroCalendar: React.FC<HeroCalendarProps> = ({ apartment, startDate, endDa
                     className={`
                         relative text-center text-sm rounded-full aspect-square flex flex-col items-center justify-center p-1
                         ${!isDisabled ? 'cursor-pointer hover:bg-stone-200' : ''}
-                        ${isSelected ? 'bg-sky-accent text-white' : ''}
-                        ${isInRange || isHovering ? 'bg-sky-100' : ''}
+                        ${isSelected ? 'bg-cyan-700/40 text-white' : ''}
+                        ${isInRange || isHovering ? 'bg-cyan-700/20' : ''}
                         ${isDisabled ? 'text-stone-300' : 'text-charcoal'}
                         ${dateStr === startDate ? 'rounded-r-none' : ''}
                         ${dateStr === endDate ? 'rounded-l-none' : ''}

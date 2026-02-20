@@ -17,6 +17,7 @@ import availabilityRouter from './availability';
 import messagesRouter from './messages';
 import viewsRouter from './views';
 import adminRouter from './admin';
+import stripeRouter from './stripe';
 
 const router = Router();
 
@@ -29,6 +30,7 @@ router.use('/availability', availabilityRouter);
 router.use('/messages', messagesRouter);
 router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
+router.use('/stripe', stripeRouter);
 
 // --- Routes originally from misc.ts ---
 

@@ -81,10 +81,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
           booking={confirmedBooking}
           apartment={apartment}
           host={host}
-          onClose={() => {
-            setConfirmedBooking(null);
-            onBack();
-          }}
+          onClose={() => setConfirmedBooking(null)}
         />
       )}
     </div>
