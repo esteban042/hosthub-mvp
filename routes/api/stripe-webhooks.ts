@@ -7,12 +7,8 @@ import { BookingStatus, UserRole } from '../../types.js';
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-01-28.clover',
+    apiVersion: '2026-01-28.clover' as any,
 });
-
-interface RequestWithRawBody extends Request {
-    rawBody: Buffer;
-}
 
 router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Response, next: NextFunction) => {
   const sig = req.headers['stripe-signature'] as string;
@@ -20,7 +16,7 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent((req as RequestWithRawBody).rawBody, sig, process.env.STRIPE_WEBHOOK_SECRET!);
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
   } catch (err: any) {
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }

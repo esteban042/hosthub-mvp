@@ -1,4 +1,3 @@
-
 import { Router, Request as ExpressRequest, Response, NextFunction } from 'express';
 import { body, query } from 'express-validator';
 import { pool } from '../../db.js';
@@ -18,7 +17,6 @@ import messagesRouter from './messages.js';
 import viewsRouter from './views.js';
 import adminRouter from './admin.js';
 import stripeRouter from './stripe.js';
-import stripeWebhookRouter from './stripe-webhooks.js';
 
 const router = Router();
 
@@ -32,7 +30,6 @@ router.use('/messages', messagesRouter);
 router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
 router.use('/stripe', stripeRouter);
-router.use('/stripe-webhooks', stripeWebhookRouter);
 
 // --- Routes originally from misc.ts ---
 

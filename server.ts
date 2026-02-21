@@ -10,12 +10,16 @@ import { query } from './dputils.js';
 import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security.js';
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
+import stripeWebhookRouter from './routes/api/stripe-webhooks.js';
 import { sendEmail } from './services/email.js';
 
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist/public');
 
 const app = express();
+
+// Stripe webhook needs to be handled before express.json()
+app.use('/api/v1/stripe-webhooks', stripeWebhookRouter);
 
 app.use(express.json());
 app.use(cookieParser());
