@@ -2,7 +2,7 @@ import Stripe from 'stripe';
 import { getHostByUserId, updateHost } from './host.service.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '''2026-01-28.clover''',
+  apiVersion: '2026-01-28.clover',
 });
 
 export const createStripeAccount = async (userId: string): Promise<string> => {
@@ -28,3 +28,13 @@ export const createStripeAccount = async (userId: string): Promise<string> => {
 
   return account.id;
 };
+
+export const createStripeAccountLink = async (accountId: string): Promise<Stripe.AccountLink> => {
+  const accountLink = await stripe.accountLinks.create({
+    account: accountId,
+    refresh_url: 'http://localhost:5173/',
+    return_url: 'http://localhost:5173/',
+    type: 'account_onboarding',
+  });
+  return accountLink;
+}

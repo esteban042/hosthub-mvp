@@ -7,8 +7,7 @@ import { BookingStatus, UserRole } from '../../types.js';
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    // @ts-expect-error The Stripe types for this property appear to be incorrect.
-    apiVersion: '2023-10-16',
+    apiVersion: '2026-01-28.clover',
 });
 
 interface RequestWithRawBody extends Request {

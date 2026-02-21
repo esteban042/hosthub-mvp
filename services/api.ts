@@ -8,8 +8,6 @@ const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || ''
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const API_BASE_URL = 'http://localhost:8081';
-
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
@@ -26,7 +24,7 @@ export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
 };
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const fullUrl = `${API_BASE_URL}${endpoint}`;
+  const fullUrl = endpoint;
 
   const response = await fetch(fullUrl, {
     headers: {
