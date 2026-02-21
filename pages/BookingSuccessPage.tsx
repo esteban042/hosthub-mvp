@@ -2,6 +2,17 @@ import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { sanctumApi } from '../services/api';
 import { Booking } from '../types';
+import { CheckCircle, User, Calendar, DollarSign, Hash, Home, CreditCard, ArrowRight } from 'lucide-react';
+
+const InfoRow: React.FC<{ icon: React.ElementType, label: string, value: string | number, valueClass?: string }> = ({ icon: Icon, label, value, valueClass }) => (
+    <div className="flex justify-between items-center py-3 border-b border-stone-200/60 last:border-none">
+      <div className="flex items-center space-x-3 text-charcoal/80">
+        <Icon size={18} />
+        <span className="font-medium">{label}</span>
+      </div>
+      <span className={`font-bold text-charcoal text-lg ${valueClass}`}>{value}</span>
+    </div>
+  );
 
 const BookingSuccessPage = () => {
   const location = useLocation();
@@ -32,6 +43,8 @@ const BookingSuccessPage = () => {
     verifyBooking();
   }, [location]);
 
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Verifying your payment...</div>;
   }
@@ -45,20 +58,42 @@ const BookingSuccessPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16 text-center">
-      <h1 className="text-4xl font-bold text-emerald-600 mb-4">Booking Confirmed!</h1>
-      <p className="text-lg text-gray-700 mb-2">Thank you for your payment, {booking.guestName}.</p>
-      <p className="text-gray-600 mb-4">Your booking is now confirmed. A confirmation email has been sent to {booking.guestEmail}.</p>
-      <div className="bg-gray-100 rounded-lg p-6 max-w-md mx-auto">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Booking Summary</h2>
-        <p><strong>Booking ID:</strong> {booking.customBookingId}</p>
-        <p><strong>Apartment:</strong> {booking.apartment?.title}</p>
-        <p><strong>Dates:</strong> {new Date(booking.startDate).toLocaleDateString()} - {new Date(booking.endDate).toLocaleDateString()}</p>
-        <p><strong>Total Price:</strong> ${booking.totalPrice.toLocaleString()}</p>
-      </div>
-      <Link to={`/booking/${booking.id}`} className="inline-block mt-8 bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors">
-        View Full Booking Details
-      </Link>
+    <div className="bg-stone-50 min-h-screen flex items-center justify-center p-4">
+         <div className="bg-white border border-stone-200 rounded-2xl shadow-2xl max-w-2xl w-full font-sans">
+            <div className="p-8 space-y-8">
+                <header className="text-center space-y-3">
+                    <CheckCircle size={50} className="mx-auto text-emerald-500 bg-emerald-100 p-2 rounded-full" />
+                    <h1 className="text-4xl font-bold tracking-tight">Booking Confirmed!</h1>
+                    <p className="text-charcoal/70 text-lg">Thank you for your payment, {booking.guestName}.</p>
+                    <p className="text-gray-600">Your booking is now confirmed. A confirmation email has been sent to {booking.guestEmail}.</p>
+                </header>
+
+                <div className="bg-white/50 p-6 rounded-xl border border-stone-200/60">
+                    <InfoRow icon={Hash} label="Booking ID" value={booking.customBookingId || 'N/A'} />
+                    <InfoRow icon={User} label="Guest Name" value={booking.guestName} />
+                    {booking.apartment && <InfoRow icon={Home} label="Apartment" value={booking.apartment.title} />}
+                    <div className="flex justify-between items-center py-4 border-b border-stone-200/60">
+                        <div className="flex items-center space-x-3 text-charcoal/80">
+                            <Calendar size={18} />
+                            <span className="font-medium">Dates</span>
+                        </div>
+                        <div className="flex items-center space-x-2 font-bold text-charcoal text-lg">
+                            <span>{formatDate(booking.startDate)}</span>
+                            <ArrowRight size={20} className="text-sky-500"/>
+                            <span>{formatDate(booking.endDate)}</span>
+                        </div>
+                    </div>
+                    <InfoRow icon={DollarSign} label="Total Price" value={`$${booking.totalPrice.toFixed(2)}`} />
+                    <InfoRow icon={CreditCard} label="Payment Status" value="Paid" valueClass="text-emerald-500" />
+                </div>
+
+                <footer className="text-center">
+                    <Link to={`/booking/print/${booking.id}`} target="_blank" rel="noopener noreferrer" className="inline-block bg-blue-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-blue-600 transition-colors">
+                        View Full Booking Details
+                    </Link>
+                </footer>
+            </div>
+        </div>
     </div>
   );
 };

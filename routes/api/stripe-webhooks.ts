@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
-import { getBookingDetailsById, updateBookings } from '../../services/booking.service';
+import { getBookingDetailsById, updateBookings, getBookingById } from '../../services/booking.service';
 import { sendEmail } from '../../services/email';
 import { BookingStatus } from '../../types';
 
@@ -27,15 +27,26 @@ router.post('/', async (req, res, next) => {
 
     if (bookingId) {
       try {
-        const booking = await getBookingDetailsById(bookingId);
-        if (booking) {
-          await updateBookings([{ ...booking, status: BookingStatus.CONFIRMED }], { id: booking.hostUserId, role: 'host' });
+        const bookingDetails = await getBookingDetailsById(bookingId);
+        if (bookingDetails) {
+          const originalBooking = await getBookingById(bookingId, {
+            id: bookingDetails.hostUserId,
+            role: 'host',
+          });
+          await updateBookings([{ ...originalBooking, status: BookingStatus.PAID }], {
+            id: bookingDetails.hostUserId,
+            role: 'host',
+          });
 
           await sendEmail(
-            booking.guestEmail,
+            bookingDetails.guestEmail,
             'Your Booking Confirmation',
             'BookingConfirmation',
-            { booking, apartment: { title: booking.apartment_title }, host: { name: booking.host_name } }
+            {
+              booking: bookingDetails,
+              apartment: { title: bookingDetails.apartment_title },
+              host: { name: bookingDetails.host_name },
+            }
           );
         }
       } catch (err) {

@@ -1,0 +1,51 @@
+[debug] [2026-02-21T12:18:08.333Z] ----------------------------------------------------------------------
+[debug] [2026-02-21T12:18:08.336Z] Command:       /nix/store/ws50yvm6vzlzf7jzz6n7xh4szddrack1-nodejs-20.19.1/bin/node /nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/bin/firebase.js init
+[debug] [2026-02-21T12:18:08.337Z] CLI Version:   15.1.0
+[debug] [2026-02-21T12:18:08.337Z] Platform:      linux
+[debug] [2026-02-21T12:18:08.337Z] Node Version:  v20.19.1
+[debug] [2026-02-21T12:18:08.337Z] Time:          Sat Feb 21 2026 12:18:08 GMT+0000 (Coordinated Universal Time)
+[debug] [2026-02-21T12:18:08.337Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-02-21T12:18:10.917Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:18:10.917Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:18:10.922Z] >>> [apiv2][query] GET https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 [none]
+[debug] [2026-02-21T12:18:11.791Z] <<< [apiv2][status] GET https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 200
+[debug] [2026-02-21T12:18:11.791Z] <<< [apiv2][body] GET https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 {"workspaceId":"hosthub-mvpmain-49757162","name":"Sanctum2o26","workspaceRedirectUrl":"firebase-hosthub-mvpmain-1770589290097.cluster-fbfjltn375c6wqxlhoehbz44sk.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2026-02-21T12:16:12.307400Z","workspaceTemplate":"WORKSPACE_TEMPLATE_BLANK_WEB","owner":"SELF","serviceAccountEmail":"msp-8532731209147312342@monospace-per-ws-sa-7.iam.gserviceaccount.com","gitRepoUrl":"https://github.com/esteban042/hosthub-mvp","enableNix":true,"ownerEmail":"stkreidl@gmail.com","workstationAccessToken":"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2Nsb3VkLmdvb2dsZS5jb20vd29ya3N0YXRpb25zIiwiYXVkIjoiZmlyZWJhc2UtaG9zdGh1Yi1tdnBtYWluLTE3NzA1ODkyOTAwOTcuY2x1c3Rlci1mYmZqbHRuMzc1YzZ3cXhsaG9laGJ6NDRzay5jbG91ZHdvcmtzdGF0aW9ucy5kZXYiLCJpYXQiOjE3NzE2NzYyOTEsImV4cCI6MTc3MTc2MjY5MX0.ji5rImy9r4ZAKLW7GNHzg9Sj0F_hh3tvFJVzIZPL_FrB2mCcoUGX3Fr57vWusD8v9quiFY38xxU8L44ZPF-JrOh8THXyWJ0htQj8fniBWctTbhH9Ew4tIrxjzjB8zYERL30BLY4RU20tz2iK2jyJzebWFO6I9wlq1dcl5yEx_iFK7MkdFZop6DmZaa3m71PTZJ_RjOfd-n2J4VRjlPHKER4tEjjei7o9rkLJ2tVbtttVvZIRXS92tZoOi1bm4li_6chgpqbfoki0cda5T07WaugiCyT7lv6AO2uldnsguJPerLm5YAqhP1H2JrLHASD7Xuh98zrmCxC2wzGFHXw82Q"}
+[info] Updating Studio Workspace active project to match Firebase CLI 'test'
+[debug] [2026-02-21T12:18:11.793Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:18:11.793Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:18:11.794Z] >>> [apiv2][query] PATCH https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 updateMask=workspace.firebaseProjectId
+[debug] [2026-02-21T12:18:11.795Z] >>> [apiv2][body] PATCH https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 {"firebaseProjectId":"test"}
+[debug] [2026-02-21T12:18:12.338Z] <<< [apiv2][status] PATCH https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 200
+[debug] [2026-02-21T12:18:12.338Z] <<< [apiv2][body] PATCH https://monospace-pa.googleapis.com/v1/workspaces/hosthub-mvpmain-49757162 {"workspaceId":"hosthub-mvpmain-49757162","name":"Sanctum2o26","workspaceRedirectUrl":"firebase-hosthub-mvpmain-1770589290097.cluster-fbfjltn375c6wqxlhoehbz44sk.cloudworkstations.dev","status":"WORKSPACE_STATUS_RUNNING","lastAccessDatetime":"2026-02-21T12:16:12.307400Z","workspaceTemplate":"WORKSPACE_TEMPLATE_BLANK_WEB","serviceAccountEmail":"msp-8532731209147312342@monospace-per-ws-sa-7.iam.gserviceaccount.com","gitRepoUrl":"https://github.com/esteban042/hosthub-mvp","enableNix":true,"firebaseProjectId":"test"}
+[info] 
+     ######## #### ########  ######## ########     ###     ######  ########
+     ##        ##  ##     ## ##       ##     ##  ##   ##  ##       ##
+     ######    ##  ########  ######   ########  #########  ######  ######
+     ##        ##  ##    ##  ##       ##     ## ##     ##       ## ##
+     ##       #### ##     ## ######## ########  ##     ##  ######  ########
+
+You're about to initialize a Firebase project in this directory:
+
+  /home/user/hosthub-mvp
+
+[info] 
+=== Project Setup
+[info] 
+[info] First, let's associate this project directory with a Firebase project.
+[info] You can create multiple project aliases by running firebase use --add, 
+[info] 
+[debug] [2026-02-21T12:19:24.103Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform","https://www.googleapis.com/auth/userinfo.email"]
+[debug] [2026-02-21T12:19:24.103Z] > authorizing via signed-in user (stkreidl@gmail.com)
+[debug] [2026-02-21T12:19:24.105Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:19:24.105Z] Checked if tokens are valid: true, expires at: 1771679881198
+[debug] [2026-02-21T12:19:24.106Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/test [none]
+[debug] [2026-02-21T12:19:24.475Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/test 403
+[debug] [2026-02-21T12:19:24.475Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/test {"error":{"code":403,"message":"The caller does not have permission","status":"PERMISSION_DENIED"}}
+[debug] [2026-02-21T12:19:24.477Z] Request to https://firebase.googleapis.com/v1beta1/projects/test had HTTP Error: 403, The caller does not have permission
+[debug] [2026-02-21T12:19:24.499Z] FirebaseError: Request to https://firebase.googleapis.com/v1beta1/projects/test had HTTP Error: 403, The caller does not have permission
+    at responseToError (/nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/responseToError.js:53:12)
+    at RetryOperation._fn (/nix/store/gm9mcvzb17vv8cla08khrg29vxn3sq4r-firebase-tools-15.1.0/lib/node_modules/firebase-tools/lib/apiv2.js:322:77)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+[error] 
+[error] Error: Failed to get Firebase project test. Please make sure the project exists and your account has permission to access it.
