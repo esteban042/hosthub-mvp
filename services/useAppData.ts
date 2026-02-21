@@ -1,4 +1,4 @@
-min import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
 import { sanctumApi } from './api';
 import { checkSession, signInWithEmail, signOut } from './authService';
