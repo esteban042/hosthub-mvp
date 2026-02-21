@@ -1,19 +1,19 @@
 
 import React, { useState, useMemo } from 'react';
 import { Routes, Route } from 'react-router-dom';
-import { UserRole } from './types';
-import { useAppData } from './services/useAppData';
-import { GuestLandingPage } from './pages/GuestLandingPage';
-import HostDashboard from './pages/HostDashboard';
-import AdminDashboard from './pages/AdminDashboard';
-import ApartmentDetailPage from './pages/ApartmentDetailPage';
-import PrintableBooking from './components/PrintableBooking';
-import { Layout } from './components/Layout';
-import LoginPage from './pages/LoginPage';
-import BookingSuccessPage from './pages/BookingSuccessPage';
-import BookingCancelPage from './pages/BookingCancelPage';
+import { UserRole, BlockedDate, Booking, Host, Apartment } from './types.js';
+import { useAppData } from './services/useAppData.js';
+import { GuestLandingPage } from './pages/GuestLandingPage.js';
+import HostDashboard from './pages/HostDashboard.js';
+import AdminDashboard from './pages/AdminDashboard.js';
+import ApartmentDetailPage from './pages/ApartmentDetailPage.js';
+import PrintableBooking from './components/PrintableBooking.js';
+import { Layout } from './components/Layout.js';
+import LoginPage from './pages/LoginPage.js';
+import BookingSuccessPage from './pages/BookingSuccessPage.js';
+import BookingCancelPage from './pages/BookingCancelPage.js';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
-import GenericLandingPage from './components/GenericLandingPage';
+import GenericLandingPage from './components/GenericLandingPage.js';
 
 document.title = "Sanctum";
 
@@ -65,11 +65,11 @@ const App: React.FC = () => {
   };
 
   const formattedBlockedDates = useMemo(() => {
-    return blockedDates.map(d => ({ ...d, date: d.date.split('T')[0] }));
+    return blockedDates.map((d: BlockedDate) => ({ ...d, date: d.date.split('T')[0] }));
   }, [blockedDates]);
 
   const formattedBookings = useMemo(() => {
-    return bookings.map(b => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] }));
+    return bookings.map((b: Booking) => ({ ...b, startDate: b.startDate.split('T')[0], endDate: b.endDate.split('T')[0] }));
   }, [bookings]);
 
   const renderInitialSetup = () => {
@@ -126,7 +126,7 @@ const App: React.FC = () => {
                 <button onClick={onLogout} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Logout</button>
                 </div>;
             }
-            if (currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} onHostUpdate={(updatedHost) => handleUpdateHosts(hosts.map(h => h.id === updatedHost.id ? updatedHost : h))} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
+            if (currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} onHostUpdate={(updatedHost: Host) => handleUpdateHosts(hosts.map((h: Host) => h.id === updatedHost.id ? updatedHost : h))} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
             return null;
             default:
             return <p>Unknown user role.</p>;
@@ -134,12 +134,12 @@ const App: React.FC = () => {
         }
 
         if (selectedAptId && currentHost) {
-          const apt = apartments.find(a => a.id === selectedAptId);
+          const apt = apartments.find((a: Apartment) => a.id === selectedAptId);
           if (apt) return <ApartmentDetailPage apartment={apt} host={currentHost} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onBack={() => setSelectedAptId(null)} onNewBooking={handleNewBooking} />;
         }
 
         if (currentHost) {
-        return <GuestLandingPage host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id) => setSelectedAptId(id)} onNewBooking={handleNewBooking}/>;
+        return <GuestLandingPage host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} airbnbCalendarDates={currentHostAirbnbBlockedDates} onSelectApartment={(id: string) => setSelectedAptId(id)} onNewBooking={handleNewBooking}/>;
         }
 
         return null;

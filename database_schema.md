@@ -76,6 +76,7 @@ This document provides an overview of the database tables and their fields.
 - `check_in_info`: text
 - `stripe_account_id`: text
 - `stripe_active`: boolean
+- `currency`: jsonb
 
 ## `public.profiles`
 - `id`: uuid (Primary Key, Foreign Key to `auth.users`)
@@ -174,6 +175,7 @@ CREATE TABLE public.hosts (
   check_in_info text,
   stripe_account_id text,
   stripe_active boolean DEFAULT false,
+  currency jsonb,
   CONSTRAINT hosts_pkey PRIMARY KEY (id),
   CONSTRAINT fk_hosts_users FOREIGN KEY (user_id) REFERENCES public.users(id)
 );

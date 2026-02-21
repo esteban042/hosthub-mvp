@@ -1,0 +1,17 @@
+export const CURRENCIES = [
+  { name: 'Euro', code: 'EUR', symbol: '€' },
+  { name: 'US Dollar', code: 'USD', symbol: '$' },
+  { name: 'British Pound', code: 'GBP', symbol: '£' },
+  { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
+  { name: 'Canadian Dollar', code: 'CAD', symbol: 'CA$' },
+  { name: 'Australian Dollar', code: 'AUD', symbol: 'A$' },
+  { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
+  { name: 'Chinese Yuan', code: 'CNY', symbol: '¥' },
+  { name: 'Hong Kong Dollar', code: 'HKD', symbol: 'HK$' },
+  { name: 'Singapore Dollar', code: 'SGD', symbol: 'S$' },
+  { name: 'Thai Baht', code: 'THB', symbol: '฿' },
+  { name: 'Indonesian Rupiah', code: 'IDR', symbol: 'Rp' },
+  { name: 'Malaysian Ringgit', code: 'MYR', symbol: 'RM' },
+  { name: 'Philippine Peso', code: 'PHP', symbol: '₱' },
+  { name: 'Vietnamese Dong', code: 'VND', symbol: '₫' },
+];

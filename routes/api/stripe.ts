@@ -1,17 +1,18 @@
-import { Router } from 'express';
-import { protect, Request } from '../../middleware/auth';
-import { UserRole } from '../../types';
-import { createStripeAccount, createStripeAccountLink } from '../../services/stripe.service';
+import { Router, Response, NextFunction } from 'express';
+import { protect, AuthRequest } from '../../middleware/auth.js';
+import { UserRole } from '../../types.js';
+import { createStripeAccount, createStripeAccountLink } from '../../services/stripe.service.js';
 import Stripe from 'stripe';
-import { getBookingDetailsById } from '../../services/booking.service';
+import { getBookingDetailsById } from '../../services/booking.service.js';
 
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  // @ts-expect-error The Stripe types for this property appear to be incorrect.
+  apiVersion: '2026-01-28',
 });
 
-router.post('/connect', protect, async (req: Request, res, next) => {
+router.post('/connect', protect, async (req: AuthRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user || req.user.role !== UserRole.HOST) {
       return res.status(403).json({ error: 'You must be a host to connect to Stripe.' });
@@ -26,7 +27,7 @@ router.post('/connect', protect, async (req: Request, res, next) => {
   }
 });
 
-router.post('/verify-session', async (req, res, next) => {
+router.post('/verify-session', async (req: AuthRequest, res: Response, next: NextFunction) => {
   const { sessionId } = req.body;
 
   try {

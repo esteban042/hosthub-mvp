@@ -1,0 +1,14 @@
+# Git and Node
+.git
+.gitignore
+node_modules
+
+# IDE and environment files
+.vscode
+.idx
+.env
+
+# Logs and build artifacts
+dist
+firebase-debug.log
+npm-debug.log

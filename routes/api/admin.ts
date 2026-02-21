@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import { protect, Request } from '../../middleware/auth';
-import { UserRole } from '../../types';
-import { pool } from '../../db';
-import { keysToCamel } from '../../dputils';
+import { protect, AuthRequest } from '../../middleware/auth.js';
+import { UserRole } from '../../types.js';
+import { pool } from '../../db.js';
+import { keysToCamel } from '../../dputils.js';
 
 const router = Router();
 
-router.get('/', protect, async (req: Request, res, next) => {
+router.get('/', protect, async (req: AuthRequest, res, next) => {
   if (req.user?.role !== UserRole.ADMIN) {
     return res.status(403).json({ error: 'You are not authorized to view this information.' });
   }

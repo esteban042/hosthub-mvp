@@ -1,5 +1,5 @@
 import React from 'react';
-import { SKY_ACCENT } from '../constants';
+import { SKY_ACCENT } from '../constants.tsx';
 
 const GuestPopover: React.FC<{
   guests: number;

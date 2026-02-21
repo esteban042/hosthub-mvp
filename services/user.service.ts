@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import { query } from '../dputils';
-import { User } from '../types';
+import { query } from '../dputils.js';
+import { User } from '../types.js';
 
 /**
  * Creates a new user in the database.

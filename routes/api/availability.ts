@@ -1,16 +1,16 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { query } from 'express-validator';
-import { pool } from '../../db';
-import { keysToCamel } from '../../dputils';
-import { validate } from '../../middleware/validation';
+import { pool } from '../../db.js';
+import { keysToCamel } from '../../dputils.js';
+import { validate } from '../../middleware/validation.js';
 
 const router = Router();
 
 router.get('/', 
   query('apartmentId').isString().notEmpty(),
   validate,
-  async (req, res, next) => {
-    const { apartmentId } = req.query;
+  async (req: Request, res: Response, next: NextFunction) => {
+    const apartmentId = req.query.apartmentId as string;
 
     try {
       const client = await pool.connect();

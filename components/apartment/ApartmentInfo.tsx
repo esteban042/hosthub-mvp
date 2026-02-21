@@ -19,7 +19,7 @@ const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment, host }) => {
       if (aboutColRef.current && window.innerWidth >= 1024) {
         setMapContainerHeight(Math.max(400, aboutColRef.current.clientHeight));
       } else {
-        setMapContainerHeight(300);
+        setMapContainerHeight(250);
       }
     };
 

@@ -1,9 +1,9 @@
-import express from 'express';
-import { execute } from '../../dputils';
+import { Router, Request, Response, NextFunction } from 'express';
+import { execute } from '../../dputils.js';
 
-const router = express.Router();
+const router = Router();
 
-router.post('/:apartmentId', async (req, res, next) => {
+router.post('/:apartmentId', async (req: Request, res: Response, next: NextFunction) => {
   const { apartmentId } = req.params;
   try {
     const result = await execute(

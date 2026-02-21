@@ -1,10 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate } from '../../types';
-import { formatDate } from '../../utils/dates';
-import HeroCalendar from '../HeroCalendar';
-import { CORE_ICONS, COUNTRIES } from '../../constants';
-import Modal from '../Modal';
-import { useBookApartment } from '../../hooks/useBookApartment';
+import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
+import { formatDate } from '../../utils/dates.js';
+import HeroCalendar from '../HeroCalendar.js';
+import { CORE_ICONS, COUNTRIES } from '../../constants.tsx';
+import Modal from '../Modal.js';
+import { useBookApartment } from '../../hooks/useBookApartment.js';
 
 interface BookingFormProps {
   apartment: Apartment;

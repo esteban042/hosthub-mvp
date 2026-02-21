@@ -2,11 +2,11 @@ import { Router } from 'express';
 import { body } from 'express-validator';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { pool } from '../db';
-import { keysToCamel } from '../dputils';
-import { validate } from '../middleware/validation';
-import { protect, Request } from '../middleware/auth';
-import { config, isProduction } from '../config';
+import { pool } from '../db.js';
+import { keysToCamel } from '../dputils.js';
+import { validate } from '../middleware/validation.js';
+import { protect, AuthRequest } from '../middleware/auth.js';
+import { config, isProduction } from '../config.js';
 
 const router = Router();
 
@@ -55,7 +55,7 @@ router.post('/logout', (req, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
 });
 
-router.get('/me', protect, (req: Request, res) => {
+router.get('/me', protect, (req: AuthRequest, res) => {
     res.json(keysToCamel(req.user));
 });
 

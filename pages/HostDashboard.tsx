@@ -1,17 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types';
-import { fetchApi } from '../services/api';
-import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard';
+import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types.js';
+import { fetchApi } from '../services/api.js';
+import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard.js';
 
-import DashboardHeader from '../components/host-dashboard/DashboardHeader';
-import DashboardStats from '../components/host-dashboard/DashboardStats';
-import DashboardNav from '../components/host-dashboard/DashboardNav';
-import ApartmentEditor from '../components/host-dashboard/ApartmentEditor';
-import ApartmentsList from '../components/host-dashboard/ApartmentsList';
-import Bookings from '../components/host-dashboard/Bookings';
-import CurrentBookings from '../components/host-dashboard/CurrentBookings';
-import Calendar from '../components/host-dashboard/Calendar';
-import HostInfoEditor from '../components/host-dashboard/HostInfoEditor';
+import DashboardHeader from '../components/host-dashboard/DashboardHeader.js';
+import DashboardStats from '../components/host-dashboard/DashboardStats.js';
+import DashboardNav from '../components/host-dashboard/DashboardNav.js';
+import ApartmentEditor from '../components/host-dashboard/ApartmentEditor.js';
+import ApartmentsList from '../components/host-dashboard/ApartmentsList.js';
+import Bookings from '../components/host-dashboard/Bookings.js';
+import CurrentBookings from '../components/host-dashboard/CurrentBookings.js';
+import Calendar from '../components/host-dashboard/Calendar.js';
+import HostInfoEditor from '../components/host-dashboard/HostInfoEditor.js';
 
 interface HostDashboardProps {
   host: Host;

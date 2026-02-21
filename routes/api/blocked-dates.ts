@@ -1,16 +1,16 @@
 import { Router } from 'express';
 import { body, query } from 'express-validator';
-import { pool } from '../../db';
-import { keysToCamel } from '../../dputils';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
+import { pool } from '../../db.js';
+import { keysToCamel } from '../../dputils.js';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '../../types';
+import { UserRole, Apartment } from '../../types.js';
 
 const router = Router();
 
 // These routes were moved here from misc.ts because they depend on blocked_dates
-router.get('/host-dashboard', protect, async (req: Request, res, next) => {
+router.get('/host-dashboard', protect, async (req: AuthRequest, res, next) => {
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
 
   const userId = req.user.id;
@@ -24,8 +24,8 @@ router.get('/host-dashboard', protect, async (req: Request, res, next) => {
     const host = hostRes.rows[0];
 
     const apartmentsRes = await client.query('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
-    const apartments = apartmentsRes.rows;
-    const apartmentIds = apartments.map(apt => apt.id);
+    const apartments: Apartment[] = apartmentsRes.rows;
+    const apartmentIds = apartments.map((apt: Apartment) => apt.id);
 
     let bookings = [];
     let blockedDates = [];
@@ -53,7 +53,7 @@ router.get('/landing-data',
   query('isGuest').optional().isBoolean(),
   validate,
   async (req, res, next) => {
-    const { slug, email, isGuest } = req.query;
+    const { slug, email, isGuest } = req.query as any;
     const client = await pool.connect();
 
     try {
@@ -84,8 +84,8 @@ router.get('/landing-data',
       const host = hostRes.rows[0];
 
       const apartmentsRes = await client.query('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
-      const apartments = apartmentsRes.rows;
-      const apartmentIds = apartments.map(apt => apt.id);
+      const apartments: Apartment[] = apartmentsRes.rows;
+      const apartmentIds = apartments.map((apt: Apartment) => apt.id);
 
       let bookings = [];
       let blockedDates = [];
@@ -113,10 +113,10 @@ router.post('/blocked-dates',
   protect,
   body().isArray(),
   validate,
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res, next) => {
     const blockedDates = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.Admin;
+    const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
 
     try {
@@ -166,10 +166,10 @@ router.delete('/blocked-dates',
   protect,
   body().isArray(),
   validate,
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res, next) => {
     const blockedDatesToDelete = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.Admin;
+    const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
 
     try {

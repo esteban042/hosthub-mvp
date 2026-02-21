@@ -2,7 +2,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import crypto from 'crypto';
 import { Request, Response, NextFunction } from 'express';
-import { isProduction } from '../config';
+import { isProduction } from '../config.js';
 
 export const nonceGenerator = (req: Request, res: Response, next: NextFunction) => {
   res.locals.nonce = crypto.randomBytes(16).toString('hex');

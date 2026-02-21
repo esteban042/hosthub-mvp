@@ -1,5 +1,5 @@
-import { query, execute } from '../dputils';
-import { Apartment, User, UserRole } from '../types';
+import { query, execute } from '../dputils.js';
+import { Apartment, User, UserRole } from '../types.js';
 
 /**
  * Fetches all apartments from the database.
@@ -71,7 +71,7 @@ export async function updateApartments(updatedApartments: Apartment[], user: Use
     await execute('BEGIN');
     try {
         let userHostId: string | null = null;
-        if (user.role !== UserRole.Admin) {
+        if (user.role !== UserRole.ADMIN) {
             const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
             if (hostRes.length === 0) {
                 throw new Error('You do not have a host profile and cannot update apartments.');
@@ -80,7 +80,7 @@ export async function updateApartments(updatedApartments: Apartment[], user: Use
         }
 
         for (const apt of updatedApartments) {
-            if (user.role !== UserRole.Admin) {
+            if (user.role !== UserRole.ADMIN) {
                 const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1 FOR UPDATE', [apt.id]);
                 if (aptRes.length === 0) {
                     throw new Error(`Apartment with id ${apt.id} not found.`);

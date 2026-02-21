@@ -1,4 +1,4 @@
-import { pool } from './db';
+import { pool } from './db.js';
 import { QueryResult } from 'pg';
 
 // Helper to convert snake_case object keys to camelCase

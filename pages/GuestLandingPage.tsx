@@ -1,13 +1,13 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Host, Apartment, Booking, BlockedDate } from '../types';
-import { formatDate } from '../utils/dates';
-import { CORE_ICONS, SKY_ACCENT } from '../constants';
-import HeroCalendar from '../components/HeroCalendar';
-import GuestPopover from '../components/GuestPopover';
-import FeaturedStays from '../components/FeaturedStays';
-import PremiumLandingExtension from '../components/PremiumLandingExtension';
-import Modal from '../components/Modal';
+import { Host, Apartment, Booking, BlockedDate } from '../types.js';
+import { formatDate } from '../utils/dates.js';
+import { CORE_ICONS, SKY_ACCENT } from '../constants.tsx';
+import HeroCalendar from '../components/HeroCalendar.js';
+import GuestPopover from '../components/GuestPopover.js';
+import FeaturedStays from '../components/FeaturedStays.js';
+import PremiumLandingExtension from '../components/PremiumLandingExtension.js';
+import Modal from '../components/Modal.js';
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
 import type { Engine } from "tsparticles-engine";

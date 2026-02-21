@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { UserRole, Host, User } from '../types';
+import { UserRole, Host, User } from '../types.js';
 
 interface LayoutProps {
   children: React.ReactNode;
   role: UserRole;
-  setRole: (role: UserRole) => void;
   onSignIn: () => void;
-  currentHost: Host;
+  currentHost: Host | null;
   allHosts: Host[];
   onHostChange: (slug: string) => void;
   user: User | null;
@@ -39,7 +38,6 @@ const LegalModal: React.FC<{ title: string; isOpen: boolean; onClose: () => void
 export const Layout: React.FC<LayoutProps> = ({ 
   children, 
   role, 
-  setRole, 
   user, 
   onLogout,
   onSignIn

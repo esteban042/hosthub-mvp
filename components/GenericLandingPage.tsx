@@ -1,8 +1,8 @@
 
 import React from 'react';
-import { Host, SubscriptionType } from '../types';
+import { Host, SubscriptionType } from '../types.js';
 import { ArrowRight, CheckCircle, ShieldCheck, Calendar, Star, DollarSign, MapPin, Search, Building, Book } from 'lucide-react';
-import { SKY_ACCENT, TERRACOTTA, MINT_ACCENT } from '../constants';
+import { SKY_ACCENT, TERRACOTTA, MINT_ACCENT } from '../constants.tsx';
 
 interface GenericLandingPageProps {
   hosts: Host[];

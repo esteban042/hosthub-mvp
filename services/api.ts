@@ -1,15 +1,13 @@
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
+import { config } from '../config.js';
 
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || '';
+const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Define the base URL for the API. In a real-world scenario, this would
-// likely come from an environment variable. For this fix, we are hardcoding it
-// to ensure the frontend can communicate with the backend server.
 const API_BASE_URL = 'http://localhost:8081';
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -28,9 +26,6 @@ export const fetchAndParseIcal = async (icalUrl: string): Promise<string[]> => {
 };
 
 export async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  // Construct the full URL by prepending the base URL to the endpoint.
-  // This ensures that all API calls are directed to the correct backend server,
-  // bypassing any potential issues with development server proxies.
   const fullUrl = `${API_BASE_URL}${endpoint}`;
 
   const response = await fetch(fullUrl, {

@@ -1,22 +1,22 @@
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { body } from 'express-validator';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
-import { SubscriptionType, UserRole } from '../../types';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
+import { SubscriptionType, UserRole } from '../../types.js';
 import { 
   getHosts, 
   getPublicHosts, 
   createHost, 
   updateHost, 
   getHostById 
-} from '../../services/host.service';
+} from '../../services/host.service.js';
 
 const router = Router();
 
 router.get('/', 
   protect,
-  async (req: Request, res, next) => {
-    if (req.user?.role?.toLowerCase() !== UserRole.Admin) {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (req.user?.role !== UserRole.ADMIN) {
       return res.status(403).json({ error: 'You are not authorized to view this information.' });
     }
     try {
@@ -28,7 +28,7 @@ router.get('/',
 });
 
 router.get('/public', 
-  async (req, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
       const hosts = await getPublicHosts();
       res.json(hosts);
@@ -44,7 +44,7 @@ router.post('/',
     body('slug').not().isEmpty().trim().escape(),
     body('subscriptionType').isIn(Object.values(SubscriptionType)),
     body('commissionRate').isFloat({ gt: 0 }),
-    body('vat').isFloat({ gte: 0 }).optional(),
+    body('vat').isFloat({ min: 0 }).optional(),
     body('businessId').trim().escape().optional(),
     body('checkInTime').optional({ checkFalsy: true }).trim().escape(),
     body('checkOutTime').optional({ checkFalsy: true }).trim().escape(),
@@ -52,10 +52,11 @@ router.post('/',
     body('checkInMessage').optional({ checkFalsy: true }).trim().escape(),
     body('welcomeMessage').optional({ checkFalsy: true }).trim().escape(),
     body('checkoutMessage').optional({ checkFalsy: true }).trim().escape(),
+    body('currency').optional({ checkFalsy: true }).trim().escape(),
   ],
   validate,
-  async (req: Request, res, next) => {
-    if (req.user?.role?.toLowerCase() !== UserRole.Admin) {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (req.user?.role !== UserRole.ADMIN) {
       return res.status(403).json({ error: 'You are not authorized to create a host.' });
     }
 
@@ -76,7 +77,7 @@ router.post('/',
 router.put('/:hostId', 
   protect, 
   validate, 
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     const { hostId } = req.params;
     const updatedFields = req.body;
 
@@ -86,9 +87,14 @@ router.put('/:hostId',
         return res.status(404).json({ error: `Host with id ${hostId} not found.` });
       }
 
-      if (req.user?.role?.toLowerCase() !== UserRole.ADMIN && String(host.userId) !== String(req.user?.id)) {
+      if (req.user?.role !== UserRole.ADMIN && String(host.userId) !== String(req.user?.id)) {
         const userRole = req.user?.role || 'undefined';
         return res.status(403).json({ error: `Authorization failed. Your role is '${userRole}'. You are not the owner of this host.` });
+      }
+
+      // Only admins can update the currency
+      if (updatedFields.currency && req.user?.role !== UserRole.ADMIN) {
+        return res.status(403).json({ error: 'You are not authorized to update the currency.' });
       }
 
       const updatedHost = await updateHost(hostId, updatedFields);

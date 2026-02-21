@@ -1,14 +1,14 @@
-import { Response, NextFunction } from 'express';
+import { Request as ExpressRequest, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { pool } from '../db';
-import { config } from '../config';
-import { User } from '../types';
+import { pool } from '../db.js';
+import { config } from '../config.js';
+import { User } from '../types.js';
 
-export interface Request extends Express.Request {
+export interface AuthRequest extends ExpressRequest {
   user?: User;
 }
 
-export const protect = async (req: Request, res: Response, next: NextFunction) => {
+export const protect = async (req: AuthRequest, res: Response, next: NextFunction) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {

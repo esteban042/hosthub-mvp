@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { sanctumApi } from '../services/api';
-import { Booking } from '../types';
+import { sanctumApi } from '../services/api.js';
+import { Booking } from '../types.js';
 
 const PrintableBooking: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>();

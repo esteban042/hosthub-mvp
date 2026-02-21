@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Host, SubscriptionType } from '../../types';
+import { Host, SubscriptionType, UserRole } from '../../types';
 import { X, ShieldCheck, Layout, BarChart, ImageIcon, Type, Trash2, Zap, FileText, Link, CreditCard } from 'lucide-react';
 import { COUNTRIES } from '../../utils/countries';
+import { CURRENCIES } from '../../utils/currencies';
 import { TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../../constants';
+import { useAppData } from '../../services/useAppData';
 
 interface HostConfigurationModalProps {
   isOpen: boolean;
@@ -15,6 +17,7 @@ interface HostConfigurationModalProps {
 const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({ 
   isOpen, onClose, onSave, initialHost, monthlyStats 
 }) => {
+  const { user } = useAppData();
   const [editingHost, setEditingHost] = useState<Partial<Host> | null>(initialHost);
   const [activeModalTab, setActiveModalTab] = useState<'basics' | 'content' | 'legal' | 'statistics' | 'stripe'>('basics');
   const [isSaved, setIsSaved] = useState(false);
@@ -183,6 +186,22 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                           <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">VAT (%)</label>
                           <input type="number" value={editingHost.vat || 0} onChange={e => setEditingHost({...editingHost, vat: parseInt(e.target.value)})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
                       </div>
+                     {user && user.role === UserRole.ADMIN && ( <div>
+                          <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Currency</label>
+                          <select
+                            value={editingHost.currency?.code || ''}
+                            onChange={e => {
+                                const currency = CURRENCIES.find(c => c.code === e.target.value);
+                                setEditingHost({ ...editingHost, currency });
+                            }}
+                            className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm focus:ring-1 focus:ring-sky-accent transition-all outline-none appearance-none"
+                            >
+                            <option value="">Select a currency</option>
+                            {CURRENCIES.map(currency => (
+                                <option key={currency.code} value={currency.code}>{currency.name} ({currency.symbol})</option>
+                            ))}
+                            </select>
+                      </div>)}
                   </div>
                   <div>
                     <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Business ID</label>

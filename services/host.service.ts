@@ -1,5 +1,5 @@
-import { query, execute } from '../dputils';
-import { Host } from '../types';
+import { query, execute } from '../dputils.js';
+import { Host } from '../types.js';
 
 /**
  * Fetches all hosts from the database.
@@ -47,13 +47,14 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     checkInMessage,
     welcomeMessage,
     checkoutMessage,
-    userId
+    userId,
+    currency
   } = hostData;
 
   const sql = `
     INSERT INTO hosts
-      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
+      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id, currency)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
     RETURNING *
   `;
 
@@ -81,7 +82,8 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     checkInMessage,
     welcomeMessage,
     checkoutMessage,
-    userId
+    userId,
+    currency
   ];
 
   const result = await query<Host>(sql, params);
@@ -120,12 +122,10 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     let queryIndex = 1;
 
     for (const key in updatedFields) {
-        // Ensure the key is a property of the object and not 'id'
         if (Object.prototype.hasOwnProperty.call(updatedFields, key) && key !== 'id') {
             const snakeKey = key.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
             queryParts.push(`${snakeKey} = $${queryIndex++}`);
-            // @ts-ignore
-            queryValues.push(updatedFields[key]);
+            queryValues.push(updatedFields[key as keyof Partial<Host>]);
         }
     }
 
@@ -136,7 +136,6 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     const queryString = `UPDATE hosts SET ${queryParts.join(', ')} WHERE id = $${queryIndex} RETURNING *`;
     queryValues.push(hostId);
 
-    // Using a transaction for the update
     await execute('BEGIN');
     try {
         const result = await query<Host>(queryString, queryValues);

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Apartment } from '../types';
-import ApartmentCard from './apartment/ApartmentCard';
+import { Apartment } from '../types.js';
+import ApartmentCard from './apartment/ApartmentCard.js';
 
 interface FeaturedStaysProps {
   apartments: Apartment[];

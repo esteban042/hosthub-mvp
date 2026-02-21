@@ -1,21 +1,21 @@
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { body, param } from 'express-validator';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
 import { 
     getAllBookings, 
     createBooking, 
     getBookingDetailsById, 
     updateBookings 
-} from '../../services/booking.service';
-import { UserRole } from '../../types';
+} from '../../services/booking.service.js';
+import { UserRole } from '../../types.js';
 
 const router = Router();
 
 router.get('/', 
     protect, 
-    async (req: Request, res, next) => {
-        if (req.user?.role !== UserRole.Admin) {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+        if (req.user?.role !== UserRole.ADMIN) {
             return res.status(403).json({ error: 'You are not authorized to view this information.' });
         }
         try {
@@ -38,7 +38,7 @@ router.post('/',
     body('numGuests').isInt({ gt: 0 }),
     body('guestMessage').optional().trim().escape(),
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const newBooking = await createBooking(req.body);
             res.status(201).json(newBooking);
@@ -57,7 +57,7 @@ router.get('/:id',
     protect,
     param('id').isString().notEmpty(),
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         const { id } = req.params;
         try {
             const booking = await getBookingDetailsById(id);
@@ -65,7 +65,7 @@ router.get('/:id',
                 return res.status(404).json({ error: 'Booking not found' });
             }
 
-            if (req.user?.role !== UserRole.Admin && String(booking.hostUserId) !== String(req.user?.id)) {
+            if (req.user?.role !== UserRole.ADMIN && String(booking.hostUserId) !== String(req.user?.id)) {
                 return res.status(403).json({ error: 'You are not authorized to view this booking' });
             }
 
@@ -80,7 +80,7 @@ router.put('/',
     protect,
     body().isArray(),
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         const updatedBookingsData = req.body;
         try {
             const result = await updateBookings(updatedBookingsData, req.user!);

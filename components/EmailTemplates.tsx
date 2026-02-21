@@ -1,5 +1,5 @@
 import React from 'react';
-import { Host, Apartment, Booking } from '../types';
+import { Host, Apartment, Booking } from '../types.js';
 import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard, X, MessageSquare, ServerCrash, KeySquare, Info, LogOut } from 'lucide-react';
 
 interface TemplateProps {
@@ -56,7 +56,7 @@ const InfoRow: React.FC<{ icon: React.ElementType, label: string, value: string 
   </div>
 );
 
-const SpecialInfoBlock: React.FC<{ icon: React.ElementType, title: string, content: string | undefined }> = ({ icon: Icon, title, content }) => {
+const SpecialInfoBlock: React.FC<{ icon: React.ElementType, title: string, content: string | undefined | null }> = ({ icon: Icon, title, content }) => {
   if (!content) return null;
   return (
     <div style={{ marginTop: '2rem' }}>
@@ -107,13 +107,13 @@ export const CheckInMessageTemplate: React.FC<TemplateProps> = ({ host, apartmen
             <SpecialInfoBlock 
                 icon={KeySquare} 
                 title="Check-In Instructions"
-                content={apartment.checkInInstructions}
+                content={host.checkInInfo}
             />
 
             <SpecialInfoBlock 
                 icon={Info} 
                 title="House Rules"
-                content={apartment.houseRules}
+                content={host.terms}
             />
 
              <div style={{ marginTop: '2rem' }}>
@@ -143,7 +143,7 @@ export const CheckoutMessageTemplate: React.FC<TemplateProps> = ({ host, apartme
                 <SpecialInfoBlock 
                     icon={LogOut} 
                     title="Checkout Instructions"
-                    content={apartment.checkoutInstructions}
+                    content={host.checkoutMessage}
                 />
 
                  <div style={{ marginTop: '2rem' }}>

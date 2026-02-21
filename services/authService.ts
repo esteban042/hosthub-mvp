@@ -1,5 +1,5 @@
 import { User } from '../types.js';
-import { fetchApi } from './api';
+import { fetchApi } from './api.js';
 
 interface AuthResult {
   user: User | null;

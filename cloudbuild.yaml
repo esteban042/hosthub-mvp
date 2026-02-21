@@ -1,13 +1,45 @@
 steps:
-# Build the container image
+# Build the container image, making secrets available as build-time variables
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['build', '-t', 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app', '.']
+  entrypoint: 'bash'
+  args:
+  - '-c'
+  - |
+    docker build --tag 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app' \
+    --build-arg VITE_SUPABASE_URL=$$VITE_SUPABASE_URL \
+    --build-arg VITE_SUPABASE_ANON_KEY=$$VITE_SUPABASE_ANON_KEY \
+    --build-arg VITE_STRIPE_PUBLISHABLE_KEY=$$VITE_STRIPE_PUBLISHABLE_KEY \
+    .
+  secretEnv: ['VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY', 'VITE_STRIPE_PUBLISHABLE_KEY']
+
 # Push the container image to Artifact Registry
 - name: 'gcr.io/cloud-builders/docker'
   args: ['push', 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app']
-# Deploy container image to Cloud Run
+
+# Deploy container image to Cloud Run, securely sourcing all runtime secrets
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
-  args: ['run', 'deploy', 'sanctum-app', '--image', 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app', '--region', 'us-central1', '--platform', 'managed', '--allow-unauthenticated']
+  args:
+  - 'run'
+  - 'deploy'
+  - 'sanctum-app'
+  - '--image'
+  - 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app'
+  - '--region'
+  - 'us-central1'
+  - '--platform'
+  - 'managed'
+  - '--allow-unauthenticated'
+  - '--set-secrets=JWT_SECRET=JWT_SECRET:latest,DATABASE_URL=DATABASE_URL:latest,ADMIN_EMAIL=ADMIN_EMAIL:latest,BREVO_SMTP_USER=BREVO_SMTP_USER:latest,BREVO_SMTP_PASS=BREVO_SMTP_PASS:latest,BREVO_SENDER_EMAIL=BREVO_SENDER_EMAIL:latest,STRIPE_SECRET_KEY=STRIPE_SECRET_KEY:latest,STRIPE_WEBHOOK_SECRET=STRIPE_WEBHOOK_SECRET:latest,VITE_SUPABASE_URL=VITE_SUPABASE_URL:latest,VITE_SUPABASE_ANON_KEY=VITE_SUPABASE_ANON_KEY:latest,VITE_STRIPE_PUBLISHABLE_KEY=VITE_STRIPE_PUBLISHABLE_KEY:latest'
+
 images:
-- us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app
+- 'us-central1-docker.pkg.dev/$PROJECT_ID/sanctum-repo/sanctum-app'
+
+availableSecrets:
+  secretManager:
+  - versionName: projects/$PROJECT_ID/secrets/VITE_SUPABASE_URL/versions/latest
+    env: 'VITE_SUPABASE_URL'
+  - versionName: projects/$PROJECT_ID/secrets/VITE_SUPABASE_ANON_KEY/versions/latest
+    env: 'VITE_SUPABASE_ANON_KEY'
+  - versionName: projects/$PROJECT_ID/secrets/VITE_STRIPE_PUBLISHABLE_KEY/versions/latest
+    env: 'VITE_STRIPE_PUBLISHABLE_KEY'

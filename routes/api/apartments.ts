@@ -1,21 +1,21 @@
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { body, param } from 'express-validator';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
 import { 
     getAllApartments, 
     createApartment, 
     updateApartments, 
     getApartmentById 
-} from '../../services/apartment.service';
-import { UserRole } from '../../types';
+} from '../../services/apartment.service.js';
+import { UserRole } from '../../types.js';
 
 const router = Router();
 
 router.get('/', 
     protect, 
-    async (req: Request, res, next) => {
-        if (req.user?.role !== UserRole.Admin) {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+        if (req.user?.role !== UserRole.ADMIN) {
             return res.status(403).json({ error: 'You are not authorized to view this information.' });
         }
         try {
@@ -42,7 +42,7 @@ router.post('/',
         body('maxStayNights').isInt({ gt: 0 }),
     ],
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const newApartment = await createApartment(req.body, req.user!);
             res.status(201).json(newApartment);
@@ -59,7 +59,7 @@ router.put('/',
     protect,
     body().isArray(),
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         const updatedApartmentsData = req.body;
         try {
             await updateApartments(updatedApartmentsData, req.user!);
@@ -78,7 +78,7 @@ router.put('/',
 router.get('/:id', 
     param('id').isString().notEmpty(),
     validate,
-    async (req, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
             const apartment = await getApartmentById(id);

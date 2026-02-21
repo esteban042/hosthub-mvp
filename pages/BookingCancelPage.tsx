@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { sanctumApi } from '../services/api';
-import { Booking } from '../types';
+import { sanctumApi } from '../services/api.js';
+import { Booking } from '../types.js';
 
 const BookingCancelPage = () => {
   const location = useLocation();

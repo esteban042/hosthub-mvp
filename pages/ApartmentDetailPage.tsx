@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate } from '../types';
-import { BookingConfirmationCard } from '../components/booking/BookingConfirmationCard';
-import ApartmentHeader from '../components/apartment/ApartmentHeader';
-import ApartmentStats from '../components/apartment/ApartmentStats';
-import ApartmentInfo from '../components/apartment/ApartmentInfo';
-import BookingSection from '../components/booking/BookingSection';
-import { sanctumApi } from '../services/api';
+import { Apartment, Host, Booking, BlockedDate } from '../types.js';
+import { BookingConfirmationCard } from '../components/booking/BookingConfirmationCard.js';
+import ApartmentHeader from '../components/apartment/ApartmentHeader.js';
+import ApartmentStats from '../components/apartment/ApartmentStats.js';
+import ApartmentInfo from '../components/apartment/ApartmentInfo.js';
+import BookingSection from '../components/booking/BookingSection.js';
+import { sanctumApi } from '../services/api.js';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;

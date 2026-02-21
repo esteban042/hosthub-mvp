@@ -5,15 +5,15 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 
-import { config, isProduction } from './config';
-import { query } from './dputils';
-import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security';
-import authRoutes from './routes/auth';
-import apiRoutes from './routes/api';
-import { sendEmail } from './services/email';
+import { config, isProduction } from './config.js';
+import { query } from './dputils.js';
+import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security.js';
+import authRoutes from './routes/auth.js';
+import apiRoutes from './routes/api.js';
+import { sendEmail } from './services/email.js';
 
 const rootPath = process.cwd();
-const clientPath = path.join(rootPath, 'dist');
+const clientPath = path.join(rootPath, 'dist/public');
 
 const app = express();
 
@@ -96,14 +96,16 @@ process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
     });
 });
 
-app.listen(config.port, '0.0.0.0', () => {
+const port = process.env.PORT ? parseInt(process.env.PORT, 10) : config.port;
+
+app.listen(port, '0.0.0.0', () => {
   console.log(`
   🚀 Sanctum Unified Server active!
   ---------------------------------
-  Port: ${config.port}
-  Health Check: http://0.0.0.0:${config.port}/health
-  API Base: http://0.0.0.0:${config.port}/api/v1
-  Auth Base: http://0.0.0.0:${config.port}/auth
+  Port: ${port}
+  Health Check: http://0.0.0.0:${port}/health
+  API Base: http://0.0.0.0:${port}/api/v1
+  Auth Base: http://0.0.0.0:${port}/auth
   Static Root: ${clientPath}
   ---------------------------------
   `);

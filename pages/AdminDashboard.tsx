@@ -1,13 +1,13 @@
 
 import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, BookingStatus } from '../types';
+import { Host, Apartment, Booking, BookingStatus } from '../types.js';
 import { Plus, DollarSign } from 'lucide-react';
-import { sanctumApi as api } from '../services/api';
-import AdminStats from '../components/admin/AdminStats';
-import HostsGrid from '../components/admin/HostsGrid';
-import HostConfigurationModal from '../components/admin/HostConfigurationModal';
-import BillingDashboard from '../components/admin/BillingDashboard';
-import { SKY_ACCENT, TEXT_COLOR } from '../constants';
+import { sanctumApi as api } from '../services/api.js';
+import AdminStats from '../components/admin/AdminStats.js';
+import HostsGrid from '../components/admin/HostsGrid.js';
+import HostConfigurationModal from '../components/admin/HostConfigurationModal.js';
+import BillingDashboard from '../components/admin/BillingDashboard.js';
+import { SKY_ACCENT, TEXT_COLOR } from '../constants.tsx';
 
 interface AdminDashboardProps {
   hosts: Host[];

@@ -1,5 +1,5 @@
 
-import { Booking, BlockedDate, BookingStatus } from '../types';
+import { Booking, BlockedDate, BookingStatus } from '../types.js';
 
 /**
  * Checks if two date ranges overlap.
@@ -32,7 +32,7 @@ export const checkAvailability = (
 ): { available: boolean; conflicts: (Booking | BlockedDate)[] } => {
   const conflicts: (Booking | BlockedDate)[] = [];
 
-  // Check Active Bookings (Confirmed OR Requested)
+  // Check Active Bookings (Confirmed OR Paid)
   const bookingConflicts = existingBookings.filter(
     (b) =>
       b.apartmentId === apartmentId &&
@@ -64,4 +64,3 @@ export const checkAvailability = (
 /**
  * Checks for warnings (pending requests that overlap)
  */
-

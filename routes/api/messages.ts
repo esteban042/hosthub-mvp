@@ -1,17 +1,17 @@
 
-import { Router } from 'express';
+import { Router, Response, NextFunction } from 'express';
 import { body } from 'express-validator';
-import { pool } from '../../db';
-import { keysToCamel } from '../../dputils';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
-import { sendEmail } from '../../services/email';
+import { pool } from '../../db.js';
+import { keysToCamel } from '../../dputils.js';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
+import { sendEmail } from '../../services/email.js';
 
 const router = Router();
 
-const sendMessage = async (req: Request, res, next, messageType: 'check-in' | 'welcome' | 'checkout') => {
+const sendMessage = async (req: AuthRequest, res: Response, next: NextFunction, messageType: 'check-in' | 'welcome' | 'checkout') => {
     const { bookingId } = req.params;
-    const hostId = req.user.id;
+    const hostId = req.user!.id;
 
     try {
         const client = await pool.connect();
@@ -84,9 +84,9 @@ const sendMessage = async (req: Request, res, next, messageType: 'check-in' | 'w
     }
 };
 
-router.post('/:bookingId/check-in', protect, (req: Request, res, next) => sendMessage(req, res, next, 'check-in'));
-router.post('/:bookingId/welcome', protect, (req: Request, res, next) => sendMessage(req, res, next, 'welcome'));
-router.post('/:bookingId/checkout', protect, (req: Request, res, next) => sendMessage(req, res, next, 'checkout'));
+router.post('/:bookingId/check-in', protect, (req: AuthRequest, res, next) => sendMessage(req, res, next, 'check-in'));
+router.post('/:bookingId/welcome', protect, (req: AuthRequest, res, next) => sendMessage(req, res, next, 'welcome'));
+router.post('/:bookingId/checkout', protect, (req: AuthRequest, res, next) => sendMessage(req, res, next, 'checkout'));
 
 
 router.post('/', 
@@ -94,9 +94,9 @@ router.post('/',
     body('bookingId').isString().notEmpty(),
     body('message').not().isEmpty().trim().escape(),
     validate,
-    async (req: Request, res, next) => {
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
         const { bookingId, message } = req.body;
-        const hostId = req.user.id;
+        const hostId = req.user!.id;
 
         try {
             const client = await pool.connect();

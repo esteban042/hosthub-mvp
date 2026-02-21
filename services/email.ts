@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import fs from 'fs';
-import { config } from '../config';
+import { config } from '../config.js';
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
 import {
@@ -39,7 +39,7 @@ export async function sendEmail(toEmail: string, subject: string, templateName: 
       throw new Error(`Invalid email template: ${templateName}`);
     }
 
-    const reactElement = React.createElement(TemplateComponent, data);
+    const reactElement = React.createElement(TemplateComponent as React.FC<any>, data);
     htmlContent = ReactDOMServer.renderToStaticMarkup(reactElement);
 
     const smtpUser = config.brevo.smtpUser;

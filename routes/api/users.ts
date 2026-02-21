@@ -1,7 +1,7 @@
-import { Router } from 'express';
+import { Router, Request, Response, NextFunction } from 'express';
 import { body } from 'express-validator';
-import { validate } from '../../middleware/validation';
-import { createUser } from '../../services/user.service';
+import { validate } from '../../middleware/validation.js';
+import { createUser } from '../../services/user.service.js';
 
 const router = Router();
 
@@ -9,7 +9,7 @@ router.post('/',
   body('email').isEmail().normalizeEmail(),
   body('password').isLength({ min: 8 }),
   validate,
-  async (req, res, next) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
     try {
       const newUser = await createUser(email, password);

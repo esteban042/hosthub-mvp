@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SKY_ACCENT, BACKGROUND_COLOR, TEXT_COLOR } from '../constants';
+import { SKY_ACCENT, BACKGROUND_COLOR, TEXT_COLOR } from '../constants.tsx';
 
 interface LoginPageProps {
   onLogin: (email: string, password: string) => Promise<string | null>;

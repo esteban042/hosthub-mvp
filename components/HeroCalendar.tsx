@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Apartment, Booking, BlockedDate, BookingStatus, PriceRule } from '../types';
+import { Apartment, Booking, BlockedDate, BookingStatus, PriceRule } from '../types.js';
 
 interface HeroCalendarProps {
     apartment?: Apartment;

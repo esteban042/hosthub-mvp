@@ -1,10 +1,11 @@
-import { query, execute } from '../dputils';
-import { sendEmail } from './email';
-import { Booking, Apartment, Host, User, UserRole, BookingStatus } from '../types';
+import { query, execute } from '../dputils.js';
+import { sendEmail } from './email.js';
+import { Booking, Apartment, Host, User, UserRole, BookingStatus } from '../types.js';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
+  // @ts-expect-error The Stripe types for this property appear to be incorrect.
+  apiVersion: '2024-04-10',
 });
 
 /**
@@ -29,6 +30,37 @@ async function getHostById(hostId: string): Promise<Host> {
     }
     return result[0];
 }
+
+/**
+ * Fetches a single booking by its ID. Can perform authorization check.
+ */
+export async function getBookingById(bookingId: string, user?: User): Promise<Booking | null> {
+    const bookings = await query<Booking>('SELECT * FROM bookings WHERE id = $1', [bookingId]);
+    if (bookings.length === 0) {
+        return null;
+    }
+    const booking = bookings[0];
+
+    if (user) {
+        if (user.role === UserRole.ADMIN) {
+            return booking; // Admins can see any booking
+        }
+
+        const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
+        if (hostRes.length === 0) {
+            throw new Error('User is not a host.');
+        }
+        const userHostId = hostRes[0].id;
+
+        const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1', [booking.apartmentId]);
+        if (aptRes.length === 0 || String(aptRes[0].hostId) !== String(userHostId)) {
+            throw new Error(`You are not authorized to view booking with id ${bookingId}.`);
+        }
+    }
+
+    return booking;
+}
+
 
 /**
  * Fetches all bookings from the database. For admin use.
@@ -104,7 +136,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
                 },
             });
             newBooking.stripeSessionId = session.id;
-            newBooking.stripeSessionUrl = session.url;
+            newBooking.stripeSessionUrl = session.url ?? undefined;
         }
         
         await execute('COMMIT');
@@ -170,7 +202,7 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
         const resultBookings: Booking[] = [];
         let userHostId: string | null = null;
 
-        if (user.role !== UserRole.Admin) {
+        if (user.role !== UserRole.ADMIN) {
             const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
             if (hostRes.length === 0) {
                 throw new Error('You do not have a host profile and cannot update bookings.');
@@ -189,7 +221,7 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
             }
             const originalBooking = originalBookingRes[0];
 
-            if (user.role !== UserRole.Admin) {
+            if (user.role !== UserRole.ADMIN) {
                 const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1', [originalBooking.apartmentId]);
                 if (aptRes.length === 0 || String(aptRes[0].hostId) !== String(userHostId)) {
                     throw new Error(`You are not authorized to update booking with id ${id}.`);

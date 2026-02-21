@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { sanctumApi } from '../services/api';
-import { Booking } from '../types';
+import { sanctumApi } from '../services/api.js';
+import { Booking } from '../types.js';
 
 export const useBookApartment = () => {
   const [isLoading, setIsLoading] = useState(false);

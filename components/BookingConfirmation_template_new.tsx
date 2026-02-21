@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { sanctumApi } from '../services/api';
-import { Booking } from '../types';
-import { formatBookingRange } from '../utils/formatBookingRange';
+import { sanctumApi } from '../services/api.js';
+import { Booking } from '../types.js';
+import { formatBookingRange } from '../utils/formatBookingRange.js';
 
 const BookingConfirmation = () => {
   const { bookingId } = useParams<{ bookingId: string }>();

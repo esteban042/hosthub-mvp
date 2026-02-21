@@ -1,24 +1,24 @@
 
-import { Router } from 'express';
+import { Router, Request as ExpressRequest, Response, NextFunction } from 'express';
 import { body, query } from 'express-validator';
-import { pool } from '../../db';
-import { keysToCamel } from '../../dputils';
-import { validate } from '../../middleware/validation';
-import { protect, Request } from '../../middleware/auth';
-import { sendEmail } from '../../services/email';
+import { pool } from '../../db.js';
+import { keysToCamel } from '../../dputils.js';
+import { validate } from '../../middleware/validation.js';
+import { protect, AuthRequest } from '../../middleware/auth.js';
+import { sendEmail } from '../../services/email.js';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '../../types';
+import { UserRole } from '../../types.js';
 
-import apartmentsRouter from './apartments';
-import bookingsRouter from './bookings';
-import hostsRouter from './hosts';
-import usersRouter from './users';
-import availabilityRouter from './availability';
-import messagesRouter from './messages';
-import viewsRouter from './views';
-import adminRouter from './admin';
-import stripeRouter from './stripe';
-import stripeWebhookRouter from './stripe-webhooks';
+import apartmentsRouter from './apartments.js';
+import bookingsRouter from './bookings.js';
+import hostsRouter from './hosts.js';
+import usersRouter from './users.js';
+import availabilityRouter from './availability.js';
+import messagesRouter from './messages.js';
+import viewsRouter from './views.js';
+import adminRouter from './admin.js';
+import stripeRouter from './stripe.js';
+import stripeWebhookRouter from './stripe-webhooks.js';
 
 const router = Router();
 
@@ -44,7 +44,7 @@ router.post('/send-email',
   body('apartment').isObject(),
   body('host').isObject(),
   validate,
-  async (req, res, next) => {
+  async (req: ExpressRequest, res: Response, next: NextFunction) => {
     const { toEmail, subject, templateName, ...data } = req.body;
     try {
       const result = await sendEmail(toEmail, subject, templateName, data);
@@ -59,9 +59,9 @@ router.post('/send-message',
   body('booking').isObject(),
   body('message').not().isEmpty().trim().escape(),
   validate,
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     const { booking, message } = req.body;
-    const hostId = req.user.id;
+    const hostId = req.user!.id;
 
     try {
       const client = await pool.connect();
@@ -95,7 +95,7 @@ router.post('/send-message',
 );
 
 router.get('/public-hosts',
-  async (req, res, next) => {
+  async (req: ExpressRequest, res: Response, next: NextFunction) => {
     try {
       const client = await pool.connect();
       const result = await client.query('SELECT slug, name FROM hosts');
@@ -109,7 +109,7 @@ router.get('/public-hosts',
 
 // --- Routes originally from blocked-dates.ts ---
 
-router.get('/host-dashboard', protect, async (req: Request, res, next) => {
+router.get('/host-dashboard', protect, async (req: AuthRequest, res: Response, next: NextFunction) => {
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
 
   const userId = req.user.id;
@@ -151,7 +151,7 @@ router.get('/landing-data',
   query('email').optional().isEmail(),
   query('isGuest').optional().isBoolean(),
   validate,
-  async (req, res, next) => {
+  async (req: ExpressRequest, res: Response, next: NextFunction) => {
     const { slug, email, isGuest } = req.query;
     const client = await pool.connect();
 
@@ -212,10 +212,10 @@ router.post('/blocked-dates',
   protect,
   body().isArray(),
   validate,
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     const blockedDates = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.Admin;
+    const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
 
     try {
@@ -265,10 +265,10 @@ router.delete('/blocked-dates',
   protect,
   body().isArray(),
   validate,
-  async (req: Request, res, next) => {
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
     const blockedDatesToDelete = req.body;
     const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.Admin;
+    const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
 
     try {

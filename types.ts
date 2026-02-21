@@ -1,3 +1,4 @@
+
 export enum UserRole {
   GUEST = 'guest',
   HOST = 'host',
@@ -32,8 +33,15 @@ export interface User {
   role: UserRole;
 }
 
+export interface Currency {
+  name: string;
+  code: string;
+  symbol: string;
+}
+
 export interface Host {
   id: string;
+  userId: string;
   slug: string;
   name: string;
   bio: string;
@@ -73,6 +81,7 @@ export interface Host {
   depositPercentage?: number;
   stripeAccountId?: string;
   stripeActive?: boolean;
+  currency?: Currency;
 }
 
 export interface Apartment {
@@ -103,6 +112,8 @@ export interface Booking {
   guestName: string;
   guestEmail: string;
   guestCountry: string;
+  guestPhone: string;
+  guestMessage: string;
   numGuests: number;
   startDate: string;
   endDate: string;

@@ -1,8 +1,27 @@
 import { useState, useEffect, useCallback } from 'react';
-import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
-import { sanctumApi } from './api';
-import { checkSession, signInWithEmail, signOut } from './authService';
+import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types.js';
+import { sanctumApi } from './api.js';
+import { checkSession, signInWithEmail, signOut } from './authService.js';
 import { format } from 'date-fns';
+
+// Define interfaces for the structured data returned by the API
+interface AdminData {
+  hosts: Host[];
+  apartments: Apartment[];
+  bookings: Booking[];
+}
+
+interface HostData {
+  host: Host;
+  apartments: Apartment[];
+  bookings: Booking[];
+  blockedDates: BlockedDate[];
+}
+
+interface GuestData {
+  host: Host;
+  apartments: Apartment[];
+}
 
 export const useAppData = () => {
   const [loading, setLoading] = useState(true);
@@ -27,12 +46,12 @@ export const useAppData = () => {
 
       if (sessionUser) {
         if (sessionUser.role === UserRole.ADMIN) {
-          const adminData = await sanctumApi.getAdminDashboardData();
+          const adminData = await sanctumApi.getAdminDashboardData() as AdminData;
           setHosts(adminData.hosts || []);
           setApartments(adminData.apartments || []);
           setBookings(adminData.bookings || []);
         } else if (sessionUser.role === UserRole.HOST) {
-          const hostData = await sanctumApi.getHostDashboardData();
+          const hostData = await sanctumApi.getHostDashboardData() as HostData;
           if (hostData && hostData.host) {
             setCurrentHost(hostData.host);
             setApartments(hostData.apartments || []);
@@ -48,7 +67,7 @@ export const useAppData = () => {
         const params = new URLSearchParams(window.location.search);
         const hostSlug = params.get('host');
         if (hostSlug) {
-          const guestData = await sanctumApi.getLandingData({ slug: hostSlug }, true);
+          const guestData = await sanctumApi.getLandingData({ slug: hostSlug }, true) as GuestData;
           setCurrentHost(guestData.host);
           setApartments(guestData.apartments);
         } else {

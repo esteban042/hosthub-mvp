@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { sanctumApi } from '../services/api';
-import { Booking } from '../types';
+import { sanctumApi } from '../services/api.js';
+import { Booking } from '../types.js';
 import { CheckCircle, User, Calendar, DollarSign, Hash, Home, CreditCard, ArrowRight } from 'lucide-react';
 
 const InfoRow: React.FC<{ icon: React.ElementType, label: string, value: string | number, valueClass?: string }> = ({ icon: Icon, label, value, valueClass }) => (

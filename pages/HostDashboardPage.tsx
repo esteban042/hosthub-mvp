@@ -1,5 +1,5 @@
 import React from 'react';
-import { Host, Apartment, Booking } from '../types';
+import { Host, Apartment, Booking } from '../types.js';
 
 interface HostDashboardPageProps {
   host: Host;
