@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+min import { useState, useEffect, useCallback } from 'react';
 import { UserRole, Host, Apartment, Booking, BlockedDate, User } from '../types';
 import { sanctumApi } from './api';
 import { checkSession, signInWithEmail, signOut } from './authService';
@@ -108,9 +108,7 @@ export const useAppData = () => {
       const newBooking = await sanctumApi.createBooking(bookingData);
       if (newBooking.stripeSessionUrl) {
         window.location.href = newBooking.stripeSessionUrl;
-      } else {
-        await loadApplicationData(false);
-      }
+      } 
     } catch (err: any) {
       setError(err.message);
     }

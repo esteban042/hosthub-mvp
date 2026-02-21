@@ -174,6 +174,13 @@ export const sanctumApi = {
   createStripeConnectLink: () => {
     return fetchApi<{ url: string }>('/api/v1/stripe/connect', { method: 'POST' });
   },
+  
+  verifyStripeSession: (sessionId: string) => {
+    return fetchApi<Booking>('/api/v1/stripe/verify-session', {
+      method: 'POST',
+      body: JSON.stringify({ sessionId }),
+    });
+  },
 
   // Generic methods for API calls
   post: (endpoint: string, body: any) => fetchApi(endpoint, {
