@@ -81,14 +81,30 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
     
     try {
         const apartment = await getApartmentById(apartmentId, true);
-        
+        const host = await getHostById(apartment.hostId);
+
         const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
         if (nights < apartment.minStayNights) {
             throw new Error(`This property requires a minimum stay of ${apartment.minStayNights} nights.`);
         }
-        
-        const host = await getHostById(apartment.hostId);
-        
+
+        const hostNetTotal = nights * apartment.pricePerNight;
+        let finalPrice = hostNetTotal;
+        let hostPayoutAmount = 0;
+
+        if (host.stripeAccountId && host.commissionRate > 0) {
+            const platformCommissionRate = host.commissionRate;
+            const stripeCommissionRate = 0.029;
+            const stripeFixedFee = 0.30;
+
+            finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+            hostPayoutAmount = hostNetTotal;
+        } else {
+            finalPrice = hostNetTotal;
+        }
+
+        const totalPrice = Math.round(finalPrice * 100) / 100;
+
         const bookingCountRes = await query<{ count: string }>('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
         const bookingCount = parseInt(bookingCountRes[0].count, 10);
         
@@ -104,8 +120,6 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
             throw new Error('The selected dates are not available');
         }
         
-        const totalPrice = nights * apartment.pricePerNight;
-        
         const status = host.stripeAccountId ? BookingStatus.PENDING_PAYMENT : BookingStatus.CONFIRMED;
 
         const bookingRes = await query<Booking>(
@@ -116,15 +130,29 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         let newBooking = bookingRes[0];
 
         if (host.stripeAccountId) {
+            const finalPriceInCents = Math.round(totalPrice * 100);
+            const hostPayoutInCents = Math.round(hostPayoutAmount * 100);
+
+            const paymentIntentData = hostPayoutInCents > 0 ? {
+                payment_intent_data: {
+                    transfer_data: {
+                        destination: host.stripeAccountId,
+                        amount: hostPayoutInCents,
+                    },
+                },
+            } : {};
+
             const session = await stripe.checkout.sessions.create({
                 payment_method_types: ['card'],
                 line_items: [{
                     price_data: {
                         currency: 'usd',
                         product_data: {
-                            name: `Booking for ${apartment.title}`,
+                            name: `Stay at ${apartment.title}`,
+                            description: `Booking for ${nights} nights from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`,
+                            images: apartment.photos.slice(0, 5),
                         },
-                        unit_amount: totalPrice * 100,
+                        unit_amount: finalPriceInCents,
                     },
                     quantity: 1,
                 }],
@@ -134,6 +162,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
                 metadata: {
                     bookingId: newBooking.id,
                 },
+                ...paymentIntentData,
             });
 
             const stripeSessionId = session.id;

@@ -1,4 +1,3 @@
-
 export enum UserRole {
   GUEST = 'guest',
   HOST = 'host',
@@ -6,15 +5,15 @@ export enum UserRole {
 }
 
 export enum SubscriptionType {
-  BASIC = 'basic',
-  PRO = 'pro',
-  ENTERPRISE = 'enterprise',
+  BASIC = 'Basic',
+  PRO = 'Pro',
+  ENTERPRISE = 'Enterprise',
 }
 
 export const SUBSCRIPTION_PRICES = {
-  [SubscriptionType.BASIC]: 20,
-  [SubscriptionType.PRO]: 50,
-  [SubscriptionType.ENTERPRISE]: 150,
+  [SubscriptionType.BASIC]: 15,
+  [SubscriptionType.PRO]: 45,
+  [SubscriptionType.ENTERPRISE]: 85,
 };
 
 export enum BookingStatus {

@@ -38,20 +38,42 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     }
   }, [bookError]);
 
-  const totalPrice = useMemo(() => {
-    if (!startDate || !endDate) return 0;
+  const { finalPrice } = useMemo(() => {
+    if (!startDate || !endDate) {
+        // If no dates, show the base price per night
+        return { finalPrice: apartment.pricePerNight || 0 };
+    }
+
     const start = new Date(startDate);
     const end = new Date(endDate);
     let total = 0;
     let current = new Date(start);
+
     while (current.toISOString().split('T')[0] < end.toISOString().split('T')[0]) {
-      const dateStr = current.toISOString().split('T')[0];
-      const override = apartment.priceOverrides?.find(rule => dateStr >= rule.startDate && dateStr <= rule.endDate);
-      total += override ? override.price : (apartment.pricePerNight || 0);
-      current.setDate(current.getDate() + 1);
+        const dateStr = current.toISOString().split('T')[0];
+        const override = apartment.priceOverrides?.find(rule => dateStr >= rule.startDate && dateStr <= rule.endDate);
+        total += override ? override.price : (apartment.pricePerNight || 0);
+        current.setDate(current.getDate() + 1);
     }
-    return total;
-  }, [startDate, endDate, apartment]);
+
+    const hostNetTotal = total;
+    let finalPrice = hostNetTotal;
+
+    // Only apply the markup if the host has a Stripe account connected
+    if (host.stripeAccountId && host.commissionRate > 0) {
+        const platformCommissionRate = host.commissionRate;
+        const stripeCommissionRate = 0.029; // Standard Stripe fee
+        const stripeFixedFee = 0.30; // Standard Stripe fee
+
+        // Reverse calculate the final price
+        finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+    }
+
+    return { 
+        finalPrice: Math.round(finalPrice * 100) / 100,
+    };
+  }, [startDate, endDate, apartment, host]);
+
 
   useEffect(() => {
     if (startDate && endDate) {
@@ -110,6 +132,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     e.preventDefault();
     if (!validateForm() || isLoading) return;
 
+    // The backend does not need totalPrice, it calculates it securely
     const bookingDetails = {
       apartmentId: apartment.id,
       guestName: name,
@@ -126,19 +149,20 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
 
     if (newBooking) {
         onNewBooking(newBooking);
-        setName('');
-        setEmail('');
-        setPhone('');
-        setGuestCountry('');
-        setNumGuests(1);
-        setStartDate('');
-        setEndDate('');
-        setMessage('');
-        setFormErrors({});
-        setModalContent({ title: 'Booking Confirmed', message: 'Your booking has been successfully processed.' });
-        setIsModalOpen(true);
+        if (newBooking.stripeSessionUrl) {
+            window.location.href = newBooking.stripeSessionUrl; // Redirect to Stripe Checkout
+        } else {
+          // Handle non-payment confirmation
+          setModalContent({ 
+            title: 'Booking Request Sent', 
+            message: 'Your booking request has been sent to the host. They will contact you shortly to confirm the details.' 
+          });
+          setIsModalOpen(true);
+        }
     }
   };
+  
+  const isStripeBooking = !!host.stripeAccountId;
 
   return (
     <>
@@ -152,12 +176,13 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
       <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
         <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
           <div>
-            <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">Estimated total</span>
-            <span className="text-5xl font-black text-charcoal">${totalPrice > 0 ? totalPrice.toLocaleString() : (apartment.pricePerNight || 0).toLocaleString()}</span>
+            <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">{startDate && endDate ? 'Total price' : 'Price per night'}</span>
+            <span className="text-5xl font-black text-charcoal">${finalPrice.toLocaleString()}</span>
           </div>
         </div>
 
         <form noValidate onSubmit={handleBooking} className="space-y-6">
+           {/* Form fields remain the same */}
           <div className="space-y-2">
             <label className="block text-sm text-charcoal font-medium ml-1">Guest name</label>
             <input
@@ -270,9 +295,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
             disabled={isLoading}
             className="w-full bg-sky-700/80 text-white disabled:bg-alabaster/70 disabled:text-stone-400 disabled:cursor-not-allowed py-7 rounded-full transition-all text-[12px] tracking-[0.3em] uppercase mt-8 shadow-2xl shadow-sky-700/30 active:scale-[0.98]"
           >
-            {isLoading ? 'Booking...' : 'Book now'}
+            {isLoading ? 'Processing...' : (isStripeBooking ? 'Book & Pay' : 'Book Now')}
           </button>
-          <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6 text-charcoal">Book with instant confirmation</p>
+          <p className="text-[10px] text-center font-medium uppercase tracking-widest mt-6 text-charcoal">
+            {isStripeBooking ? 'Secure booking by Stripe' : 'Book with instant confirmation'}
+          </p>
         </form>
       </div>
     </>
