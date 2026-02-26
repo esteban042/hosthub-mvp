@@ -12,7 +12,7 @@ interface ApartmentDetailPageProps {
   host: Host;
   bookings: Booking[];
   blockedDates: BlockedDate[];
-  airbnbCalendarDates: string[];
+  airbnbCalendarDates: string[];th
   onBack: () => void;
   onNewBooking: (booking: Booking) => void;
 }
@@ -83,7 +83,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
           host={host}
           onClose={() => {
             setConfirmedBooking(null);
-            onBack();
+            // onBack();
           }}
         />
       )}

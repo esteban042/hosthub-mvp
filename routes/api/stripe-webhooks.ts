@@ -7,7 +7,7 @@ import { BookingStatus, UserRole } from '../../types.js';
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-01-28.clover' as any,
+    apiVersion: '2026-02-25.clover' as any,
 });
 
 router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Response, next: NextFunction) => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard } from 'lucide-react';
+import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard, ClipboardCheck } from 'lucide-react';
 import { Booking, Apartment, Host } from '../types.js';
 import { BACKGROUND_COLOR, TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../../constants.tsx';
 
@@ -10,13 +10,13 @@ interface BookingConfirmationCardProps {
   onClose: () => void;
 }
 
-const InfoRow: React.FC<{ icon: React.ElementType, label: string, value: string | number }> = ({ icon: Icon, label, value }) => (
+const InfoRow: React.FC<{ icon: React.ElementType, label: string, value: string | number, valueClass?: string }> = ({ icon: Icon, label, value, valueClass }) => (
   <div className="flex justify-between items-center py-3 border-b border-stone-200/60 last:border-none">
     <div className="flex items-center space-x-3 text-charcoal/80">
       <Icon size={18} />
       <span className="font-medium">{label}</span>
     </div>
-    <span className="font-bold text-charcoal text-lg">{value}</span>
+    <span className={`font-bold text-charcoal text-lg ${valueClass}`}>{value}</span>
   </div>
 );
 
@@ -54,22 +54,14 @@ export const BookingConfirmationCard: React.FC<BookingConfirmationCardProps> = (
             <InfoRow icon={Hash} label="Booking ID" value={booking.customBookingId || 'N/A'} />
             <InfoRow icon={Home} label="Apartment" value={apartment.title} />
             <InfoRow icon={Briefcase} label="Host" value={host.name} />
-            <div className="flex justify-between items-center py-4 border-b border-stone-200/60">
-              <div className="flex items-center space-x-3 text-charcoal/80">
-                <Calendar size={18} />
-                <span className="font-medium">Dates</span>
-              </div>
-              <div className="flex items-center space-x-2 font-bold text-charcoal text-lg">
-                <span>{formatDate(booking.startDate)}</span>
-                <ArrowRight size={20} className="text-sky-accent"/>
-                <span>{formatDate(booking.endDate)}</span>
-              </div>
-            </div>
+            <InfoRow icon={Calendar} label="Check-in Date" value={formatDate(booking.startDate)} />
+            <InfoRow icon={Calendar} label="Check-out Date" value={formatDate(booking.endDate)} />
             <InfoRow icon={Users} label="Number of Guests" value={booking.numGuests} />
             <InfoRow icon={DollarSign} label="Total Price" value={`$${booking.totalPrice.toFixed(2)}`} />
             {booking.depositAmount && booking.depositAmount > 0 && (
               <InfoRow icon={DollarSign} label="Deposit Amount" value={`$${booking.depositAmount.toFixed(2)}`} />
             )}
+            <InfoRow icon={ClipboardCheck} label="Booking Status" value={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)} valueClass="text-emerald-500" />
           </div>
 
           <InfoBlock 

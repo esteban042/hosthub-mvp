@@ -8,8 +8,7 @@ import { getBookingDetailsById } from '../../services/booking.service.js';
 const router = Router();
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // @ts-expect-error The Stripe types for this property appear to be incorrect.
-  apiVersion: '2026-01-28',
+  apiVersion: '2026-02-25.clover' as any,
 });
 
 router.post('/connect', protect, async (req: AuthRequest, res: Response, next: NextFunction) => {

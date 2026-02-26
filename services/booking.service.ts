@@ -2,10 +2,10 @@ import { query, execute } from '../dputils.js';
 import { sendEmail } from './email.js';
 import { Booking, Apartment, Host, User, UserRole, BookingStatus } from '../types.js';
 import Stripe from 'stripe';
+import { config } from '../config.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  // @ts-expect-error The Stripe types for this property appear to be incorrect.
-  apiVersion: '2024-04-10',
+  apiVersion: '2026-02-25.clover' as any,
 });
 
 /**
@@ -129,14 +129,21 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
                     quantity: 1,
                 }],
                 mode: 'payment',
-                success_url: `${process.env.APP_URL}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: `${process.env.APP_URL}/booking/cancel?booking_id=${newBooking.id}`,
+                success_url: `${config.appUrl}/booking/success?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: `${config.appUrl}/booking/cancel?booking_id=${newBooking.id}`,
                 metadata: {
                     bookingId: newBooking.id,
                 },
             });
-            newBooking.stripeSessionId = session.id;
-            newBooking.stripeSessionUrl = session.url ?? undefined;
+
+            const stripeSessionId = session.id;
+            const stripeSessionUrl = session.url ?? undefined;
+
+            const updatedBookingRes = await query<Booking>(
+                `UPDATE bookings SET stripe_session_id = $1, stripe_session_url = $2 WHERE id = $3 RETURNING *`,
+                [stripeSessionId, stripeSessionUrl, newBooking.id]
+            );
+            newBooking = updatedBookingRes[0];
         }
         
         await execute('COMMIT');

@@ -45,6 +45,7 @@ This document provides an overview of the database tables and their fields.
 - `guest_country`: text
 - `custom_booking_id`: text
 - `stripe_session_id`: text
+- `stripe_session_url`: text
 
 ## `public.hosts`
 - `id`: text (Primary Key)
@@ -142,6 +143,7 @@ CREATE TABLE public.bookings (
   guest_country text,
   custom_booking_id text,
   stripe_session_id text,
+  stripe_session_url text,
   CONSTRAINT bookings_pkey PRIMARY KEY (id),
   CONSTRAINT bookings_apartment_id_fkey FOREIGN KEY (apartment_id) REFERENCES public.apartments(id)
 );

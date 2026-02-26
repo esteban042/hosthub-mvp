@@ -6,6 +6,13 @@ import { config } from '../config.js';
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
 
+// const SUPABASE_URL = process.env?.VITE_SUPABASE_URL || '';
+//  const SUPABASE_ANON_KEY = process.env?.VITE_SUPABASE_ANON_KEY || '';
+
+// const SUPABASE_URL = config.supabaseUrl;
+// const SUPABASE_ANON_KEY = config.supabaseAnonKey;
+
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

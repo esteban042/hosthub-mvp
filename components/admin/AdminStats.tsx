@@ -1,8 +1,7 @@
-
 import React, { useMemo } from 'react';
 import { Host, Apartment, Booking, SubscriptionType, BookingStatus, SUBSCRIPTION_PRICES } from '../../types';
 import { CreditCard, Percent, Globe, Layers } from 'lucide-react';
-import { SKY_ACCENT, TEXT_COLOR } from '../../constants';
+import StatCard from '../host-dashboard/StatCard';
 
 interface AdminStatsProps {
   hosts: Host[];
@@ -30,45 +29,26 @@ const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-      <div className="bg-white/50 p-8 rounded-[2rem] border border-gray-700 shadow-xl flex items-center space-x-5">
-        <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
-          <CreditCard className="w-6 h-6" />
-        </div>
-        <div>
-        <h4 className="text-2xl font-black leading-none" style={{ color: TEXT_COLOR }}>${stats.monthlySubscription.toLocaleString()}</h4>
-        <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500"> Subscription Revenue</p>
-
-        </div>
-        </div>
-      <div className="bg-zinc-100 p-8 rounded-[2rem] border border-gray-800 shadow-xl flex items-center space-x-5">
-        <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
-          <Percent className="w-6 h-6" />
-        </div> 
-        <div>
-          <h4 className="text-2xl font-black leading-none" style={{ color: TEXT_COLOR }}>${Math.round(stats.totalCommission).toLocaleString()}</h4>
-          <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Platform Commission</p>
-        </div>
-      </div>
-      <div className="bg-zinc-100 p-8 rounded-[2rem] border border-stone-200 shadow-xl flex items-center space-x-5">
-        <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
-          <Globe className="w-6 h-6" />
-        </div>
-        <div>
-        <h4 className="text-2xl font-black leading-none" style={{ color: TEXT_COLOR }}>{stats.activeHosts}</h4>
-        <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Active Hosts</p>
-     
-        </div>
-       </div>
-      <div className="bg-white/50 p-8 rounded-[2rem] border border-stone-200 shadow-xl flex items-center space-x-5">
-        <div className="w-12 h-12 bg-sky-accent/10 rounded-2xl flex items-center justify-center" style={{ color: SKY_ACCENT }}>
-          <Layers className="w-6 h-6" />
-        </div>
-        <div>
-        <h4 className="text-2xl font-black leading-none" style={{ color: TEXT_COLOR }}>{stats.totalAssets}</h4>
-        <p className="text-[10px] font-bold uppercase tracking-widest mt-2 text-stone-500">Asset Online</p>
-
-        </div>
-       </div>
+      <StatCard
+        icon={<CreditCard className="w-6 h-6" />}
+        label="Subscription Revenue"
+        value={`$${stats.monthlySubscription.toLocaleString()}`}
+      />
+      <StatCard
+        icon={<Percent className="w-6 h-6" />}
+        label="Platform Commission"
+        value={`$${Math.round(stats.totalCommission).toLocaleString()}`}
+      />
+      <StatCard
+        icon={<Globe className="w-6 h-6" />}
+        label="Active Hosts"
+        value={stats.activeHosts}
+      />
+      <StatCard
+        icon={<Layers className="w-6 h-6" />}
+        label="Asset Online"
+        value={stats.totalAssets}
+      />
     </div>
   );
 };

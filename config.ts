@@ -13,6 +13,9 @@ export const config = {
   jwtSecret: getEnvVar('JWT_SECRET'),
   databaseUrl: getEnvVar('DATABASE_URL'),
   adminEmail: getEnvVar('ADMIN_EMAIL'),
+  supabaseUrl: getEnvVar('VITE_SUPABASE_URL'),
+  supabaseAnonKey: getEnvVar('VITE_SUPABASE_ANON_KEY'),
+  appUrl: getEnvVar('APP_URL', 'http://localhost:5173'),
   brevo: {
     smtpUser: getEnvVar('BREVO_SMTP_USER', ''),
     smtpPass: getEnvVar('BREVO_SMTP_PASS', ''),

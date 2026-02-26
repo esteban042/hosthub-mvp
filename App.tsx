@@ -1,6 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import { UserRole, BlockedDate, Booking, Host, Apartment } from './types.js';
 import { useAppData } from './services/useAppData.js';
 import { GuestLandingPage } from './pages/GuestLandingPage.js';
@@ -14,6 +13,7 @@ import BookingSuccessPage from './pages/BookingSuccessPage.js';
 import BookingCancelPage from './pages/BookingCancelPage.js';
 import { Database, RefreshCcw, AlertTriangle } from 'lucide-react';
 import GenericLandingPage from './components/GenericLandingPage.js';
+import HostAcquisitionPage from './pages/HostAcquisitionPage.js';
 
 document.title = "Sanctum";
 
@@ -91,6 +91,9 @@ const App: React.FC = () => {
           <button disabled={seeding} onClick={handleSeed} className="bg-emerald-500 hover:bg-emerald-600 text-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all active:scale-95 shadow-2xl shadow-emerald-500/20 flex items-center space-x-3">{seeding ? <RefreshCcw className="w-4 h-4 animate-spin" /> : <RefreshCcw className="w-4 h-4" />}<span>Provision Mock Data</span></button>
           <button onClick={() => setShowLogin(true)} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Access Admin Console</button>
         </div>
+        <div className="mt-8">
+          <Link to="/hosts" className="text-emerald-400 hover:text-emerald-500 transition-colors">Are you a host?</Link>
+        </div>
       </div>
     );
   };
@@ -155,6 +158,7 @@ const App: React.FC = () => {
 
   return (
     <Routes>
+      <Route path="/hosts" element={<HostAcquisitionPage />} />
       <Route path="/booking/success" element={<BookingSuccessPage />} />
       <Route path="/booking/cancel" element={<BookingCancelPage />} />
       <Route path="/booking/print/:bookingId" element={<PrintableBooking />} />
