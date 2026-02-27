@@ -111,7 +111,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <LegalModal title="Terms of Service" isOpen={activeLegal === 'terms'} onClose={() => setActiveLegal(null)}>
         <section className="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">1. Booking Philosophy</h4>
-          <p>By using HostHub, you agree to respect the sanctuaries provided by our hosts. Stays are granted based on mutual trust and adherence to house-specific guidelines provided at the time of confirmation.</p>
+          <p>By using Sanctum, you agree to respect the sanctuaries provided by our hosts. Stays are granted based on mutual trust and adherence to house-specific guidelines provided at the time of confirmation.</p>
         </section>
         <section className="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">2. Financial Obligations</h4>
@@ -119,7 +119,7 @@ export const Layout: React.FC<LayoutProps> = ({
         </section>
         <section className="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">3. Platform Conduct</h4>
-          <p>Unauthorized access to the Host Studio or manipulation of pricing data will result in immediate termination of access to the HostHub Property Network.</p>
+          <p>Unauthorized access to the Host Studio or manipulation of pricing data will result in immediate termination of access to the Sanctum Property Network.</p>
         </section>
       </LegalModal>
     </div>

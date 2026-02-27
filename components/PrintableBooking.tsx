@@ -103,7 +103,7 @@ const PrintableBooking: React.FC = () => {
         </div>
 
         <footer className="text-center mt-10 text-gray-500">
-            <p>Thank you for your business!</p>
+            <p>Thank you for your for staying with us!</p>
         </footer>
     </div>
   );
