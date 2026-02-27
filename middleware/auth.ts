@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
 import { config } from '../config.js';
 import { User } from '../types.js';
+import { keysToCamel } from '../dputils.js';
 
 export interface AuthRequest extends ExpressRequest {
   user?: User;
@@ -23,13 +24,15 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
 
   try {
     const decoded = jwt.verify(token, config.jwtSecret) as jwt.JwtPayload;
-    const result = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [decoded.id]);
+    
+    // Fetch all user data
+    const result = await pool.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
 
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Not authorized, user not found' });
     }
 
-    req.user = result.rows[0];
+    req.user = keysToCamel(result.rows[0]);
     next();
   } catch (err) {
     console.error('Token verification or user fetch failed:', err);

@@ -16,6 +16,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
+  const [updatingBookingId, setUpdatingBookingId] = React.useState<string | null>(null);
   const todayStr = new Date().toISOString().split('T')[0];
 
   const handleOpenModal = (booking: Booking) => {
@@ -64,15 +65,16 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
   };
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
-    if (status === BookingStatus.CANCELED) {
-        try {
+    setUpdatingBookingId(booking.id);
+    try {
+        if (status === BookingStatus.CANCELED) {
             await sanctumApi.cancelBooking(booking.id);
-            onUpdateBooking(booking, status); // To update the UI
-        } catch (error) {
-            console.error("Failed to cancel booking:", error);
         }
-    } else {
-        onUpdateBooking(booking, status);
+        onUpdateBooking(booking, status); 
+    } catch (error) {
+        console.error(`Failed to update booking to ${status}:`, error);
+    } finally {
+        setUpdatingBookingId(null);
     }
   };
 
@@ -151,6 +153,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
                   onSendWelcomeMessage={handleSendWelcomeMessage}
                   onSendCheckoutMessage={handleSendCheckoutMessage}
                   statusFilter={statusFilter}
+                  isUpdating={updatingBookingId === b.id}
                 />
               ))}
             </div>

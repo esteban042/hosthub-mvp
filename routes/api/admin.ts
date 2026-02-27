@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { protect, AuthRequest } from '../../middleware/auth.js';
 import { UserRole } from '../../types.js';
-import { pool } from '../../db.js';
-import { keysToCamel } from '../../dputils.js';
+import { query } from '../../dputils.js';
+import { Host, Apartment, Booking } from '../../types.js';
 
 const router = Router();
 
@@ -11,24 +11,20 @@ router.get('/', protect, async (req: AuthRequest, res, next) => {
     return res.status(403).json({ error: 'You are not authorized to view this information.' });
   }
 
-  const client = await pool.connect();
-
   try {
-    const hostsRes = await client.query('SELECT * FROM hosts');
+    const hostsRes = await query<Host>('SELECT * FROM hosts');
     const hosts = hostsRes.rows;
 
-    const apartmentsRes = await client.query('SELECT * FROM apartments');
+    const apartmentsRes = await query<Apartment>('SELECT * FROM apartments');
     const apartments = apartmentsRes.rows;
 
-    const bookingsRes = await client.query('SELECT * FROM bookings');
+    const bookingsRes = await query<Booking>('SELECT * FROM bookings');
     const bookings = bookingsRes.rows;
 
-    res.json(keysToCamel({ hosts, apartments, bookings }));
+    res.json({ hosts, apartments, bookings });
 
   } catch (err) {
     next(err);
-  } finally {
-    client.release();
   }
 });
 

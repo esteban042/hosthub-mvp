@@ -14,10 +14,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 async function getApartmentById(apartmentId: string, forUpdate: boolean = false): Promise<Apartment> {
     const sql = `SELECT * FROM apartments WHERE id = $1 ${forUpdate ? 'FOR UPDATE' : ''}`;
     const result = await query<Apartment>(sql, [apartmentId]);
-    if (result.length === 0) {
+    if (result.rows.length === 0) {
         throw new Error('Apartment not found');
     }
-    return result[0];
+    return result.rows[0];
 }
 
 /**
@@ -25,10 +25,10 @@ async function getApartmentById(apartmentId: string, forUpdate: boolean = false)
  */
 async function getHostById(hostId: string): Promise<Host> {
     const result = await query<Host>('SELECT * FROM hosts WHERE id = $1', [hostId]);
-    if (result.length === 0) {
+    if (result.rows.length === 0) {
         throw new Error('Host not found');
     }
-    return result[0];
+    return result.rows[0];
 }
 
 /**
@@ -36,10 +36,10 @@ async function getHostById(hostId: string): Promise<Host> {
  */
 export async function getBookingById(bookingId: string, user?: User): Promise<Booking | null> {
     const bookings = await query<Booking>('SELECT * FROM bookings WHERE id = $1', [bookingId]);
-    if (bookings.length === 0) {
+    if (bookings.rows.length === 0) {
         return null;
     }
-    const booking = bookings[0];
+    const booking = bookings.rows[0];
 
     if (user) {
         if (user.role === UserRole.ADMIN) {
@@ -47,13 +47,13 @@ export async function getBookingById(bookingId: string, user?: User): Promise<Bo
         }
 
         const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
-        if (hostRes.length === 0) {
+        if (hostRes.rows.length === 0) {
             throw new Error('User is not a host.');
         }
-        const userHostId = hostRes[0].id;
+        const userHostId = hostRes.rows[0].id;
 
         const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1', [booking.apartmentId]);
-        if (aptRes.length === 0 || String(aptRes[0].hostId) !== String(userHostId)) {
+        if (aptRes.rows.length === 0 || String(aptRes.rows[0].hostId) !== String(userHostId)) {
             throw new Error(`You are not authorized to view booking with id ${bookingId}.`);
         }
     }
@@ -66,7 +66,8 @@ export async function getBookingById(bookingId: string, user?: User): Promise<Bo
  * Fetches all bookings from the database. For admin use.
  */
 export async function getAllBookings(): Promise<Booking[]> {
-    return query<Booking>('SELECT * FROM bookings ORDER BY created_at DESC');
+    const result = await query<Booking>('SELECT * FROM bookings ORDER BY created_at DESC');
+    return result.rows;
 }
 
 /**
@@ -106,7 +107,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         const totalPrice = Math.round(finalPrice * 100) / 100;
 
         const bookingCountRes = await query<{ count: string }>('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
-        const bookingCount = parseInt(bookingCountRes[0].count, 10);
+        const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
         
         const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
         const customBookingId = `${hostInitials}${String(bookingCount + 1).padStart(7, '0')}`;
@@ -116,7 +117,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
             [apartmentId, startDate, endDate]
         );
         
-        if (overlappingBookingsRes.length > 0) {
+        if (overlappingBookingsRes.rows.length > 0) {
             throw new Error('The selected dates are not available');
         }
         
@@ -127,7 +128,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
             [apartmentId, startDate, endDate, totalPrice, status, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
         );
-        let newBooking = bookingRes[0];
+        let newBooking = bookingRes.rows[0];
 
         if (host.stripeAccountId) {
             const finalPriceInCents = Math.round(totalPrice * 100);
@@ -172,7 +173,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
                 `UPDATE bookings SET stripe_session_id = $1, stripe_session_url = $2 WHERE id = $3 RETURNING *`,
                 [stripeSessionId, stripeSessionUrl, newBooking.id]
             );
-            newBooking = updatedBookingRes[0];
+            newBooking = updatedBookingRes.rows[0];
         }
         
         await execute('COMMIT');
@@ -209,6 +210,7 @@ export async function getBookingDetailsById(bookingId: string): Promise<any | nu
           a.city AS apartment_city,
           a.photos AS apartment_photos,
           a.price_per_night,
+          a.host_id,
           h.name AS host_name,
           h.contact_email AS host_email,
           h.phone_number AS host_phone,
@@ -219,14 +221,14 @@ export async function getBookingDetailsById(bookingId: string): Promise<any | nu
           apartments a ON b.apartment_id = a.id
         JOIN
           hosts h ON a.host_id = h.id
-        LEFT JOIN
+        INNER JOIN
           users u ON h.user_id = u.id
         WHERE
           b.id = $1`,
         [bookingId]
     );
 
-    return result.length > 0 ? result[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
 }
 
 /**
@@ -240,10 +242,10 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
 
         if (user.role !== UserRole.ADMIN) {
             const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
-            if (hostRes.length === 0) {
+            if (hostRes.rows.length === 0) {
                 throw new Error('You do not have a host profile and cannot update bookings.');
             }
-            userHostId = hostRes[0].id;
+            userHostId = hostRes.rows[0].id;
         }
 
         for (const booking of updatedBookings) {
@@ -252,14 +254,14 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
             } = booking;
 
             const originalBookingRes = await query<Booking>('SELECT * FROM bookings WHERE id = $1 FOR UPDATE', [id]);
-            if (originalBookingRes.length === 0) {
+            if (originalBookingRes.rows.length === 0) {
                 throw new Error(`Booking with id ${id} not found.`);
             }
-            const originalBooking = originalBookingRes[0];
+            const originalBooking = originalBookingRes.rows[0];
 
             if (user.role !== UserRole.ADMIN) {
                 const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1', [originalBooking.apartmentId]);
-                if (aptRes.length === 0 || String(aptRes[0].hostId) !== String(userHostId)) {
+                if (aptRes.rows.length === 0 || String(aptRes.rows[0].hostId) !== String(userHostId)) {
                     throw new Error(`You are not authorized to update booking with id ${id}.`);
                 }
             }
@@ -271,7 +273,7 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
                 WHERE id = $9 RETURNING *`,
                 [guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id]
             );
-            const updatedBooking = updateRes[0];
+            const updatedBooking = updateRes.rows[0];
             resultBookings.push(updatedBooking);
 
             if (updatedBooking.status === 'canceled' && originalBooking.status !== 'canceled') {

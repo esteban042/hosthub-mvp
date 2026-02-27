@@ -1,5 +1,5 @@
 import { pool } from './db.js';
-import { QueryResult } from 'pg';
+import { QueryResult, QueryResultRow } from 'pg';
 
 // Helper to convert snake_case object keys to camelCase
 // This was moved from db.ts
@@ -26,11 +26,16 @@ export const keysToCamel = (o: any): any => {
  *
  * @param sql The SQL query to execute.
  * @param params The parameters for the SQL query.
- * @returns A promise that resolves to an array of objects, with keys converted to camelCase.
+ * @returns A promise that resolves to the QueryResult.
  */
-export async function query<T>(sql: string, params?: any[]): Promise<T[]> {
-  const result = await pool.query(sql, params);
-  return keysToCamel(result.rows);
+export async function query<T extends QueryResultRow>(sql: string, params?: any[]): Promise<QueryResult<T>> {
+  const result = await pool.query<T>(sql, params);
+  // Convert snake_case keys to camelCase
+  if (result.rows) {
+    result.rows = keysToCamel(result.rows);
+  }
+
+  return result;
 }
 
 /**

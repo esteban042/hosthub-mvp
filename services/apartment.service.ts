@@ -5,7 +5,8 @@ import { Apartment, User, UserRole } from '../types.js';
  * Fetches all apartments from the database.
  */
 export async function getAllApartments(): Promise<Apartment[]> {
-    return query<Apartment>('SELECT * FROM apartments ORDER BY created_at DESC');
+    const result = await query<Apartment>('SELECT * FROM apartments ORDER BY created_at DESC');
+    return result.rows;
 }
 
 /**
@@ -13,10 +14,10 @@ export async function getAllApartments(): Promise<Apartment[]> {
  */
 export async function createApartment(apartmentData: Omit<Apartment, 'id' | 'hostId' | 'createdAt' | 'updatedAt'>, user: User): Promise<Apartment> {
     const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
-    if (hostRes.length === 0) {
+    if (hostRes.rows.length === 0) {
         throw new Error('You do not have a host profile and cannot create apartments.');
     }
-    const hostId = hostRes[0].id;
+    const hostId = hostRes.rows[0].id;
 
     const {
         title,
@@ -61,7 +62,7 @@ export async function createApartment(apartmentData: Omit<Apartment, 'id' | 'hos
         ]
     );
 
-    return result[0];
+    return result.rows[0];
 }
 
 /**
@@ -73,19 +74,19 @@ export async function updateApartments(updatedApartments: Apartment[], user: Use
         let userHostId: string | null = null;
         if (user.role !== UserRole.ADMIN) {
             const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
-            if (hostRes.length === 0) {
+            if (hostRes.rows.length === 0) {
                 throw new Error('You do not have a host profile and cannot update apartments.');
             }
-            userHostId = hostRes[0].id;
+            userHostId = hostRes.rows[0].id;
         }
 
         for (const apt of updatedApartments) {
             if (user.role !== UserRole.ADMIN) {
                 const aptRes = await query<{ hostId: string }>('SELECT host_id FROM apartments WHERE id = $1 FOR UPDATE', [apt.id]);
-                if (aptRes.length === 0) {
+                if (aptRes.rows.length === 0) {
                     throw new Error(`Apartment with id ${apt.id} not found.`);
                 }
-                if (String(aptRes[0].hostId) !== String(userHostId)) {
+                if (String(aptRes.rows[0].hostId) !== String(userHostId)) {
                     throw new Error(`You are not authorized to update apartment with id ${apt.id}.`);
                 }
             }
@@ -121,5 +122,5 @@ export async function updateApartments(updatedApartments: Apartment[], user: Use
  */
 export async function getApartmentById(apartmentId: string): Promise<Apartment | null> {
     const apartments = await query<Apartment>('SELECT * FROM apartments WHERE id = $1', [apartmentId]);
-    return apartments.length > 0 ? apartments[0] : null;
+    return apartments.rows.length > 0 ? apartments.rows[0] : null;
 }

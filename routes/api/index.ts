@@ -1,12 +1,13 @@
 import { Router, Request as ExpressRequest, Response, NextFunction } from 'express';
-import { body, query } from 'express-validator';
+import { body, query as queryValidator } from 'express-validator';
 import { pool } from '../../db.js';
+import { query } from '../../dputils.js';
 import { keysToCamel } from '../../dputils.js';
 import { validate } from '../../middleware/validation.js';
 import { protect, AuthRequest } from '../../middleware/auth.js';
 import { sendEmail } from '../../services/email.js';
 import { v4 as uuidv4 } from 'uuid';
-import { UserRole } from '../../types.js';
+import { UserRole, Host, Apartment, Booking, BlockedDate } from '../../types.js';
 
 import apartmentsRouter from './apartments.js';
 import bookingsRouter from './bookings.js';
@@ -17,6 +18,7 @@ import messagesRouter from './messages.js';
 import viewsRouter from './views.js';
 import adminRouter from './admin.js';
 import stripeRouter from './stripe.js';
+import importerRouter from './importer.js';
 
 const router = Router();
 
@@ -30,6 +32,7 @@ router.use('/messages', messagesRouter);
 router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
 router.use('/stripe', stripeRouter);
+router.use('/import', importerRouter);
 
 // --- Routes originally from misc.ts ---
 
@@ -61,18 +64,15 @@ router.post('/send-message',
     const hostId = req.user!.id;
 
     try {
-      const client = await pool.connect();
-      const hostResult = await client.query('SELECT * FROM hosts WHERE id = $1', [hostId]);
+      const hostResult = await query<Host>('SELECT * FROM hosts WHERE id = $1', [hostId]);
       const host = hostResult.rows[0];
 
       if (!host) {
-        client.release();
         return res.status(404).json({ error: 'Host not found' });
       }
 
-      const apartmentResult = await client.query('SELECT * FROM apartments WHERE id = $1', [booking.apartmentId]);
+      const apartmentResult = await query<Apartment>('SELECT * FROM apartments WHERE id = $1', [booking.apartmentId]);
       const apartment = apartmentResult.rows[0];
-      client.release();
 
       if (!apartment) {
         return res.status(404).json({ error: 'Apartment not found' });
@@ -94,10 +94,8 @@ router.post('/send-message',
 router.get('/public-hosts',
   async (req: ExpressRequest, res: Response, next: NextFunction) => {
     try {
-      const client = await pool.connect();
-      const result = await client.query('SELECT slug, name FROM hosts');
-      client.release();
-      res.json(keysToCamel(result.rows));
+      const result = await query('SELECT slug, name FROM hosts');
+      res.json(result.rows);
     } catch (err) {
       next(err);
     }
@@ -110,47 +108,55 @@ router.get('/host-dashboard', protect, async (req: AuthRequest, res: Response, n
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
 
   const userId = req.user.id;
-  const client = await pool.connect();
 
   try {
-    const hostRes = await client.query('SELECT * FROM hosts WHERE user_id = $1', [userId]);
+    const hostRes = await query<Host>('SELECT * FROM hosts WHERE user_id = $1', [userId]);
     if (hostRes.rows.length === 0) {
       return res.status(404).json({ error: 'Host profile not found for this user. Please create a host profile.' });
     }
-    const host = hostRes.rows[0];
+    const host = keysToCamel(hostRes.rows[0]);
 
-    const apartmentsRes = await client.query('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
-    const apartments = apartmentsRes.rows;
+    const apartmentsRes = await query<Apartment>('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
+    const apartments = apartmentsRes.rows.map(apt => {
+        const camelApt = keysToCamel(apt);
+        if (camelApt.pricePerNight) {
+            camelApt.pricePerNight = parseFloat(camelApt.pricePerNight as string);
+        }
+        return camelApt;
+    });
     const apartmentIds = apartments.map(apt => apt.id);
 
-    let bookings = [];
-    let blockedDates = [];
+    let bookings: Booking[] = [];
+    let blockedDates: BlockedDate[] = [];
 
     if (apartmentIds.length > 0) {
-      const bookingsRes = await client.query('SELECT * FROM bookings WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
-      bookings = bookingsRes.rows;
+      const bookingsRes = await query<any>('SELECT * FROM bookings WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
+      bookings = bookingsRes.rows.map(booking => {
+          const camelBooking = keysToCamel(booking);
+          if (camelBooking.totalPrice) {
+              camelBooking.totalPrice = parseFloat(camelBooking.totalPrice);
+          }
+          return camelBooking;
+      });
 
-      const blockedDatesRes = await client.query('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
-      blockedDates = blockedDatesRes.rows;
+      const blockedDatesRes = await query<BlockedDate>('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
+      blockedDates = blockedDatesRes.rows.map(date => keysToCamel(date));
     }
 
-    res.json(keysToCamel({ host, apartments, bookings, blockedDates }));
+    res.json({ host, apartments, bookings, blockedDates });
 
   } catch (err) {
     next(err);
-  } finally {
-    client.release();
   }
 });
 
 router.get('/landing-data',
-  query('slug').optional().isString(),
-  query('email').optional().isEmail(),
-  query('isGuest').optional().isBoolean(),
+  queryValidator('slug').optional().isString(),
+  queryValidator('email').optional().isEmail(),
+  queryValidator('isGuest').optional().isBoolean(),
   validate,
   async (req: ExpressRequest, res: Response, next: NextFunction) => {
     const { slug, email, isGuest } = req.query;
-    const client = await pool.connect();
 
     try {
       let hostQueryText = 'SELECT';
@@ -172,35 +178,33 @@ router.get('/landing-data',
         hostQueryText += ' LIMIT 1';
       }
 
-      const hostRes = await client.query(hostQueryText, hostQueryParams);
+      const hostRes = await query<Host>(hostQueryText, hostQueryParams);
 
       if (hostRes.rows.length === 0) {
         return res.status(404).json({ error: 'Host not found' });
       }
       const host = hostRes.rows[0];
 
-      const apartmentsRes = await client.query('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
+      const apartmentsRes = await query<Apartment>('SELECT * FROM apartments WHERE host_id = $1', [host.id]);
       const apartments = apartmentsRes.rows;
       const apartmentIds = apartments.map(apt => apt.id);
 
-      let bookings = [];
-      let blockedDates = [];
+      let bookings: Booking[] = [];
+      let blockedDates: BlockedDate[] = [];
 
       if (apartmentIds.length > 0) {
         const bookingSelect = isGuest === 'true' ? 'apartment_id, start_date, end_date' : '*';
-        const bookingsRes = await client.query(`SELECT ${bookingSelect} FROM bookings WHERE apartment_id = ANY($1::text[])`, [apartmentIds]);
+        const bookingsRes = await query<Booking>(`SELECT ${bookingSelect} FROM bookings WHERE apartment_id = ANY($1::text[])`, [apartmentIds]);
         bookings = bookingsRes.rows;
 
-        const blockedDatesRes = await client.query('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
+        const blockedDatesRes = await query<BlockedDate>('SELECT * FROM blocked_dates WHERE apartment_id = ANY($1::text[])', [apartmentIds]);
         blockedDates = blockedDatesRes.rows;
       }
 
-      res.json(keysToCamel({ host, apartments, bookings, blockedDates }));
+      res.json({ host, apartments, bookings, blockedDates });
 
     } catch (err) {
       next(err);
-    } finally {
-      client.release();
     }
 });
 

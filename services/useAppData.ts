@@ -181,7 +181,7 @@ export const useAppData = () => {
     handleLogout,
     handleHostChange,
     handleNewBooking,
-    handleUpdateBookings: createApiHandler(sanctumApi.updateBookings, { silent: true }),
+    handleUpdateBookings: setBookings,
     handleUpdateApartments: createApiHandler(sanctumApi.updateApartments, { silent: true }),
     handleUpdateHosts: createApiHandler(sanctumApi.updateHosts),
     handleBlockedDatesChange: () => loadApplicationData(false),

@@ -6,12 +6,14 @@ import {
     getAllBookings, 
     createBooking, 
     getBookingDetailsById, 
-    updateBookings 
+    updateBookings,
+    getBookingById
 } from '../../services/booking.service.js';
-import { UserRole } from '../../types.js';
+import { UserRole, BookingStatus } from '../../types.js';
 
 const router = Router();
 
+// GET /api/bookings - Admin only
 router.get('/', 
     protect, 
     async (req: AuthRequest, res: Response, next: NextFunction) => {
@@ -27,6 +29,7 @@ router.get('/',
     }
 );
 
+// POST /api/bookings - Create a new booking
 router.post('/', 
     body('apartmentId').isString().notEmpty(),
     body('startDate').isISO8601(),
@@ -53,6 +56,7 @@ router.post('/',
     }
 );
 
+// GET /api/bookings/:id - Get booking details
 router.get('/:id', 
     protect,
     param('id').isString().notEmpty(),
@@ -76,6 +80,7 @@ router.get('/:id',
     }
 );
 
+// PUT /api/bookings/ - Bulk update bookings
 router.put('/', 
     protect,
     body().isArray(),
@@ -87,6 +92,39 @@ router.put('/',
             res.status(200).json(result);
         } catch (err: any) {
             if (err.message.includes('not authorized') || err.message.includes('do not have a host profile')) {
+                return res.status(403).json({ error: err.message });
+            } else if (err.message.includes('not found')) {
+                return res.status(404).json({ error: err.message });
+            }
+            next(err);
+        }
+    }
+);
+
+// PUT /api/bookings/:id/cancel - Cancel a booking
+router.put('/:id/cancel',
+    protect,
+    param('id').isString().notEmpty(),
+    validate,
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const { id } = req.params;
+        try {
+            const bookingToCancel = await getBookingById(id, req.user!); 
+
+            if (!bookingToCancel) {
+                 return res.status(404).json({ error: 'Booking not found' });
+            }
+            
+            const updatedBooking = {
+                ...bookingToCancel,
+                status: BookingStatus.CANCELED,
+            };
+
+            const result = await updateBookings([updatedBooking], req.user!);
+            res.status(200).json(result[0]);
+
+        } catch (err: any) {
+            if (err.message.includes('not authorized')) {
                 return res.status(403).json({ error: err.message });
             } else if (err.message.includes('not found')) {
                 return res.status(404).json({ error: err.message });

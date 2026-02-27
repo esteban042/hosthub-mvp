@@ -33,28 +33,50 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
 
-  const myApartments = useMemo(() => apartments.filter(a => a.hostId === host.id), [apartments, host.id]);
-  const myBookings = useMemo(() => bookings.filter(b => myApartments.some(a => a.id === b.apartmentId)), [bookings, myApartments]);
+  const myApartments = useMemo(() => host ? apartments.filter(a => a.hostId === host.id) : [], [apartments, host]);
+  const myBookings = useMemo(() => {
+    if (!bookings) return [];
+    return bookings.filter(b => 
+      b && 
+      typeof b.startDate === 'string' && 
+      typeof b.endDate === 'string' &&
+      myApartments.some(a => a.id === b.apartmentId)
+    );
+  }, [bookings, myApartments]);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
   const handleUpdateStatus = async (booking: Booking, status: BookingStatus) => {
     const updatedBooking = { ...booking, status };
-    onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
+    try {
+      await fetchApi('/api/v1/bookings', {
+        method: 'PUT',
+        body: JSON.stringify([updatedBooking]),
+      });
+      onUpdateBookings(bookings.map(b => b.id === booking.id ? updatedBooking : b));
+    } catch (error) {
+      console.error("Failed to update booking status:", error);
+    }
   };
 
   const stats = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const activeUnits = myApartments.filter(a => a.isActive).length;
+    try {
+      if (!host) return { activeUnits: 0, active: 0, past: 0, revenueYear: 0, totalPageViews: 0 };
+      const currentYear = new Date().getFullYear();
+      const activeUnits = myApartments.filter(a => a.isActive).length;
 
-    const active = myBookings.filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && b.endDate >= todayStr).length;
-    const pastCount = myBookings.filter(b => b.endDate < todayStr).length;
-    const revenueYear = myBookings
-        .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
-        .reduce((sum, b) => sum + b.totalPrice, 0);
-    const totalPageViews = myApartments.reduce((sum, apt) => sum + (apt.pageViews || 0), 0);
-    return { activeUnits, active, past: pastCount, revenueYear, totalPageViews };
-  }, [myBookings, myApartments, todayStr]);
+      const active = myBookings.filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && b.endDate >= todayStr).length;
+      const pastCount = myBookings.filter(b => b.endDate < todayStr).length;
+      const revenueYear = myBookings
+          .filter(b => (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && new Date(b.startDate).getFullYear() === currentYear)
+          .reduce((sum, b) => sum + b.totalPrice, 0);
+      const totalPageViews = myApartments.reduce((sum, apt) => sum + (apt.pageViews || 0), 0);
+      return { activeUnits, active, past: pastCount, revenueYear, totalPageViews };
+    } catch (error) {
+        console.error("Error calculating stats:", error);
+        return { activeUnits: 0, active: 0, past: 0, revenueYear: 0, totalPageViews: 0 };
+    }
+  }, [myBookings, myApartments, todayStr, host]);
 
   const toggleManualBlock = async (aptId: string, date: string) => {
     const existing = blockedDates.find(d => d.apartmentId === aptId && d.date === date);
@@ -78,7 +100,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   };
 
   const handleSaveApartment = (processedApt: Partial<Apartment>) => {
-    if (!processedApt) return;
+    if (!processedApt || !host) return;
 
     if (!processedApt.amenities) processedApt.amenities = [];
     if (!processedApt.photos) processedApt.photos = ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'];
@@ -105,6 +127,10 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     setShowAptModal(false);
     setEditingApt(null);
   };
+
+  if (!host) {
+    return <div>Loading...</div>; // Or some other placeholder
+  }
 
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-700 font-dm">

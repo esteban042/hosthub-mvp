@@ -17,9 +17,9 @@ export async function createUser(email: string, password: string): Promise<User>
     [email, passwordHash]
   );
 
-  if (result.length === 0) {
+  if (result.rows.length === 0) {
     throw new Error('User creation failed unexpectedly.');
   }
 
-  return result[0];
+  return result.rows[0];
 }

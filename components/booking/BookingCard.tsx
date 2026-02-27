@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Booking, BookingStatus } from '../../types.js';
-import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer, KeySquare, LogIn, LogOut } from 'lucide-react';
+import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer } from 'lucide-react';
 import { formatBookingRange } from '../../utils/formatBookingRange.js';
 import { getGuestDisplayName } from '../../utils/bookingUtils.js';
 import MessageMenu from '../host-dashboard/MessageMenu.js';
@@ -34,9 +34,20 @@ const BookingCard: React.FC<{
   onSendCheckoutMessage: (booking: Booking) => void;
   statusFilter: string;
   showButtons?: boolean;
-}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, onSendCheckInMessage, onSendWelcomeMessage, onSendCheckoutMessage, statusFilter, showButtons = true }) => {
+  isUpdating?: boolean;
+}> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, onSendCheckInMessage, onSendWelcomeMessage, onSendCheckoutMessage, statusFilter, showButtons = true, isUpdating = false }) => {
   const [isMessageMenuOpen, setIsMessageMenuOpen] = useState(false);
   const guestDisplayName = getGuestDisplayName(b.guestName, b.guestEmail);
+
+  const ActionButton: React.FC<{ onClick: () => void; className: string; children: React.ReactNode; disabled?: boolean }> = ({ onClick, className, children, disabled }) => (
+    <button onClick={onClick} className={`flex-1 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center ${className}`} disabled={disabled}>
+      {isUpdating && disabled ? (
+        <div className="flex justify-center items-center">
+          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+        </div>
+      ) : children}
+    </button>
+  );
 
   return (
     <div key={b.id} className="bg-white/50 rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-accent/30 transition-all border-charcoal/10">
@@ -91,27 +102,30 @@ const BookingCard: React.FC<{
             <div className="flex-grow flex items-center justify-center space-x-2">
                 {statusFilter !== 'past' && b.status === BookingStatus.CONFIRMED && (
                     <>
-                    <button 
+                    <ActionButton 
                       onClick={() => handleUpdateStatus(b, BookingStatus.PAID)} 
-                      className="flex-1 bg-transparent border border-green-600  text-green-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all text-center"
+                      className="bg-transparent border border-green-600 text-green-600"
+                      disabled={isUpdating}
                     >
                       Mark as Paid
-                    </button>
-                    <button 
+                    </ActionButton>
+                    <ActionButton 
                       onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
-                      className="flex-1 bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all text-center"
+                      className="bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white"
+                      disabled={isUpdating}
                     >
                       Cancel
-                    </button>
+                    </ActionButton>
                     </>
                 )}
                 {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
-                    <button 
+                    <ActionButton 
                       onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
-                      className="w-full bg-transparent border border-rose-600 text-rose-600 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:text-white transition-all text-center"
+                      className="w-full bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white"
+                      disabled={isUpdating}
                     >
                       Cancel
-                    </button>
+                    </ActionButton>
                 )}
             </div>
         </div>

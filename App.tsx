@@ -72,12 +72,15 @@ const App: React.FC = () => {
   }, [bookings]);
 
   const renderInitialSetup = () => {
-    if (user || currentHost || loading) return null;
     const params = new URLSearchParams(window.location.search);
-    if (params.get('host')) return null;
+    if (user || currentHost || loading || params.get('host')) return null;
+
+    if (showLogin) {
+      return <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />;
+    }
 
     if (hosts.length > 0) {
-      return <GenericLandingPage hosts={hosts} onHostChange={handleHostChange} onSignIn={() => setShowLogin(true)} />;
+      return <GenericLandingPage hosts={hosts} onSignIn={() => setShowLogin(true)} />;
     }
 
     return (
@@ -97,14 +100,6 @@ const App: React.FC = () => {
   const AppContent = () => {
     const initialSetup = renderInitialSetup();
     if (initialSetup) {
-        if (showLogin) {
-            return (
-                <>
-                    {initialSetup}
-                    <LoginPage onLogin={handleLogin} onCancel={() => setShowLogin(false)} />
-                </>
-            )
-        }
         return initialSetup;
     }
 

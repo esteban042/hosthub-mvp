@@ -29,7 +29,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     const hostBookings = bookings.filter(b => {
       const apartment = apartments.find(a => a.id === b.apartmentId);
-      return apartment && apartment.hostId === editingHost.id && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID);
+      return apartment && apartment.hostId === editingHost.id && (b.status === BookingStatus.CONFIRMED || b.status === BookingStatus.PAID) && b.startDate;
     });
 
     const statsByMonth: { [key: string]: { bookings: number; commission: number } } = {};

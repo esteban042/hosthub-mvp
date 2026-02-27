@@ -20,6 +20,11 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
     window.print();
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return '';
+    return dateString.split('T')[0];
+  };
+
   return (
     <div className="p-8 bg-white text-charcoal font-sans">
       <div id="bill-content">
@@ -27,7 +32,6 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
           <div>
             <h1 className="text-3xl font-bold">Invoice</h1>
             <p className="text-stone-500">Bill to: {host.name}</p>
-            <p className="text-stone-500">{host.email}</p>
           </div>
           <div className="text-right">
             <h2 className="text-xl font-bold">{billingPeriod}</h2>
@@ -49,8 +53,8 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
             <tbody>
               {bookings.map(b => (
                 <tr key={b.id} className="border-b border-stone-200">
-                  <td className="py-2">#{b.id.substring(0, 8)}</td>
-                  <td className="py-2">{b.startDate} to {b.endDate}</td>
+                  <td className="py-2">#{b.customBookingId || b.id.substring(0, 8)}</td>
+                  <td className="py-2">{formatDate(b.startDate)} to {formatDate(b.endDate)}</td>
                   <td className="py-2">{b.guestName}</td>
                   <td className="py-2 text-right">${b.totalPrice.toFixed(2)}</td>
                 </tr>

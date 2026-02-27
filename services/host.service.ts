@@ -6,7 +6,8 @@ import { Host } from '../types.js';
  * @returns A promise that resolves to an array of Host objects.
  */
 export async function getHosts(): Promise<Host[]> {
-  return query<Host>('SELECT * FROM hosts');
+  const result = await query<Host>('SELECT * FROM hosts');
+  return result.rows;
 }
 
 /**
@@ -14,7 +15,8 @@ export async function getHosts(): Promise<Host[]> {
  * @returns A promise that resolves to an array of partial Host objects, including only slug and name.
  */
 export async function getPublicHosts(): Promise<Pick<Host, 'slug' | 'name'>[]> {
-  return query<Pick<Host, 'slug' | 'name'>>('SELECT slug, name FROM hosts');
+  const result = await query<Pick<Host, 'slug' | 'name'>>('SELECT slug, name FROM hosts');
+  return result.rows;
 }
 
 /**
@@ -71,7 +73,6 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     country,
     phoneNumber,
     landingPagePicture,
-    airbnbCalendarLink,
     JSON.stringify(premiumConfig),
     paymentInstructions,
     vat,
@@ -87,7 +88,7 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
   ];
 
   const result = await query<Host>(sql, params);
-  return result[0];
+  return result.rows[0];
 }
 
 /**
@@ -97,7 +98,7 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
  */
 export async function getHostById(hostId: string): Promise<Host | null> {
     const result = await query<Host>('SELECT * FROM hosts WHERE id = $1', [hostId]);
-    return result.length > 0 ? result[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
 }
 
 /**
@@ -107,7 +108,7 @@ export async function getHostById(hostId: string): Promise<Host | null> {
  */
 export async function getHostByUserId(userId: string): Promise<Host | null> {
     const result = await query<Host>('SELECT * FROM hosts WHERE user_id = $1', [userId]);
-    return result.length > 0 ? result[0] : null;
+    return result.rows.length > 0 ? result.rows[0] : null;
 }
 
 /**
@@ -140,7 +141,7 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     try {
         const result = await query<Host>(queryString, queryValues);
         await execute('COMMIT');
-        return result[0];
+        return result.rows[0];
     } catch (error) {
         await execute('ROLLBACK');
         throw error;

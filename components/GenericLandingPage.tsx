@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Host, SubscriptionType, SUBSCRIPTION_PRICES } from '../types.js';
-import { ArrowRight, CheckCircle, MapPin, DollarSign, TrendingUp, Sparkles, Menu, X } from 'lucide-react';
+import { ArrowRight, CheckCircle, MapPin, DollarSign, TrendingUp, Sparkles, Menu, X, Calendar, MessageSquare, CreditCard } from 'lucide-react';
 
 interface GenericLandingPageProps {
   hosts: Host[];
@@ -131,10 +131,7 @@ const GenericLandingPage: React.FC<GenericLandingPageProps> = ({ hosts, onSignIn
                         <NavLink href="#roi-calculator" onClick={scrollTo('roi-calculator')}>ROI Calculator</NavLink>
                         <NavLink href="#pricing" onClick={scrollTo('pricing')}>Pricing</NavLink>
                     </nav>
-                    <div className="hidden md:flex items-center space-x-4">
-                         <button onClick={onSignIn} className="text-stone-700 font-medium hover:text-sky-600 transition-colors">Sign In</button>
-                         <button onClick={onSignIn} className="bg-sky-600 text-white px-6 py-2 rounded-full font-bold hover:bg-sky-700 transition-all">Get Started</button>
-                    </div>
+
                     <div className="md:hidden">
                         <button onClick={() => setIsMenuOpen(!isMenuOpen)}>{isMenuOpen ? <X/> : <Menu />}</button>
                     </div>
@@ -146,8 +143,6 @@ const GenericLandingPage: React.FC<GenericLandingPageProps> = ({ hosts, onSignIn
                         <NavLink href="#features" onClick={scrollTo('features')}>Features</NavLink>
                         <NavLink href="#roi-calculator" onClick={scrollTo('roi-calculator')}>ROI Calculator</NavLink>
                         <NavLink href="#pricing" onClick={scrollTo('pricing')}>Pricing</NavLink>
-                        <button onClick={onSignIn} className="w-full bg-sky-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-sky-700 transition-all text-left">Get Started</button>
-                        <button onClick={onSignIn} className="w-full bg-stone-100 text-charcoal px-6 py-3 rounded-xl font-bold transition-all text-left">Sign In</button>
                     </nav>
                 </div>
             )}
@@ -170,11 +165,22 @@ const GenericLandingPage: React.FC<GenericLandingPageProps> = ({ hosts, onSignIn
         {/* Features Section */}
         <section id="features" className="py-20 sm:py-28 container mx-auto px-4">
              <div className="text-center mb-16">
-                <h2 className="text-4xl sm:text-5xl font-extrabold text-charcoal tracking-tight">I'll help you own your Google Maps presence and capture direct bookings.</h2>
+                <p className="text-sky-600 font-bold text-lg">Everything you need</p>
+                <h2 className="text-4xl sm:text-5xl font-extrabold text-charcoal tracking-tight mt-2">All-in-one platform</h2>
+                <p className="mt-6 text-xl text-stone-600 max-w-3xl mx-auto">From calendars to automated messaging and payment processing, we have you covered. Get all the tools you need to run your business efficiently.</p>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-6xl mx-auto">
-                 <Feature icon={<MapPin/>} title="Dominate Local Search">
-                    We set up and optimize your Google Maps listing to rank higher, attracting guests searching for stays in your area.
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 max-w-7xl mx-auto">
+                 <Feature icon={<MapPin/>} title="Direct Booking Site">
+                    Get a beautiful, mobile-friendly website that showcases your properties and allows guests to book directly with you.
+                </Feature>
+                <Feature icon={<Calendar/>} title="Calendar Sync">
+                    Automatically sync your bookings and availability with other platforms like Airbnb and Vrbo to prevent double bookings.
+                </Feature>
+                <Feature icon={<MessageSquare/>} title="Automated Messaging">
+                    Save time with automated messages for booking confirmations, check-in instructions, and post-stay reviews.
+                </Feature>
+                <Feature icon={<CreditCard/>} title="Payment Processing">
+                    Securely accept credit card payments from guests with our built-in Stripe integration. No more chasing payments.
                 </Feature>
                 <Feature icon={<DollarSign/>} title="Slash Commissions">
                     Keep more of your earnings. Our 4% fee beats the 15%+ charged by major platforms, directly boosting your profit.
