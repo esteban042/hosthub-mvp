@@ -6,12 +6,6 @@ import { config } from '../config.js';
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || '';
 const SUPABASE_ANON_KEY = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || '';
 
-// const SUPABASE_URL = process.env?.VITE_SUPABASE_URL || '';
-//  const SUPABASE_ANON_KEY = process.env?.VITE_SUPABASE_ANON_KEY || '';
-
-// const SUPABASE_URL = config.supabaseUrl;
-// const SUPABASE_ANON_KEY = config.supabaseAnonKey;
-
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -180,6 +174,14 @@ export const sanctumApi = {
       method: 'POST',
       body: JSON.stringify({ sessionId }),
     });
+  },
+
+  importAirbnbIcal: (data: { hostId: string, icalUrl: string }) => {
+    return sanctumApi.post('/api/v1/importer/ical', data);
+  },
+
+  importAirbnbListing: (data: { hostId: string, listingUrl: string }) => {
+    return sanctumApi.post('/api/v1/importer/listing', data);
   },
 
   // Generic methods for API calls

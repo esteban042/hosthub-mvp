@@ -33,7 +33,7 @@ const HostCard: React.FC<HostCardProps> = ({ host, apartments, bookings, onConfi
             <img src={host.avatar} className="w-full h-full object-cover" alt={host.name} />
           </div>
           <div className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${
-            host.subscriptionType === SubscriptionType.ENTERPRISE ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/40' :
+            host.subscriptionType === SubscriptionType.PREMIUM ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/40' :
             host.subscriptionType === SubscriptionType.PRO ? 'bg-sky-500/10 text-sky-700 border-sky-700/40' :
             'bg-stone-200 text-stone-600 border-stone-300'
           }`}>

@@ -7,7 +7,7 @@ import { QueryResult } from 'pg';
 
 const router = Router();
 
-router.post('/airbnb', protect, async (req: AuthRequest, res) => {
+router.post('/listing', protect, async (req: AuthRequest, res) => {
   if (req.user?.role !== UserRole.HOST) {
     return res.status(403).json({ message: 'Forbidden: Only hosts can import apartments.' });
   }

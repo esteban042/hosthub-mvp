@@ -33,7 +33,7 @@ router.use('/messages', messagesRouter);
 router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
 router.use('/stripe', stripeRouter);
-router.use('/import', importerRouter);
+router.use('/importer', importerRouter);
 router.use('/files', filesRouter);
 
 // --- Routes originally from misc.ts ---

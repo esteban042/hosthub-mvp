@@ -8,7 +8,7 @@ import { Host } from '../../types';
 // Mock the child components to isolate the GenericLandingPage component
 jest.mock('../../types.js', () => ({
     ...jest.requireActual('../../types.js'),
-    SUBSCRIPTION_PRICES: { Basic: 0, Pro: 79, Enterprise: 249 },
+    SUBSCRIPTION_PRICES: { Basic: 0, Pro: 79, Premium: 249 },
   }));
 
 

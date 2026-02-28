@@ -41,6 +41,7 @@ const App: React.FC = () => {
     handleUpdateApartments,
     handleUpdateHosts,
     handleBlockedDatesChange,
+    handleImportListingFromAirbnb,
   } = useAppData();
 
   const onLogout = async () => {
@@ -120,7 +121,22 @@ const App: React.FC = () => {
                 <button onClick={onLogout} className="bg-transparent border border-stone-800 text-stone-400 hover:text-white hover:border-white px-10 py-5 rounded-full font-black text-[11px] uppercase tracking-widest transition-all">Logout</button>
                 </div>;
             }
-            if (currentHost) return <HostDashboard host={currentHost} apartments={apartments} bookings={formattedBookings} blockedDates={formattedBlockedDates} onUpdateBookings={handleUpdateBookings} onBlockedDatesChange={handleBlockedDatesChange} onUpdateApartments={handleUpdateApartments} onHostUpdate={(updatedHost: Host) => handleUpdateHosts(hosts.map((h: Host) => h.id === updatedHost.id ? updatedHost : h))} airbnbCalendarDates={currentHostAirbnbBlockedDates} loadingAirbnbIcal={loadingAirbnbIcal} />;
+            if (currentHost) {
+                return (
+                    <HostDashboard
+                        host={currentHost}
+                        apartments={apartments}
+                        bookings={formattedBookings}
+                        blockedDates={formattedBlockedDates}
+                        onUpdateBookings={handleUpdateBookings}
+                        onBlockedDatesChange={handleBlockedDatesChange}
+                        onUpdateApartments={handleUpdateApartments}
+                        onHostUpdate={(updatedHost: Host) => handleUpdateHosts(hosts.map((h: Host) => h.id === updatedHost.id ? updatedHost : h))}
+                        onImportListingFromAirbnb={handleImportListingFromAirbnb}
+                        loadingAirbnbIcal={loadingAirbnbIcal} 
+                    />
+                );
+            }
             return null;
             default:
             return <p>Unknown user role.</p>;

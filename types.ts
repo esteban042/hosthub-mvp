@@ -7,13 +7,13 @@ export enum UserRole {
 export enum SubscriptionType {
   BASIC = 'Basic',
   PRO = 'Pro',
-  ENTERPRISE = 'Enterprise',
+  PREMIUM = 'Premium',
 }
 
 export const SUBSCRIPTION_PRICES = {
-  [SubscriptionType.BASIC]: 15,
-  [SubscriptionType.PRO]: 45,
-  [SubscriptionType.ENTERPRISE]: 85,
+  [SubscriptionType.BASIC]: 29,
+  [SubscriptionType.PRO]: 9,
+  [SubscriptionType.PREMIUM]: 19,
 };
 
 export enum BookingStatus {

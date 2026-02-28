@@ -2,7 +2,6 @@ import React, { useState, useMemo } from 'react';
 import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types.js';
 import { fetchApi } from '../services/api.js';
 import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard.js';
-
 import DashboardHeader from '../components/host-dashboard/DashboardHeader.js';
 import DashboardStats from '../components/host-dashboard/DashboardStats.js';
 import DashboardNav from '../components/host-dashboard/DashboardNav.js';
@@ -11,6 +10,7 @@ import ApartmentsList from '../components/host-dashboard/ApartmentsList.js';
 import Bookings from '../components/host-dashboard/Bookings.js';
 import CurrentBookings from '../components/host-dashboard/CurrentBookings.js';
 import Calendar from '../components/host-dashboard/Calendar.js';
+import AirbnbImportModal from '../components/host-dashboard/AirbnbImportModal.js';
 import HostInfoEditor from '../components/host-dashboard/HostInfoEditor.js';
 
 interface HostDashboardProps {
@@ -22,16 +22,17 @@ interface HostDashboardProps {
   onBlockedDatesChange: () => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
   onHostUpdate: (updatedHost: Host) => void;
-  airbnbCalendarDates: string[]; 
-  loadingAirbnbIcal: boolean; 
+  onImportListingFromAirbnb: (listingUrl: string) => void;
+  loadingAirbnbIcal: boolean;
 }
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, airbnbCalendarDates, loadingAirbnbIcal
+  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, onImportListingFromAirbnb, loadingAirbnbIcal 
 }) => {
   const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics' | 'general-info'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
+  const [showAirbnbImportModal, setShowAirbnbImportModal] = useState<boolean>(false);
 
   const myApartments = useMemo(() => host ? apartments.filter(a => a.hostId === host.id) : [], [apartments, host]);
   const myBookings = useMemo(() => {
@@ -99,42 +100,52 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     }
   };
 
-  const handleSaveApartment = (processedApt: Partial<Apartment>) => {
+  const handleSaveApartment = async (processedApt: Partial<Apartment>) => {
     if (!processedApt || !host) return;
 
-    if (!processedApt.amenities) processedApt.amenities = [];
-    if (!processedApt.photos) processedApt.photos = ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'];
-    if (!processedApt.priceOverrides) processedApt.priceOverrides = [];
+    const apartmentData = {
+      ...processedApt,
+      hostId: host.id,
+      amenities: processedApt.amenities || [],
+      photos: processedApt.photos || ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'],
+      priceOverrides: processedApt.priceOverrides || [],
+      isActive: processedApt.isActive === undefined ? true : processedApt.isActive,
+    };
 
-    if (processedApt.id) {
-      onUpdateApartments(myApartments.map(a => a.id === processedApt.id ? { ...a, ...processedApt } as Apartment : a));
-    } else {
-      const newApt: Apartment = {
-        ...processedApt,
-        id: `apt-${Date.now()}`,
-        hostId: host.id,
-        capacity: processedApt.capacity || 2,
-        beds: processedApt.beds || 1,
-        bathrooms: processedApt.bathrooms || 1,
-        pricePerNight: processedApt.pricePerNight || 100,
-        title: processedApt.title || 'Untitled sanctuary',
-        description: processedApt.description || '',
-        city: processedApt.city || '',
-        isActive: true,
-      } as Apartment;
-      onUpdateApartments([...apartments, newApt]);
+    try {
+      if (apartmentData.id) {
+        const updatedApt = await fetchApi(`/api/v1/apartments/${apartmentData.id}`, {
+          method: 'PUT',
+          body: JSON.stringify(apartmentData),
+        });
+        onUpdateApartments(apartments.map(a => a.id === updatedApt.id ? updatedApt as Apartment : a));
+      } else {
+        const { id, ...newAptPayload } = apartmentData;
+        const newApt = await fetchApi('/api/v1/apartments', {
+          method: 'POST',
+          body: JSON.stringify(newAptPayload),
+        });
+        onUpdateApartments([...apartments, newApt as Apartment]);
+      }
+
+      setShowAptModal(false);
+      setEditingApt(null);
+    } catch (error) {
+      console.error("Failed to save apartment:", error);
     }
-    setShowAptModal(false);
-    setEditingApt(null);
   };
 
   if (!host) {
-    return <div>Loading...</div>; // Or some other placeholder
+    return <div>Loading...</div>;
   }
 
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-6 animate-in fade-in duration-700 font-dm">
-      <DashboardHeader hostSlug={host.slug} onAddUnit={() => { setEditingApt({}); setShowAptModal(true); }} />
+      <DashboardHeader 
+        hostSlug={host.slug} 
+        onAddUnit={() => { setEditingApt({}); setShowAptModal(true); }} 
+        onImportFromAirbnb={() => setShowAirbnbImportModal(true)}
+      />
       <DashboardStats stats={stats} />
       <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
 
@@ -142,22 +153,23 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} host={host} onUpdateBooking={handleUpdateStatus} />}
       {activeTab === 'calendar' && <Calendar />}
       {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
-      {activeTab === 'statistics' && (
-        <div className="border border-gray-800 rounded-2xl p-8">
-          <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />
-        </div>
-      )}
-      {activeTab === 'general-info' && (
-        <div className="border border-zinc-800 rounded-2xl p-8">
-            <HostInfoEditor host={host} onHostUpdate={onHostUpdate} />
-        </div>
-      )}
+      {activeTab === 'statistics' && <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />}
+      {activeTab === 'general-info' && <HostInfoEditor host={host} onHostUpdate={onHostUpdate} />}
 
       {showAptModal && editingApt && (
         <ApartmentEditor 
           editingApt={editingApt} 
+          host={host}
           onSave={handleSaveApartment} 
           onClose={() => { setShowAptModal(false); setEditingApt(null); }} 
+        />
+      )}
+
+      {showAirbnbImportModal && (
+        <AirbnbImportModal
+          onClose={() => setShowAirbnbImportModal(false)}
+          onImport={onImportListingFromAirbnb}
+          loading={loadingAirbnbIcal}
         />
       )}
     </div>

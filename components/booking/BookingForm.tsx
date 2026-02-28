@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate, Currency } from '../../types.js';
+import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
 import { formatDate } from '../../utils/dates.js';
 import HeroCalendar from '../HeroCalendar.js';
 import { CORE_ICONS, COUNTRIES } from '../../constants.tsx';
 import Modal from '../Modal.js';
 import { useBookApartment } from '../../hooks/useBookApartment.js';
 import { getStripeFixedFee, getCurrency, STRIPE_COMMISSION_RATE } from '../../utils/currencies.js';
+import BookingPriceBreakdown from './BookingPriceBreakdown.js';
 
 interface BookingFormProps {
   apartment: Apartment;
@@ -39,15 +40,28 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     }
   }, [bookError]);
 
-  const { finalPrice, currency } = useMemo(() => {
+  const { finalPrice, currency, nights, serviceFee, basePrice } = useMemo(() => {
     const hostCurrency = getCurrency(host.currency?.code) || { code: 'usd', symbol: '$' };
+    const defaultReturn = {
+        finalPrice: apartment.pricePerNight || 0,
+        currency: hostCurrency,
+        nights: 0,
+        serviceFee: 0,
+        basePrice: apartment.pricePerNight || 0,
+    };
 
     if (!startDate || !endDate) {
-        return { finalPrice: apartment.pricePerNight || 0, currency: hostCurrency };
+        return defaultReturn;
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
+    const nightsCalc = Math.round((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+
+    if (nightsCalc <= 0) {
+        return defaultReturn;
+    }
+    
     let total = 0;
     let current = new Date(start);
 
@@ -59,22 +73,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     }
 
     const hostNetTotal = total;
-    let finalPrice = hostNetTotal;
+    let calculatedFinalPrice = hostNetTotal;
+    let calculatedServiceFee = 0;
 
     if (host.stripeAccountId && host.commissionRate > 0) {
         const platformCommissionRate = host.commissionRate / 100;
         const stripeCommissionRate = STRIPE_COMMISSION_RATE;
         const stripeFixedFee = getStripeFixedFee(hostCurrency.code);
 
-        finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+        const unroundedFinalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+        calculatedFinalPrice = Math.ceil(unroundedFinalPrice / 10) * 10;
+        calculatedServiceFee = calculatedFinalPrice - hostNetTotal;
     }
 
-    return { 
-        finalPrice: parseFloat(finalPrice.toFixed(2)),
+    return {
+        finalPrice: calculatedFinalPrice,
         currency: hostCurrency,
+        nights: nightsCalc,
+        serviceFee: calculatedServiceFee,
+        basePrice: hostNetTotal,
     };
   }, [startDate, endDate, apartment, host]);
-
 
   useEffect(() => {
     if (startDate && endDate) {
@@ -175,10 +194,19 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
       <div className="bg-alabaster/40 backdrop-blur-3xl p-10 rounded-[2.5rem] border border-stone-200 shadow-2xl max-w-3xl mx-auto">
         <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
           <div>
-            <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">{startDate && endDate ? 'Total price' : 'Price per night'}</span>
+            <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">{nights > 0 ? 'Total price' : 'Price per night'}</span>
             <span className="text-5xl font-black text-charcoal">{currency.symbol}{finalPrice.toLocaleString()}</span>
           </div>
         </div>
+
+        {nights > 0 && (
+          <BookingPriceBreakdown
+            pricePerNight={basePrice / nights}
+            nights={nights}
+            serviceFee={serviceFee}
+            totalPrice={finalPrice}
+          />
+        )}
 
         <form noValidate onSubmit={handleBooking} className="space-y-6">
           <div className="space-y-2">

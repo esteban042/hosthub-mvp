@@ -60,10 +60,11 @@ export async function getAllBookings(): Promise<Booking[]> {
 }
 
 const calculateBookingPrices = (hostNetTotal: number, host: Host) => {
-    let finalPrice = hostNetTotal;
+    // If no Stripe, we still need to round the total to an integer for the DB.
+    let finalPrice = Math.round(hostNetTotal);
     let platformFee = 0;
     let stripeFee = 0;
-    let hostPayout = hostNetTotal;
+    let hostPayout = finalPrice;
 
     if (host.stripeAccountId && host.commissionRate > 0) {
         if (!host.currency) {
@@ -73,18 +74,25 @@ const calculateBookingPrices = (hostNetTotal: number, host: Host) => {
         const stripeCommissionRate = STRIPE_COMMISSION_RATE;
         const stripeFixedFee = getStripeFixedFee(host.currency.code);
 
-        finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+        // Calculate the theoretical price that ensures the host gets their desired net total
+        const unroundedFinalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
         
-        platformFee = finalPrice * platformCommissionRate;
-        stripeFee = (finalPrice * stripeCommissionRate) + stripeFixedFee;
+        // Round final price up to the nearest 10 as requested
+        finalPrice = Math.ceil(unroundedFinalPrice / 10) * 10;
+        
+        // Calculate fees based on the new final price and round them to the nearest integer
+        platformFee = Math.round(finalPrice * platformCommissionRate);
+        stripeFee = Math.round((finalPrice * stripeCommissionRate) + stripeFixedFee);
+        
+        // Host payout is the remainder to ensure accounting integrity (all values are integers)
         hostPayout = finalPrice - platformFee - stripeFee;
     }
 
     return {
-        totalPrice: parseFloat(finalPrice.toFixed(2)),
-        platformFee: parseFloat(platformFee.toFixed(2)),
-        stripeFee: parseFloat(stripeFee.toFixed(2)),
-        hostPayout: parseFloat(hostPayout.toFixed(2)),
+        totalPrice: finalPrice,
+        platformFee: platformFee,
+        stripeFee: stripeFee,
+        hostPayout: hostPayout,
     };
 }
 

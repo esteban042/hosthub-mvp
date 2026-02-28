@@ -72,7 +72,7 @@ export const MOCK_HOSTS: Host[] = [
     name: 'Elena Rossi',
     bio: 'Third-generation villa manager dedicated to preserving the rustic elegance of the Italian countryside.',
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=200&h=200',
-    subscriptionType: SubscriptionType.ENTERPRISE,
+    subscriptionType: SubscriptionType.PREMIUM,
     commissionRate: 5,
     contactEmail: 'elena.rossi@tuscan.it',
     physicalAddress: 'Via Chianti 50, 53100 Siena',

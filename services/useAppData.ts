@@ -33,6 +33,7 @@ export const useAppData = () => {
   const [apartments, setApartments] = useState<Apartment[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
+  const [loadingAirbnbIcal, setLoadingAirbnbIcal] = useState(false);
 
   const loadApplicationData = useCallback(async (showLoadingScreen = true) => {
     if (showLoadingScreen) {
@@ -90,6 +91,40 @@ export const useAppData = () => {
   useEffect(() => {
     loadApplicationData();
   }, [loadApplicationData]);
+
+  const handleSyncAirbnbCalendar = useCallback(async (icalUrl: string) => {
+    if (!currentHost) {
+      setError("No host selected for import.");
+      return;
+    }
+    setLoadingAirbnbIcal(true);
+    setError(null);
+    try {
+      await sanctumApi.importAirbnbIcal({ hostId: currentHost.id, icalUrl });
+      await loadApplicationData(false); // Refresh data after update
+    } catch (err: any) {
+      setError(err.message || "Failed to import from Airbnb.");
+    } finally {
+      setLoadingAirbnbIcal(false);
+    }
+  }, [currentHost, loadApplicationData]);
+  
+  const handleImportListingFromAirbnb = useCallback(async (listingUrl: string) => {
+    if (!currentHost) {
+      setError("No host selected for import.");
+      return;
+    }
+    setLoadingAirbnbIcal(true);
+    setError(null);
+    try {
+      await sanctumApi.importAirbnbListing({ hostId: currentHost.id, listingUrl });
+      await loadApplicationData(false); // Refresh all data
+    } catch (err: any) {
+      setError(err.message || "Failed to import Airbnb listing.");
+    } finally {
+      setLoadingAirbnbIcal(false);
+    }
+  }, [currentHost, loadApplicationData]);
 
   const onToggleBlock = useCallback(async (apartmentId: string, date: Date) => {
     const dateToToggle = format(date, 'yyyy-MM-dd');
@@ -175,6 +210,8 @@ export const useAppData = () => {
     apartments,
     bookings,
     blockedDates,
+    loadingAirbnbIcal,
+    currentHostAirbnbBlockedDates: [],
     onToggleBlock,
     handleSeed: createApiHandler(sanctumApi.seedDatabase),
     handleAuth,
@@ -185,7 +222,7 @@ export const useAppData = () => {
     handleUpdateApartments: createApiHandler(sanctumApi.updateApartments, { silent: true }),
     handleUpdateHosts: createApiHandler(sanctumApi.updateHosts),
     handleBlockedDatesChange: () => loadApplicationData(false),
-    loadingAirbnbIcal: false,
-    currentHostAirbnbBlockedDates: [],
+    handleSyncAirbnbCalendar,
+    handleImportListingFromAirbnb,
   };
 };

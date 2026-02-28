@@ -131,7 +131,11 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
     }
 
     if (queryParts.length === 0) {
-        throw new Error('No fields to update.');
+        const host = await getHostById(hostId);
+        if(!host) {
+            throw new Error(`Host with id ${hostId} not found.`);
+        }
+        return host;
     }
 
     const queryString = `UPDATE hosts SET ${queryParts.join(', ')} WHERE id = $${queryIndex} RETURNING *`;

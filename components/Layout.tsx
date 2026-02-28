@@ -96,7 +96,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <LegalModal title="Privacy Policy" isOpen={activeLegal === 'privacy'} onClose={() => setActiveLegal(null)}>
         <section className="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">1. Data Collection</h4>
-          <p>We collect personal information necessary for processing your luxury stay requests, including name, email, and payment preferences. This data is curated with the highest regard for discretion and security.</p>
+          <p>We collect personal information necessary for processing your requests, including name, email, and payment preferences. This data is curated with the highest regard for discretion and security.</p>
         </section>
         <section className="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">2. Use of Information</h4>

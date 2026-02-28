@@ -7,34 +7,29 @@ interface ApartmentStatsProps {
 }
 
 const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
+  const stats = [
+    { icon: CORE_ICONS.Bed("w-8 h-8 text-sky-700"), label: 'Beds', value: apartment.guests },
+    { icon: CORE_ICONS.Bath("w-8 h-8 text-sky-700"), label: 'Baths', value: apartment.bathrooms },
+    { icon: CORE_ICONS.Guests("w-7 h-7 text-sky-700"), label: 'Guests', value: apartment.capacity },
+  ];
+
   return (
-    <div className="flex items-center space-x-12 py-8 border-y border-stone-800/40 mb-16 overflow-x-auto whitespace-nowrap scrollbar-hide">
-      <div className="flex items-center space-x-4">
-        <div className="w-12 h-12 flex items-center justify-center text-sky-700 ">
-          {CORE_ICONS.Bed("w-8 h-8")}
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Beds</span>
-          <span className="text-2xl font-bold text-sky-accent leading-none mt-1">{apartment.bedrooms}</span>
-        </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <div className="w-12 h-12 flex items-center justify-center text-sky-700">
-          {CORE_ICONS.Bath("w-8 h-8")}
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Baths</span>
-          <span className="text-2xl font-bold leading-none mt-1">{apartment.bathrooms}</span>
-        </div>
-      </div>
-      <div className="flex items-center space-x-4">
-        <div className="w-12 h-12 flex items-center justify-center text-sky-700 ">
-          {CORE_ICONS.Guests("w-7 h-7")}
-        </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-bold uppercase tracking-widest text-stone-500">Guests</span>
-          <span className="text-2xl font-bold leading-none mt-1">{apartment.capacity}</span>
-        </div>
+    <div className="py-8 my-12">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 border-y border-stone-200 py-8">
+        {stats.map((stat, index) => (
+          <div 
+            key={index} 
+            className={`flex flex-row items-center justify-center gap-x-4
+              ${index < stats.length - 1 ? 'sm:border-r sm:border-stone-200' : ''}
+              ${index > 0 ? 'mt-8 sm:mt-0' : ''}
+            `}>
+            {stat.icon}
+            <div className="flex flex-col items-start">
+              <p className="text-4xl font-bold text-charcoal -mb-1">{stat.value}</p>
+              <p className="text-sm font-bold uppercase tracking-widest text-charcoal/60">{stat.label}</p>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -57,7 +57,7 @@ const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Boo
               </div>
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal/60 text-right">Revenue</p>
-                <p className="text-2xl font-bold text-green-600 text-right">${stat.totalRevenue.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-sky-700 text-right">${stat.totalRevenue.toLocaleString()}</p>
               </div>
             </div>
           </div>

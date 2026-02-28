@@ -8,7 +8,7 @@ import GuestPopover from '../components/GuestPopover.js';
 import FeaturedStays from '../components/FeaturedStays.js';
 import PremiumLandingExtension from '../components/PremiumLandingExtension.js';
 import Modal from '../components/Modal.js';
-import Particles from "react-tsparticles";
+import Particles from "@tsparticles/react";
 import { loadFull } from "tsparticles";
 import type { Engine } from "tsparticles-engine";
 
@@ -121,7 +121,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
        <section
         className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 bg-cover bg-center"
         style={{
-          backgroundImage: `linear-gradient(rgba(242, 240, 230, 0.1), rgba(242, 240, 230, 0.9)), url(${host.premiumConfig?.heroImage || 'https://images.unsplash.com/photo-1499678329028-101435549a4e?q=80&w=2940&auto=format&fit=crop'})`,
+          backgroundImage: `linear-gradient(rgba(242, 240, 230, 0.1), rgba(242, 240, 230, 0.8)), url(${host.premiumConfig?.heroImage || 'https://images.unsplash.com/photo-1652407782785-7a1006fc114d?q=80&w=2670&auto=format&fit=crop'})`,
         }}
       >
         <Particles
@@ -131,10 +131,10 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             className="absolute top-0 left-0 w-full h-full z-0"
         />
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-accent mb-6">Welcome to Sanctum</p>
-          <h1 className="text-6xl md:text-9xl font-serif font-bold text-charcoal leading-tight tracking-tight">
+          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-accent mb-6">Welcome to {host.businessName} </p>
+          <h1 className="text-6xl md:text-9xl font-serif font-bold text-stone-800 leading-tight tracking-tight">
             Your Perfect Escape <br/>
-            <span className="text-terracotta italic">Awaits</span>
+            <span className="text-sky-700 italic">Awaits</span>
           </h1>
           <p className="mt-8 text-xl md:text-2xl text-charcoal/80 max-w-3xl mx-auto font-medium leading-relaxed">
             Discover handpicked apartments and villas for your next unforgettable getaway. Where comfort meets hospitality.
@@ -221,7 +221,6 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
               {host.socialMediaLinks?.instagram && <a href={host.socialMediaLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal">{CORE_ICONS.Instagram("w-6 h-6")}</a>}
               {host.socialMediaLinks?.facebook && <a href={host.socialMediaLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal">{CORE_ICONS.Facebook("w-6 h-6")}</a>}
           </div>
-          <p className="text-2xl font-bold">{host.name}</p>
           <p className="text-sm text-charcoal/60">&copy; {new Date().getFullYear()}. All rights reserved.</p>
           <div className="mt-4">
               <button onClick={() => setIsTermsModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">Terms</button>
