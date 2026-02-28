@@ -102,6 +102,7 @@ export interface Apartment {
   minStayNights: number;
   maxStayNights: number;
   pageViews?: number;
+  currency: Currency;
 }
 
 export interface Booking {
@@ -117,6 +118,9 @@ export interface Booking {
   startDate: string;
   endDate: string;
   totalPrice: number;
+  platformFee: number;
+  stripeFee: number;
+  hostPayout: number;
   status: BookingStatus;
   notes: string | null;
   depositAmount?: number;

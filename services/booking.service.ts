@@ -1,16 +1,14 @@
 import { query, execute } from '../dputils.js';
 import { sendEmail } from './email.js';
-import { Booking, Apartment, Host, User, UserRole, BookingStatus } from '../types.js';
+import { Booking, Apartment, Host, User, UserRole, BookingStatus, Currency } from '../types.js';
 import Stripe from 'stripe';
 import { config } from '../config.js';
+import { getStripeFixedFee, STRIPE_COMMISSION_RATE } from '../utils/currencies.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2026-02-25.clover' as any,
 });
 
-/**
- * Fetches an apartment by its ID. Can lock the row for updates.
- */
 async function getApartmentById(apartmentId: string, forUpdate: boolean = false): Promise<Apartment> {
     const sql = `SELECT * FROM apartments WHERE id = $1 ${forUpdate ? 'FOR UPDATE' : ''}`;
     const result = await query<Apartment>(sql, [apartmentId]);
@@ -20,9 +18,6 @@ async function getApartmentById(apartmentId: string, forUpdate: boolean = false)
     return result.rows[0];
 }
 
-/**
- * Fetches a host by its ID.
- */
 async function getHostById(hostId: string): Promise<Host> {
     const result = await query<Host>('SELECT * FROM hosts WHERE id = $1', [hostId]);
     if (result.rows.length === 0) {
@@ -31,9 +26,6 @@ async function getHostById(hostId: string): Promise<Host> {
     return result.rows[0];
 }
 
-/**
- * Fetches a single booking by its ID. Can perform authorization check.
- */
 export async function getBookingById(bookingId: string, user?: User): Promise<Booking | null> {
     const bookings = await query<Booking>('SELECT * FROM bookings WHERE id = $1', [bookingId]);
     if (bookings.rows.length === 0) {
@@ -43,7 +35,7 @@ export async function getBookingById(bookingId: string, user?: User): Promise<Bo
 
     if (user) {
         if (user.role === UserRole.ADMIN) {
-            return booking; // Admins can see any booking
+            return booking;
         }
 
         const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
@@ -62,17 +54,40 @@ export async function getBookingById(bookingId: string, user?: User): Promise<Bo
 }
 
 
-/**
- * Fetches all bookings from the database. For admin use.
- */
 export async function getAllBookings(): Promise<Booking[]> {
     const result = await query<Booking>('SELECT * FROM bookings ORDER BY created_at DESC');
     return result.rows;
 }
 
-/**
- * Creates a new booking in a transaction.
- */
+const calculateBookingPrices = (hostNetTotal: number, host: Host) => {
+    let finalPrice = hostNetTotal;
+    let platformFee = 0;
+    let stripeFee = 0;
+    let hostPayout = hostNetTotal;
+
+    if (host.stripeAccountId && host.commissionRate > 0) {
+        if (!host.currency) {
+            throw new Error(`Host with ID ${host.id} has a Stripe account but no currency configured.`);
+        }
+        const platformCommissionRate = host.commissionRate / 100;
+        const stripeCommissionRate = STRIPE_COMMISSION_RATE;
+        const stripeFixedFee = getStripeFixedFee(host.currency.code);
+
+        finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
+        
+        platformFee = finalPrice * platformCommissionRate;
+        stripeFee = (finalPrice * stripeCommissionRate) + stripeFixedFee;
+        hostPayout = finalPrice - platformFee - stripeFee;
+    }
+
+    return {
+        totalPrice: parseFloat(finalPrice.toFixed(2)),
+        platformFee: parseFloat(platformFee.toFixed(2)),
+        stripeFee: parseFloat(stripeFee.toFixed(2)),
+        hostPayout: parseFloat(hostPayout.toFixed(2)),
+    };
+}
+
 export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBookingId' | 'totalPrice' | 'status' | 'createdAt' | 'updatedAt'>): Promise<Booking> {
     const {
         apartmentId, startDate, endDate, guestEmail, guestName, guestCountry, guestPhone, numGuests, guestMessage
@@ -90,21 +105,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         }
 
         const hostNetTotal = nights * apartment.pricePerNight;
-        let finalPrice = hostNetTotal;
-        let hostPayoutAmount = 0;
-
-        if (host.stripeAccountId && host.commissionRate > 0) {
-            const platformCommissionRate = host.commissionRate;
-            const stripeCommissionRate = 0.029;
-            const stripeFixedFee = 0.30;
-
-            finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
-            hostPayoutAmount = hostNetTotal;
-        } else {
-            finalPrice = hostNetTotal;
-        }
-
-        const totalPrice = Math.round(finalPrice * 100) / 100;
+        const { totalPrice, platformFee, stripeFee, hostPayout } = calculateBookingPrices(hostNetTotal, host);
 
         const bookingCountRes = await query<{ count: string }>('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
         const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
@@ -124,15 +125,18 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         const status = host.stripeAccountId ? BookingStatus.PENDING_PAYMENT : BookingStatus.CONFIRMED;
 
         const bookingRes = await query<Booking>(
-            `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id)
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *`,
-            [apartmentId, startDate, endDate, totalPrice, status, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId]
+            `INSERT INTO bookings (apartment_id, start_date, end_date, total_price, status, guest_name, guest_email, guest_country, guest_phone, num_guests, guest_message, custom_booking_id, platform_fee, stripe_fee, host_payout)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) RETURNING *`,
+            [apartmentId, startDate, endDate, totalPrice, status, guestName, guestEmail, guestCountry, guestPhone, numGuests, guestMessage, customBookingId, platformFee, stripeFee, hostPayout]
         );
         let newBooking = bookingRes.rows[0];
 
         if (host.stripeAccountId) {
+            if (!host.currency) {
+                throw new Error(`Host with ID ${host.id} has a Stripe account but no currency configured.`);
+            }
             const finalPriceInCents = Math.round(totalPrice * 100);
-            const hostPayoutInCents = Math.round(hostPayoutAmount * 100);
+            const hostPayoutInCents = Math.round(hostPayout * 100);
 
             const paymentIntentData = hostPayoutInCents > 0 ? {
                 payment_intent_data: {
@@ -147,7 +151,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
                 payment_method_types: ['card'],
                 line_items: [{
                     price_data: {
-                        currency: 'usd',
+                        currency: host.currency.code.toLowerCase(),
                         product_data: {
                             name: `Stay at ${apartment.title}`,
                             description: `Booking for ${nights} nights from ${new Date(startDate).toLocaleDateString()} to ${new Date(endDate).toLocaleDateString()}`,
@@ -199,9 +203,6 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
     }
 }
 
-/**
- * Fetches detailed information for a single booking.
- */
 export async function getBookingDetailsById(bookingId: string): Promise<any | null> {
     const result = await query<any>(
         `SELECT
@@ -231,9 +232,6 @@ export async function getBookingDetailsById(bookingId: string): Promise<any | nu
     return result.rows.length > 0 ? result.rows[0] : null;
 }
 
-/**
- * Updates a batch of bookings in a transaction.
- */
 export async function updateBookings(updatedBookings: Booking[], user: User): Promise<Booking[]> {
     await execute('BEGIN');
     try {
@@ -266,12 +264,20 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
                 }
             }
 
+            const apartment = await getApartmentById(originalBooking.apartmentId);
+            const host = await getHostById(apartment.hostId);
+            const nights = Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24));
+            const hostNetTotal = nights * apartment.pricePerNight;
+            
+            const { platformFee, stripeFee, hostPayout } = calculateBookingPrices(hostNetTotal, host);
+
             const updateRes = await query<Booking>(
                 `UPDATE bookings SET
                   guest_name = $1, guest_email = $2, guest_country = $3, num_guests = $4,
-                  start_date = $5, end_date = $6, total_price = $7, status = $8
+                  start_date = $5, end_date = $6, total_price = $7, status = $8, 
+					platform_fee = $10, stripe_fee = $11, host_payout = $12
                 WHERE id = $9 RETURNING *`,
-                [guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id]
+                [guestName, guestEmail, guestCountry, numGuests, startDate, endDate, totalPrice, status, id, platformFee, stripeFee, hostPayout]
             );
             const updatedBooking = updateRes.rows[0];
             resultBookings.push(updatedBooking);

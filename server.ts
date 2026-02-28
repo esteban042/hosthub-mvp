@@ -13,6 +13,9 @@ import apiRoutes from './routes/api.js';
 import stripeWebhookRouter from './routes/api/stripe-webhooks.js';
 import { sendEmail } from './services/email.js';
 
+// DIAGNOSTIC LOG: Check if the key is present in the environment.
+console.log(`DIAGNOSTIC: SUPABASE_SERVICE_KEY is present: ${!!process.env.SUPABASE_SERVICE_KEY}`);
+
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist/public');
 

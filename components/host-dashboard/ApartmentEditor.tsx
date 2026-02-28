@@ -3,6 +3,7 @@ import { Apartment, PriceRule } from '../../types';
 import { Tag, Trash2, Info, X, Plus } from 'lucide-react';
 import DatePicker from '../DatePicker';
 import AmenitySelector from './AmenitySelector';
+import ImageUpload from './ImageUpload';
 
 interface ApartmentEditorProps {
   editingApt: Partial<Apartment> | null;
@@ -41,16 +42,9 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
     });
   };
 
-  const addPhotoUrl = () => {
+  const addPhotoUrl = (url: string) => {
     const currentPhotos = apt.photos || [];
-    setApt({ ...apt, photos: [...currentPhotos, ''] });
-  };
-
-  const updatePhotoUrl = (index: number, url: string) => {
-    const currentPhotos = apt.photos || [];
-    const newPhotos = [...currentPhotos];
-    newPhotos[index] = url;
-    setApt({ ...apt, photos: newPhotos });
+    setApt({ ...apt, photos: [...currentPhotos, url] });
   };
 
   const removePhotoUrl = (index: number) => {
@@ -172,25 +166,20 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                </div>
              </div>
              <div className="pt-10 border-t border-stone-200">
-                <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center space-x-3">
-                        <Tag className="w-5 h-5 text-emerald-400" />
-                        <h4 className="text-xl font-bold text-charcoal tracking-tight">Unit Photos</h4>
-                    </div>
-                    <button type="button" onClick={addPhotoUrl} className="text-[10px] font-black uppercase tracking-widest bg-cyan-600/10 text-cyan-700 border border-cyan-700/40 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center space-x-2">
-                      <Plus className="w-4 h-4" strokeWidth={3} />
-                      <span>Add Photo URL</span>
-                    </button>
+                <div className="flex items-center space-x-3 mb-8">
+                    <Tag className="w-5 h-5 text-emerald-400" />
+                    <h4 className="text-xl font-bold text-charcoal tracking-tight">Unit Photos</h4>
                 </div>
-                <div className="space-y-4">
+                <ImageUpload onUploadComplete={addPhotoUrl} />
+                <div className="space-y-4 mt-4">
                     {apt.photos?.map((photo, index) => (
                         <div key={index} className="flex items-center space-x-4 bg-white/50 p-4 rounded-2xl border border-stone-300 animate-in slide-in-from-bottom-2">
+                            <img src={photo} alt="Apartment" className="w-16 h-16 rounded-lg object-cover" />
                             <input
                                 type="text"
+                                readOnly
                                 value={photo}
-                                onChange={e => updatePhotoUrl(index, e.target.value)}
-                                placeholder="https://example.com/image.png"
-                                className="flex-grow bg-white border border-stone-300 rounded-xl p-3 text-xs text-charcoal outline-none focus:ring-1 focus:ring-sky-accent"
+                                className="flex-grow bg-white border-stone-300 rounded-xl p-3 text-xs text-charcoal outline-none"
                             />
                             <button
                                 type="button"
@@ -204,7 +193,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, onSave, o
                     {(!apt.photos || apt.photos.length === 0) && (
                         <div className="py-12 border border-dashed border-stone-300 rounded-[2rem] flex flex-col items-center justify-center text-stone-400 italic text-sm">
                             <Info className="w-6 h-6 mb-2 opacity-20" />
-                            <span>No photos added for this unit. Add at least one photo URL.</span>
+                            <span>No photos added for this unit. Add at least one photo.</span>
                         </div>
                     )}
                 </div>

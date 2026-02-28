@@ -19,6 +19,7 @@ import viewsRouter from './views.js';
 import adminRouter from './admin.js';
 import stripeRouter from './stripe.js';
 import importerRouter from './importer.js';
+import filesRouter from '../files.js';
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.use('/views', viewsRouter);
 router.use('/admin-dashboard', adminRouter);
 router.use('/stripe', stripeRouter);
 router.use('/import', importerRouter);
+router.use('/files', filesRouter);
 
 // --- Routes originally from misc.ts ---
 

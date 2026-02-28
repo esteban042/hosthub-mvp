@@ -2,7 +2,7 @@ import { Router, Request, Response, NextFunction, raw } from 'express';
 import Stripe from 'stripe';
 import { getBookingDetailsById, updateBookings, getBookingById } from '../../services/booking.service.js';
 import { sendEmail } from '../../services/email.js';
-import { BookingStatus, UserRole } from '../../types.js';
+import { Booking, BookingStatus, UserRole } from '../../types.js';
 
 const router = Router();
 
@@ -31,7 +31,31 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
         if (bookingDetails) {
           const originalBooking = await getBookingById(bookingId);
           if (originalBooking) {
-            await updateBookings([{ ...originalBooking, id: bookingId, status: BookingStatus.PAID }], {
+
+            const paymentIntent = await stripe.paymentIntents.retrieve(session.payment_intent as string, { expand: ['latest_charge'] });
+            const charge = paymentIntent.latest_charge as Stripe.Charge;
+            
+            let stripeFee = 0;
+            // Correctly retrieve the fee from the balance transaction
+            if (charge && charge.balance_transaction) {
+              const balanceTransaction = typeof charge.balance_transaction === 'string' ? await stripe.balanceTransactions.retrieve(charge.balance_transaction) : charge.balance_transaction;
+              if(balanceTransaction) {
+                stripeFee = balanceTransaction.fee / 100;
+              }
+            }
+            
+            const platformFee = originalBooking.totalPrice * (originalBooking.platformFee / originalBooking.totalPrice);
+            const hostPayout = originalBooking.totalPrice - platformFee - stripeFee;
+
+            const updatedBooking: Booking = {
+              ...originalBooking,
+              id: bookingId,
+              status: BookingStatus.PAID,
+              stripeFee,
+              platformFee,
+              hostPayout
+            }
+            await updateBookings([updatedBooking], {
               id: bookingDetails.hostUserId,
               role: UserRole.HOST,
               email: bookingDetails.host_email,
@@ -44,7 +68,7 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
               'Your Booking Confirmation',
               'BookingConfirmation',
               {
-                booking: bookingDetails,
+                booking: updatedBooking,
                 apartment: { title: bookingDetails.apartment_title },
                 host: { name: bookingDetails.host_name },
               }

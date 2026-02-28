@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
+import { Apartment, Host, Booking, BlockedDate, Currency } from '../../types.js';
 import { formatDate } from '../../utils/dates.js';
 import HeroCalendar from '../HeroCalendar.js';
 import { CORE_ICONS, COUNTRIES } from '../../constants.tsx';
 import Modal from '../Modal.js';
 import { useBookApartment } from '../../hooks/useBookApartment.js';
+import { getStripeFixedFee, getCurrency, STRIPE_COMMISSION_RATE } from '../../utils/currencies.js';
 
 interface BookingFormProps {
   apartment: Apartment;
@@ -38,10 +39,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     }
   }, [bookError]);
 
-  const { finalPrice } = useMemo(() => {
+  const { finalPrice, currency } = useMemo(() => {
+    const hostCurrency = getCurrency(host.currency?.code) || { code: 'usd', symbol: '$' };
+
     if (!startDate || !endDate) {
-        // If no dates, show the base price per night
-        return { finalPrice: apartment.pricePerNight || 0 };
+        return { finalPrice: apartment.pricePerNight || 0, currency: hostCurrency };
     }
 
     const start = new Date(startDate);
@@ -59,18 +61,17 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     const hostNetTotal = total;
     let finalPrice = hostNetTotal;
 
-    // Only apply the markup if the host has a Stripe account connected
     if (host.stripeAccountId && host.commissionRate > 0) {
-        const platformCommissionRate = host.commissionRate;
-        const stripeCommissionRate = 0.029; // Standard Stripe fee
-        const stripeFixedFee = 0.30; // Standard Stripe fee
+        const platformCommissionRate = host.commissionRate / 100;
+        const stripeCommissionRate = STRIPE_COMMISSION_RATE;
+        const stripeFixedFee = getStripeFixedFee(hostCurrency.code);
 
-        // Reverse calculate the final price
         finalPrice = (hostNetTotal + stripeFixedFee) / (1 - platformCommissionRate - stripeCommissionRate);
     }
 
     return { 
-        finalPrice: Math.round(finalPrice * 100) / 100,
+        finalPrice: parseFloat(finalPrice.toFixed(2)),
+        currency: hostCurrency,
     };
   }, [startDate, endDate, apartment, host]);
 
@@ -132,7 +133,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     e.preventDefault();
     if (!validateForm() || isLoading) return;
 
-    // The backend does not need totalPrice, it calculates it securely
     const bookingDetails = {
       apartmentId: apartment.id,
       guestName: name,
@@ -150,9 +150,8 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
     if (newBooking) {
         onNewBooking(newBooking);
         if (newBooking.stripeSessionUrl) {
-            window.location.href = newBooking.stripeSessionUrl; // Redirect to Stripe Checkout
+            window.location.href = newBooking.stripeSessionUrl;
         } else {
-          // Handle non-payment confirmation
           setModalContent({ 
             title: 'Booking Request Sent', 
             message: 'Your booking request has been sent to the host. They will contact you shortly to confirm the details.' 
@@ -177,12 +176,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
         <div className="flex items-baseline justify-between mb-10 pb-10 border-b border-stone-200/40">
           <div>
             <span className="text-[11px] font-medium text-charcoal uppercase tracking-[0.2em] block mb-2">{startDate && endDate ? 'Total price' : 'Price per night'}</span>
-            <span className="text-5xl font-black text-charcoal">${finalPrice.toLocaleString()}</span>
+            <span className="text-5xl font-black text-charcoal">{currency.symbol}{finalPrice.toLocaleString()}</span>
           </div>
         </div>
 
         <form noValidate onSubmit={handleBooking} className="space-y-6">
-           {/* Form fields remain the same */}
           <div className="space-y-2">
             <label className="block text-sm text-charcoal font-medium ml-1">Guest name</label>
             <input

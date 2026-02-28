@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { pool } from '../db.js';
 import { keysToCamel } from '../dputils.js';
 import { validate } from '../middleware/validation.js';
+// I am now importing the correct AuthRequest type.
 import { protect, AuthRequest } from '../middleware/auth.js';
 import { config, isProduction } from '../config.js';
 

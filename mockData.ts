@@ -37,6 +37,7 @@ export const MOCK_HOSTS: Host[] = [
     terms: 'Terms and conditions content',
     conditions: 'Conditions content',
     faq: 'FAQ content',
+    currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
   },
   {
     id: 'host-2',
@@ -62,6 +63,7 @@ export const MOCK_HOSTS: Host[] = [
     conditions: 'Conditions content',
     faq: 'FAQ content',
     premiumConfig: null,
+    currency: { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
   },
   {
     id: 'host-3',
@@ -87,6 +89,7 @@ export const MOCK_HOSTS: Host[] = [
     conditions: 'Conditions content',
     faq: 'FAQ content',
     premiumConfig: null,
+    currency: { name: 'Euro', code: 'EUR', symbol: '€' },
   },
   {
     id: 'host-4',
@@ -112,6 +115,7 @@ export const MOCK_HOSTS: Host[] = [
     conditions: 'Conditions content',
     faq: 'FAQ content',
     premiumConfig: null,
+    currency: { name: 'US Dollar', code: 'USD', symbol: '$' },
   }
 ];
 
@@ -134,6 +138,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us',
     minStayNights: 2,
     maxStayNights: 30,
+    currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
   },
   {
     id: 'apt-2',
@@ -153,6 +158,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d10839.839077209353!2d7.994236814675713!3d46.613304273874316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x478f7e2c9a9d7013%3A0xc0e0f3e6a0d6a0a0!2sGrindelwald%2C%20Switzerland!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us',
     minStayNights: 1,
     maxStayNights: 14,
+    currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
   },
   {
     id: 'apt-3',
@@ -172,6 +178,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d12965.433221971714!2d139.69234839845348!3d35.66070624009714!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x35ef4b64a13d702d%3A0x6b1c2b5d4e1a1b1a!2sShibuya%2C%20Tokyo%2C%20Japan!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us',
     minStayNights: 3,
     maxStayNights: 90,
+    currency: { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
   },
   {
     id: 'apt-4',
@@ -191,6 +198,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2891.8906967011033!2d11.33230831557999!3d43.31885507913417!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x132bc2072129a7d3%3A0x959828e8a6096d24!2sSiena%2C%20Province%20of%20Siena%2C%20Italy!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us',
     minStayNights: 7,
     maxStayNights: 60,
+    currency: { name: 'Euro', code: 'EUR', symbol: '€' },
   },
   {
     id: 'apt-5',
@@ -210,6 +218,7 @@ export const MOCK_APARTMENTS: Apartment[] = [
     mapEmbedUrl: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d114979.62688028717!2d-80.28695846101967!3d25.782361661339656!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88d9b0a20ec8c111%3A0xff96f271ddad4f65!2sMiami%2C%20FL%2C%20USA!5e0!3m2!1sen!2sus!4v1700000000000!5m2!1sen!2us',
     minStayNights: 5,
     maxStayNights: 45,
+    currency: { name: 'US Dollar', code: 'USD', symbol: '$' },
   }
 ];
 
@@ -230,7 +239,10 @@ export const MOCK_BOOKINGS: Booking[] = [
     endDate: `${currentYear}-06-15`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 1250,
-    notes: 'None'
+    notes: 'None',
+    platformFee: 0,
+    stripeFee: 0,
+    hostPayout: 1250
   },
   {
     id: 'book-2',
@@ -246,7 +258,10 @@ export const MOCK_BOOKINGS: Booking[] = [
     endDate: `${currentYear}-07-05`,
     status: BookingStatus.REQUESTED,
     totalPrice: 840,
-    notes: 'None'
+    notes: 'None',
+    platformFee: 0,
+    stripeFee: 0,
+    hostPayout: 840
   },
   {
     id: 'book-3',
@@ -262,7 +277,10 @@ export const MOCK_BOOKINGS: Booking[] = [
     endDate: `${currentYear}-08-19`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 3150,
-    notes: 'None'
+    notes: 'None',
+    platformFee: 0,
+    stripeFee: 0,
+    hostPayout: 3150
   },
   {
     id: 'book-4',
@@ -278,7 +296,10 @@ export const MOCK_BOOKINGS: Booking[] = [
     endDate: `${currentYear}-01-12`,
     status: BookingStatus.PAID,
     totalPrice: 500,
-    notes: 'None'
+    notes: 'None',
+    platformFee: 0,
+    stripeFee: 0,
+    hostPayout: 500
   },
   {
     id: 'book-5',
@@ -294,6 +315,9 @@ export const MOCK_BOOKINGS: Booking[] = [
     endDate: `${currentYear}-09-07`,
     status: BookingStatus.CONFIRMED,
     totalPrice: 3600,
-    notes: 'None'
+    notes: 'None',
+    platformFee: 0,
+    stripeFee: 0,
+    hostPayout: 3600
   }
 ];
