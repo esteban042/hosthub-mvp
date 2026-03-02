@@ -1,9 +1,11 @@
 
 import React, { useState } from 'react';
-import { Apartment, Booking, BlockedDate, BookingStatus, PriceRule } from '../types.js';
+import { Apartment, Booking, BlockedDate, BookingStatus, PriceRule, Currency } from '../types.js';
+import { formatPrice } from '../utils/formatting.js';
 
 interface HeroCalendarProps {
     apartment?: Apartment;
+    currency?: Currency;
     startDate: string;
     endDate: string;
     onSelect: (startDate: string, endDate: string) => void;
@@ -20,7 +22,7 @@ const toLocalISOString = (date: Date) => {
     return `${year}-${month}-${day}`;
 };
 
-const HeroCalendar: React.FC<HeroCalendarProps> = ({ apartment, startDate, endDate, onSelect, allBookings, allBlockedDates, airbnbBlockedDates }) => {
+const HeroCalendar: React.FC<HeroCalendarProps> = ({ apartment, currency, startDate, endDate, onSelect, allBookings, allBlockedDates, airbnbBlockedDates }) => {
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [hoveredDate, setHoveredDate] = useState<string | null>(null);
     
@@ -118,7 +120,8 @@ const HeroCalendar: React.FC<HeroCalendarProps> = ({ apartment, startDate, endDa
                     <span className={`${isDisabled ? 'line-through' : ''}`}>{i}</span>
                     {apartment && !isDisabled && (
                         <span className={`text-[10px] font-bold mt-[-2px] ${isSelected ? 'bg-cyan-700/70 text-white/70' : 'text-stone-500'}`}>
-                            ${getPriceForDate(dateStr)}
+                            {/* {currency?.symbol || '$'} */}
+                            {formatPrice(getPriceForDate(dateStr))}
                         </span>
                     )}
                 </div>

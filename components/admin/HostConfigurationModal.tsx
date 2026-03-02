@@ -171,9 +171,9 @@ const HostConfigurationModal: React.FC<HostConfigurationModalProps> = ({
                     <div>
                       <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">SaaS Tier</label>
                       <select value={editingHost.subscriptionType} onChange={e => setEditingHost({...editingHost, subscriptionType: e.target.value as SubscriptionType})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none appearance-none">
-                        <option value={SubscriptionType.BASIC}>Basic Node</option>
-                        <option value={SubscriptionType.PRO}>Pro Cluster</option>
-                        <option value={SubscriptionType.PREMIUM}>Premium Grid</option>
+                        <option value={SubscriptionType.BASIC}>Basic</option>
+                        <option value={SubscriptionType.PRO}>Pro</option>
+                        <option value={SubscriptionType.PREMIUM}>Premium</option>
                       </select>
                     </div>
                     <div>

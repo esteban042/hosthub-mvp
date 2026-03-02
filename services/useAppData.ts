@@ -109,7 +109,7 @@ export const useAppData = () => {
     }
   }, [currentHost, loadApplicationData]);
   
-  const handleImportListingFromAirbnb = useCallback(async (listingUrl: string) => {
+  const handleImportListingFromAirbnb = useCallback(async (url: string) => {
     if (!currentHost) {
       setError("No host selected for import.");
       return;
@@ -117,7 +117,20 @@ export const useAppData = () => {
     setLoadingAirbnbIcal(true);
     setError(null);
     try {
-      await sanctumApi.importAirbnbListing({ hostId: currentHost.id, listingUrl });
+        const response: any = await sanctumApi.post('/api/v1/misc/scrape-airbnb', { url });
+
+        // Safely extract data to spread
+        const scrapedData = (response && typeof response.data === 'object' && response.data !== null)
+            ? response.data
+            : {};
+
+        const newApartmentPayload = {
+            ...scrapedData,
+            hostId: currentHost.id,
+        };
+      
+      await sanctumApi.post('/api/v1/apartments', newApartmentPayload);
+
       await loadApplicationData(false); // Refresh all data
     } catch (err: any) {
       setError(err.message || "Failed to import Airbnb listing.");

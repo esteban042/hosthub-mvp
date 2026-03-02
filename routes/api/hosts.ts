@@ -82,7 +82,7 @@ router.put('/:hostId',
     const updatedFields = req.body;
 
     try {
-      const host = await getHostById(hostId);
+      const host = await getHostById(hostId as string);
       if (!host) {
         return res.status(404).json({ error: `Host with id ${hostId} not found.` });
       }
@@ -97,7 +97,7 @@ router.put('/:hostId',
         return res.status(403).json({ error: 'You are not authorized to update the currency.' });
       }
 
-      const updatedHost = await updateHost(hostId, updatedFields);
+      const updatedHost = await updateHost(hostId as string, updatedFields);
       res.status(200).json(updatedHost);
     } catch (err) {
       next(err);

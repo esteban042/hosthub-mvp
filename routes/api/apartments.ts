@@ -81,7 +81,7 @@ router.get('/:id',
     async (req: AuthRequest, res: Response, next: NextFunction) => {
         try {
             const { id } = req.params;
-            const apartment = await getApartmentById(id);
+            const apartment = await getApartmentById(id as string);
             if (!apartment) {
                 return res.status(404).json({ error: 'Apartment not found' });
             }

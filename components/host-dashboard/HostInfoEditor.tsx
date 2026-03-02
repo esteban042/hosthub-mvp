@@ -138,6 +138,10 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
             <textarea value={editingHost.paymentInstructions || ''} onChange={e => setEditingHost({...editingHost, paymentInstructions: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
         </div>
         <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">House Rules</label>
+            <textarea value={editingHost.houseRules || ''} onChange={e => setEditingHost({...editingHost, houseRules: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
+        </div>
+        <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Terms</label>
             <textarea value={editingHost.terms || ''} onChange={e => setEditingHost({...editingHost, terms: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
         </div>

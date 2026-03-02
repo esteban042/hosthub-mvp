@@ -1,3 +1,4 @@
+
 import { Router, Request as ExpressRequest, Response, NextFunction } from 'express';
 import { body, query as queryValidator } from 'express-validator';
 import { pool } from '../../db.js';
@@ -19,6 +20,7 @@ import viewsRouter from './views.js';
 import adminRouter from './admin.js';
 import stripeRouter from './stripe.js';
 import importerRouter from './importer.js';
+import miscRouter from './misc.js';
 import filesRouter from '../files.js';
 
 const router = Router();
@@ -35,6 +37,8 @@ router.use('/admin-dashboard', adminRouter);
 router.use('/stripe', stripeRouter);
 router.use('/importer', importerRouter);
 router.use('/files', filesRouter);
+router.use('/misc', miscRouter);
+
 
 // --- Routes originally from misc.ts ---
 

@@ -10,7 +10,6 @@ import ApartmentsList from '../components/host-dashboard/ApartmentsList.js';
 import Bookings from '../components/host-dashboard/Bookings.js';
 import CurrentBookings from '../components/host-dashboard/CurrentBookings.js';
 import Calendar from '../components/host-dashboard/Calendar.js';
-import AirbnbImportModal from '../components/host-dashboard/AirbnbImportModal.js';
 import HostInfoEditor from '../components/host-dashboard/HostInfoEditor.js';
 
 interface HostDashboardProps {
@@ -32,7 +31,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
   const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics' | 'general-info'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
   const [editingApt, setEditingApt] = useState<Partial<Apartment> | null>(null);
-  const [showAirbnbImportModal, setShowAirbnbImportModal] = useState<boolean>(false);
 
   const myApartments = useMemo(() => host ? apartments.filter(a => a.hostId === host.id) : [], [apartments, host]);
   const myBookings = useMemo(() => {
@@ -144,7 +142,6 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       <DashboardHeader 
         hostSlug={host.slug} 
         onAddUnit={() => { setEditingApt({}); setShowAptModal(true); }} 
-        onImportFromAirbnb={() => setShowAirbnbImportModal(true)}
       />
       <DashboardStats stats={stats} />
       <DashboardNav activeTab={activeTab} onTabChange={setActiveTab} />
@@ -165,13 +162,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
         />
       )}
 
-      {showAirbnbImportModal && (
-        <AirbnbImportModal
-          onClose={() => setShowAirbnbImportModal(false)}
-          onImport={onImportListingFromAirbnb}
-          loading={loadingAirbnbIcal}
-        />
-      )}
+
     </div>
   );
 };

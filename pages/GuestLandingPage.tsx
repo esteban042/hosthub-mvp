@@ -38,7 +38,11 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   }, []);
 
   const hostApartments = useMemo(() => 
-    apartments.filter(apt => apt.hostId === host.id), [apartments, host.id]);
+    apartments
+      .filter(apt => apt.hostId === host.id)
+      .map(apt => ({ ...apt, currency: host.currency })), 
+    [apartments, host.id, host.currency]
+  );
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -136,12 +140,12 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             Your Perfect Escape <br/>
             <span className="text-sky-700 italic">Awaits</span>
           </h1>
-          <p className="mt-8 text-xl md:text-2xl text-charcoal/80 max-w-3xl mx-auto font-medium leading-relaxed">
-            Discover handpicked apartments and villas for your next unforgettable getaway. Where comfort meets hospitality.
+          <p className="mt-8 text-xl md:text-2xl text-stone-300 max-w-3xl mx-auto font-medium leading-relaxed">
+          Discover a place to truly unwind. A villa for your next unforgettable holiday, where comfort meets hospitality.
           </p>
 
           <div className="mt-16 w-full max-w-5xl mx-auto">
-             <div className="bg-white/50 backdrop-blur-2xl border border-charcoal/10 rounded-[2.5rem] p-3 flex flex-col md:flex-row items-center gap-1 shadow-2xl relative z-[60]">
+             <div className="bg-white/30 backdrop-blur-2xl border border-charcoal/10 rounded-[2.5rem] p-3 flex flex-col md:flex-row items-center gap-1 shadow-2xl relative z-[60]">
                 
                 <div 
                   onClick={() => { setIsDatesOpen(!isDatesOpen); setIsGuestsOpen(false); }}

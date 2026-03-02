@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import { body, query } from 'express-validator';
 import { pool } from '../../db.js';
@@ -69,6 +70,24 @@ router.post('/send-message',
   }
 );
 
+router.post(
+  '/scrape-airbnb',
+  protect,
+  body('url').isURL().withMessage('A valid URL is required'),
+  validate,
+  async (req, res, next) => {
+    const { url } = req.body;
+
+    try {
+      const { scrapeAirbnbListing } = await import('../../services/airbnbScraper.js');
+      const data = await scrapeAirbnbListing(url);
+      res.status(200).json(data);
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
 router.get('/public-hosts', 
   async (req, res, next) => {
     try {
@@ -79,6 +98,18 @@ router.get('/public-hosts',
     } catch (err) {
       next(err);
     }
+});
+
+// Endpoint to get company information
+router.get('/company-info', protect, (req, res) => {
+  const companyInfo = {
+    name: process.env.COMPANY_NAME || "Your Company Name",
+    addressLine1: process.env.COMPANY_ADDRESS_LINE_1 || "123 Business St, Suite 101",
+    addressLine2: process.env.COMPANY_ADDRESS_LINE_2 || "Business City, 12345",
+    email: process.env.COMPANY_EMAIL || "contact@yourcompany.com",
+    website: process.env.COMPANY_WEBSITE || "www.yourcompany.com",
+  };
+  res.json(companyInfo);
 });
 
 export default router;

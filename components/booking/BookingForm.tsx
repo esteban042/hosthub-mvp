@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
 import { formatDate } from '../../utils/dates.js';
-import HeroCalendar from '../HeroCalendar.js';
+import HeroCalendar from '../HeroCalendar.tsx';
 import { CORE_ICONS, COUNTRIES } from '../../constants.tsx';
 import Modal from '../Modal.js';
 import { useBookApartment } from '../../hooks/useBookApartment.js';
@@ -239,6 +239,7 @@ const BookingForm: React.FC<BookingFormProps> = ({ apartment, host, airbnbCalend
               <div className="absolute top-full left-1/2 -translate-x-1/2 w-[calc(100%+2rem)] z-[100] mt-4 bg-white p-4 rounded-3xl shadow-2xl border border-stone-200">
                 <HeroCalendar
                   apartment={apartment}
+                  currency={currency}
                   startDate={startDate}
                   endDate={endDate}
                   onSelect={(s, e) => {

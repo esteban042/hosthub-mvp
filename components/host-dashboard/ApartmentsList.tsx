@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Apartment } from '../../types';
 import { CARD_BORDER } from '../../constants';
 import { Eye } from 'lucide-react';
@@ -6,9 +6,18 @@ import { Eye } from 'lucide-react';
 interface ApartmentsListProps {
   apartments: Apartment[];
   onConfigure: (apartment: Apartment) => void;
+  onImport: (url: string) => void; // Correctly define onImport prop
+  loading: boolean;
 }
 
-const ApartmentsList: React.FC<ApartmentsListProps> = ({ apartments, onConfigure }) => {
+const ApartmentsList: React.FC<ApartmentsListProps> = ({ apartments, onConfigure, onImport, loading }) => {
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  const handleImport = (url: string) => {
+    onImport(url);
+    setIsImportModalOpen(false);
+  };
+
   return (
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">

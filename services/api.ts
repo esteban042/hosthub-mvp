@@ -180,7 +180,7 @@ export const sanctumApi = {
     return sanctumApi.post('/api/v1/importer/ical', data);
   },
 
-  importAirbnbListing: (data: { hostId: string, listingUrl: string }) => {
+  importAirbnbListing: (data: { hostId: string, url: string }) => {
     return sanctumApi.post('/api/v1/importer/listing', data);
   },
 

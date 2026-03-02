@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Booking, BlockedDate, BookingStatus } from '../../types.js';
+import { Booking, BlockedDate, BookingStatus, Currency } from '../../types.js';
 import { CARD_BORDER } from '../../constants.tsx';
+import { formatPrice } from '../../utils/formatting.js';
 
 const AvailabilityCalendar: React.FC<{ 
-  aptId: string, 
+  aptId: string,
+  pricePerNight: number, 
+  currency: Currency,
   bookings: Booking[], 
   blockedDates: BlockedDate[], 
   airbnbCalendarDates: string[], 
   loadingIcal: boolean, 
   onToggle: (date: string) => void 
-}> = ({ aptId, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
+}> = ({ aptId, pricePerNight, currency, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
@@ -62,9 +65,12 @@ const AvailabilityCalendar: React.FC<{
         <button
           key={dateStr}
           onClick={() => onToggle(dateStr)}
-          className={`h-12 flex flex-col items-center justify-center text-[10px] font-bold rounded-xl border transition-all ${dayClass}`}
+          className={`h-16 flex flex-col items-center justify-center text-[10px] font-bold rounded-xl border transition-all ${dayClass}`}
         >
-          {d}
+            <span className="text-lg">{d}</span>
+            {!booked && !blockedManually && !airbnbBlocked && (
+            <span className="text-stone-400 text-[8px] mt-1">{currency?.symbol || '$'}{formatPrice(pricePerNight)}</span>
+            )}
         </button>
       );
     }

@@ -5,6 +5,7 @@ import DatePicker from '../DatePicker';
 import AmenitySelector from './AmenitySelector';
 import ImageUpload from './ImageUpload';
 import { getCurrency } from '../../utils/currencies';
+import { sanctumApi } from '../../services/api';
 
 interface ApartmentEditorProps {
   editingApt: Partial<Apartment> | null;
@@ -15,6 +16,9 @@ interface ApartmentEditorProps {
 
 const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onSave, onClose }) => {
   const [apt, setApt] = useState<Partial<Apartment> | null>(editingApt);
+  const [airbnbUrl, setAirbnbUrl] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
   const currency = getCurrency(host?.currency?.code);
 
   if (!apt) return null;
@@ -22,6 +26,31 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     onSave(apt);
+  };
+  
+  const handleAirbnbImport = async () => {
+    if (!airbnbUrl) {
+      setImportError('Please enter an Airbnb URL.');
+      return;
+    }
+    setIsImporting(true);
+    setImportError(null);
+    try {
+      const response = await sanctumApi.post('/api/misc/scrape-airbnb', { url: airbnbUrl });
+      const { title, description, amenities, photos, price } = response;
+      setApt(prevApt => ({
+        ...prevApt,
+        title: title || prevApt?.title,
+        description: description || prevApt?.description,
+        amenities: amenities || prevApt?.amenities,
+        photos: photos || prevApt?.photos,
+        pricePerNight: price || prevApt?.pricePerNight,
+      }));
+    } catch (error: any) {
+      setImportError(error.message || 'An error occurred during import.');
+    } finally {
+      setIsImporting(false);
+    }
   };
 
   const addPriceOverride = () => {
@@ -64,6 +93,17 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
        <div className="bg-[#F7F5F0] border border-stone-200 w-full max-w-4xl rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl space-y-10 my-8 sm:my-12 relative text-left font-dm">
           <button onClick={onClose} className="absolute top-6 right-6 sm:top-10 sm:right-10 text-stone-400 hover:text-charcoal transition-colors"><X className="w-7 h-7 sm:w-8 sm:h-8" /></button>
           <h3 className="text-2xl sm:text-3xl font-bold text-charcoal leading-none tracking-tight">Unit Configuration</h3>
+
+          <div className="space-y-4">
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/60 mb-3">Import from Airbnb</label>
+            <div className="flex gap-2">
+              <input type="text" placeholder="Paste Airbnb URL..." value={airbnbUrl} onChange={e => setAirbnbUrl(e.target.value)} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm text-charcoal focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
+              <button type="button" onClick={handleAirbnbImport} disabled={isImporting} className="bg-cyan-600/10 text-cyan-700 border border-cyan-700/40 px-6 py-2 rounded-xl hover:bg-emerald-500/20 transition-all flex items-center justify-center space-x-2">
+                {isImporting ? 'Importing...' : 'Import'}
+              </button>
+            </div>
+            {importError && <p className="text-sm text-red-500">{importError}</p>}
+          </div>
 
           <form onSubmit={handleSave} className="space-y-10">
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -165,13 +205,13 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
                           <Trash2 className="w-5 h-5" />
                        </button>
                     </div>
-                  ))}\
+                  ))}
                   {(!apt.priceOverrides || apt.priceOverrides.length === 0) && (
                     <div className="py-12 border border-dashed border-stone-300 rounded-[2rem] flex flex-col items-center justify-center text-stone-400 italic text-sm text-center">
                        <Info className="w-6 h-6 mb-2 opacity-20" />
                        <span>No seasonal pricing rules configured.</span>
                     </div>
-                  )}\
+                  )}
                </div>
              </div>
 
@@ -195,17 +235,17 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
                                 type="button"
                                 onClick={() => removePhotoUrl(index)}
                                 className="p-3 w-full sm:w-auto bg-white border border-stone-300 rounded-xl text-stone-400 hover:text-rose-500 transition-all"
-                            >\
+                            >
                                 <Trash2 className="w-5 h-5 mx-auto" />
                             </button>
                         </div>
-                    ))}\
+                    ))}
                     {(!apt.photos || apt.photos.length === 0) && (
                         <div className="py-12 border border-dashed border-stone-300 rounded-[2rem] flex flex-col items-center justify-center text-stone-400 italic text-sm text-center">
                             <Info className="w-6 h-6 mb-2 opacity-20" />
                             <span>No photos have been added for this unit.</span>
                         </div>
-                    )}\
+                    )}
                 </div>
               </div>
 

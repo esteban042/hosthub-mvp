@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, BookingStatus, SUBSCRIPTION_PRICES } from '../../types';
+import { Host, Apartment, Booking, BookingStatus, SUBSCRIPTION_PRICES, SubscriptionType } from '../../types';
 import PrintableBill from './PrintableBill';
 import Modal from '../Modal';
 import { ArrowLeft } from 'lucide-react';
@@ -38,8 +38,10 @@ const BillingDashboard: React.FC<BillingDashboardProps> = ({ hosts, apartments, 
 
         const totalBookingVolume = hostBookingsInMonth.reduce((sum, b) => sum + b.totalPrice, 0);
         const commission = totalBookingVolume * (host.commissionRate / 100);
+        
         const subscriptionPrice = SUBSCRIPTION_PRICES[host.subscriptionType] || 0;
-        const totalDue = commission + subscriptionPrice;
+
+        const totalDue = subscriptionPrice;
 
         return {
             hostId: host.id,
@@ -93,7 +95,11 @@ const BillingDashboard: React.FC<BillingDashboardProps> = ({ hosts, apartments, 
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {monthlyHostData.map(data => (
+        {monthlyHostData.map(data => {
+            const host = hosts.find(h => h.id === data.hostId);
+            const currencySymbol = host?.currency?.symbol || '$';
+
+            return (
             <div key={data.hostId} className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
                 <div className="flex justify-between items-start">
                     <div>
@@ -107,15 +113,19 @@ const BillingDashboard: React.FC<BillingDashboardProps> = ({ hosts, apartments, 
                 <div className="mt-4 space-y-2 text-sm">
                     <div className="flex justify-between">
                         <span className="text-gray-600">Booking Volume:</span>
-                        <span className="font-bold text-gray-800">${data.totalBookingVolume.toFixed(2)}</span>
+                        <span className="font-bold text-gray-800">{currencySymbol}{data.totalBookingVolume.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between">
-                        <span className="text-gray-600">Commission ({hosts.find(h => h.id === data.hostId)?.commissionRate}%):</span>
-                        <span className="font-bold text-green-600">${data.commission.toFixed(2)}</span>
+                        <span className="text-gray-600">Commission ({host?.commissionRate}%):</span>
+                        <span className="font-bold text-green-600">{currencySymbol}{data.commission.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                        <span className="text-gray-600">Subscription:</span>
+                        <span className="font-bold text-gray-800">{currencySymbol}{data.subscriptionPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2 mt-2">
                         <span className="font-bold text-gray-600">Total Due:</span>
-                        <span className="font-bold text-lg text-gray-900">${data.totalDue.toFixed(2)}</span>
+                        <span className="font-bold text-lg text-gray-900">{currencySymbol}{data.totalDue.toFixed(2)}</span>
                     </div>
                 </div>
                 <button 
@@ -125,7 +135,7 @@ const BillingDashboard: React.FC<BillingDashboardProps> = ({ hosts, apartments, 
                     Generate Bill
                 </button>
             </div>
-        ))}
+        )})}
       </div>
 
       {isBillVisible && selectedBillData && (

@@ -50,13 +50,14 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     welcomeMessage,
     checkoutMessage,
     userId,
-    currency
+    currency,
+    houseRules
   } = hostData;
 
   const sql = `
     INSERT INTO hosts
-      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id, currency)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25)
+      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id, currency, house_rules)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
     RETURNING *
   `;
 
@@ -84,7 +85,8 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     welcomeMessage,
     checkoutMessage,
     userId,
-    currency
+    currency,
+    houseRules
   ];
 
   const result = await query<Host>(sql, params);
@@ -150,4 +152,14 @@ export async function updateHost(hostId: string, updatedFields: Partial<Host>): 
         await execute('ROLLBACK');
         throw error;
     }
+}
+
+/**
+ * Fetches the house rules for a given host.
+ * @param hostId The ID of the host to fetch the house rules for.
+ * @returns A promise that resolves to a string containing the house rules, or null if not found.
+ */
+export async function getHouseRules(hostId: string): Promise<string | null> {
+    const result = await query<{ house_rules: string }>('SELECT house_rules FROM hosts WHERE id = $1', [hostId]);
+    return result.rows.length > 0 ? result.rows[0].house_rules : null;
 }

@@ -64,7 +64,7 @@ router.get('/:id',
     async (req: AuthRequest, res: Response, next: NextFunction) => {
         const { id } = req.params;
         try {
-            const booking = await getBookingDetailsById(id);
+            const booking = await getBookingDetailsById(id as string);
             if (!booking) {
                 return res.status(404).json({ error: 'Booking not found' });
             }
@@ -109,7 +109,7 @@ router.put('/:id/cancel',
     async (req: AuthRequest, res: Response, next: NextFunction) => {
         const { id } = req.params;
         try {
-            const bookingToCancel = await getBookingById(id, req.user!); 
+            const bookingToCancel = await getBookingById(id as string, req.user!); 
 
             if (!bookingToCancel) {
                  return res.status(404).json({ error: 'Booking not found' });

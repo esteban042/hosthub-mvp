@@ -78,6 +78,7 @@ This document provides an overview of the database tables and their fields.
 - `stripe_account_id`: text
 - `stripe_active`: boolean
 - `currency`: jsonb
+- `house_rules`: text
 
 ## `public.profiles`
 - `id`: uuid (Primary Key, Foreign Key to `auth.users`)
@@ -140,10 +141,10 @@ CREATE TABLE public.bookings (
   guest_message text,
   deposit_amount integer,
   guest_name text,
-  guest_country text,
-  custom_booking_id text,
-  stripe_session_id text,
-  stripe_session_url text,
+  guest_country: text,
+  custom_booking_id: text,
+  stripe_session_id: text,
+  stripe_session_url: text,
   CONSTRAINT bookings_pkey PRIMARY KEY (id),
   CONSTRAINT bookings_apartment_id_fkey FOREIGN KEY (apartment_id) REFERENCES public.apartments(id)
 );
@@ -178,6 +179,7 @@ CREATE TABLE public.hosts (
   stripe_account_id text,
   stripe_active boolean DEFAULT false,
   currency jsonb,
+  house_rules text,
   CONSTRAINT hosts_pkey PRIMARY KEY (id),
   CONSTRAINT fk_hosts_users FOREIGN KEY (user_id) REFERENCES public.users(id)
 );

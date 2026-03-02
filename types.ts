@@ -81,6 +81,7 @@ export interface Host {
   stripeAccountId?: string;
   stripeActive?: boolean;
   currency?: Currency;
+  houseRules: string | null;
 }
 
 export interface Apartment {
@@ -126,6 +127,9 @@ export interface Booking {
   depositAmount?: number;
   stripeSessionId?: string;
   stripeSessionUrl?: string;
+  hostCurrency?: Currency;
+  hostBusinessName?: string;
+  hostPhysicalAddress?: string;
 }
 
 export interface BlockedDate {

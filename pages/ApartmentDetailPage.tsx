@@ -7,7 +7,7 @@ import ApartmentInfo from '../components/apartment/ApartmentInfo.js';
 import CheckInInfo from '../components/apartment/CheckInInfo.js';
 import BookingSection from '../components/booking/BookingSection.js';
 import { sanctumApi } from '../services/api.js';
-import { Clock, Home } from 'lucide-react';
+import { Clock, Home, Info } from 'lucide-react';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
@@ -67,7 +67,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       
       <div className="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-x-16 gap-y-12">
         <div className="lg:col-span-2">
-          <ApartmentInfo apartment={apartment} />
+          <ApartmentInfo apartment={apartment} host={host} />
         </div>
         <div className="lg:col-span-1">
             {apartment.mapEmbedUrl && (
@@ -103,8 +103,14 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
                 <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Check-in:</b> {host.checkInTime}</span></div>
                 <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Checkout:</b> {host.checkOutTime}</span></div>
             </div>
-            <div className="mt-12">
-              <CheckInInfo host={host} />
+            <div className="mt-8 pt-8 border-t border-stone-200">
+                <div className="flex items-start"><Info className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Cancellation policy:</b> {host.conditions}</span></div>
+            </div>
+            <div className="mt-8 pt-8 border-t border-stone-200">
+                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>House rules:</b> {host.houseRules || 'No house rules specified.'}</span></div>
+            </div>
+            <div className="mt-8 pt-8 border-t border-stone-200">
+                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>FAQ:</b> {host.faq || 'No raq specified.'}</span></div>
             </div>
         </div>
       </div>

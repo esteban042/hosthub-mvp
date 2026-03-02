@@ -118,7 +118,7 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         const bookingCountRes = await query<{ count: string }>('SELECT COUNT(b.id) FROM bookings b JOIN apartments a ON b.apartment_id = a.id WHERE a.host_id = $1', [host.id]);
         const bookingCount = parseInt(bookingCountRes.rows[0].count, 10);
         
-        const hostInitials = (host.name.match(/\b(\w)/g) || ['H', 'H']).join('').toUpperCase();
+        const hostInitials = ((host.businessName || host.name).match(/\b(\w)/g) || ['B', 'N']).join('').toUpperCase();
         const customBookingId = `${hostInitials}${String(bookingCount + 1).padStart(7, '0')}`;
         
         const overlappingBookingsRes = await query(
@@ -223,6 +223,9 @@ export async function getBookingDetailsById(bookingId: string): Promise<any | nu
           h.name AS host_name,
           h.contact_email AS host_email,
           h.phone_number AS host_phone,
+          h.currency AS host_currency,
+          h.business_name AS host_business_name,
+          h.physical_address AS host_physical_address,
           u.id AS host_user_id
         FROM
           bookings b

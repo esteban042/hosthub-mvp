@@ -1,5 +1,5 @@
 # Stage 1: Build and compile
-FROM node:20-slim as builder
+FROM node:24.14.0-slim as builder
 
 WORKDIR /usr/src/app
 
@@ -39,7 +39,7 @@ RUN npx tsc -p tsconfig.server.json
 RUN ls -la dist
 
 # Stage 2: Create the final production image
-FROM node:20-slim
+FROM node:24.14.0-slim
 
 WORKDIR /usr/src/app
 

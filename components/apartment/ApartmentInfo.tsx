@@ -1,12 +1,13 @@
 import React from 'react';
-import { Apartment } from '../../types';
+import { Apartment, Host } from '../../types';
 import { AMENITY_ICONS } from '../../constants';
 
 interface ApartmentInfoProps {
   apartment: Apartment;
+  host: Host;
 }
 
-const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment }) => {
+const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment, host }) => {
 
   const toSentenceCase = (str: string) => {
     if (!str) return '';
@@ -35,6 +36,15 @@ const ApartmentInfo: React.FC<ApartmentInfoProps> = ({ apartment }) => {
           ))}
         </div>
       </div>
+
+      {host.houseRules && (
+        <div className="space-y-8 pt-8 border-t border-stone-200">
+          <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight">House Rules</h3>
+          <p className="text-lg leading-relaxed text-charcoal/80 whitespace-pre-line">
+            {host.houseRules}
+          </p>
+        </div>
+      )}
     </div>
   );
 };

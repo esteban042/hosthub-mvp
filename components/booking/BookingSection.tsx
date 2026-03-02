@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
 import { sanctumApi } from '../../services/api.js';
 import BookingForm from './BookingForm.js';
-import CheckInInfo from '../apartment/CheckInInfo.tsx';
 
 interface BookingSectionProps {
   apartment: Apartment;

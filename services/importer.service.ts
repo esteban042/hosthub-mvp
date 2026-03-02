@@ -15,42 +15,24 @@ class ImporterService {
       });
 
       const $ = cheerio.load(data);
-      let apartmentData: any;
 
-      const initialStateScript = $('script#initial-shared-state').html();
-      if (initialStateScript) {
-        const initialState = JSON.parse(initialStateScript);
-        const urqlState = initialState.urqlState;
-        if (urqlState) {
-          const key = Object.keys(urqlState).find(k => k.includes('StaysPdpSections'));
-          if (key && urqlState[key].data) {
-            const pdpData = JSON.parse(urqlState[key].data);
-            apartmentData = pdpData.data.presentation.stayProductDetailPage.sections;
-          }
-        }
+      const title = $('h1').first().text().trim();
+      const description = $('div[data-plugin-in-point-id="DESCRIPTION_DEFAULT"]').first().text().trim();
+
+      if (!title) {
+        throw new Error("Could not extract apartment title. Airbnb\'s website structure may have changed.");
       }
 
-      if (!apartmentData) {
-        throw new Error("Could not find apartment data. Airbnb\'s website structure may have changed, making it incompatible with the importer.");
+      if (!description) {
+        throw new Error("Could not extract apartment description. Airbnb\'s website structure may have changed.");
       }
 
-      const { metadata, sections } = apartmentData;
-
-      const title = metadata?.name || 'Untitled Listing';
-      
-      const overviewSection = sections.find((s: any) => s.section?.id === 'OVERVIEW_DEFAULT_V2');
-      const description = overviewSection?.section?.htmlDescription?.htmlText || 'No description available.';
-      
-      const amenitiesSection = sections.find((s: any) => s.section?.id === 'AMENITIES_DEFAULT');
-      const amenities = amenitiesSection?.section?.amenities?.map((a: any) => a.title) || [];
-      
-      const locationSection = sections.find((s: any) => s.section?.id === 'LOCATION_DEFAULT');
-      const address = locationSection?.section?.subtitle || '';
-      
       const pricePerNight = 0;
       const capacity = 1;
-      const city = address.split(',')[0]?.trim() || '';
-      const country = address.split(',').pop()?.trim() || '';
+      const amenities: string[] = [];
+      const city = '';
+      const country = '';
+      const address = '';
       const photos = ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'];
 
       const result: QueryResult<Apartment> = await query(

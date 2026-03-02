@@ -1,6 +1,7 @@
 import React from 'react';
 import { Apartment } from '../../types.js';
 import { CORE_ICONS } from '../../constants.tsx';
+import { formatPrice } from '../../utils/formatting.js';
 
 interface ApartmentCardProps {
   apartment: Apartment;
@@ -21,7 +22,7 @@ const ApartmentCard: React.FC<ApartmentCardProps> = ({ apartment, onSelectApartm
         <div className="absolute inset-0 bg-gradient-to-t from-charcoal/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
         
         <div className="absolute bottom-4 left-4 bg-alabaster/50 backdrop-blur-md px-4 py-2 rounded-xl border border-stone-400 shadow-lg">
-          <span className="text-white font-black text-xl">${apartment.pricePerNight || 0}</span>
+          <span className="text-white font-black text-xl">{apartment.currency?.symbol || '$'}{formatPrice(apartment.pricePerNight)}</span>
           <span className="text-[10px] font-bold text-stone-300 ml-1 uppercase">/ night</span>
         </div>
       </div>

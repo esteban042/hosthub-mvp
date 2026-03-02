@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
-import { Host, Apartment, Booking, SubscriptionType, BookingStatus, SUBSCRIPTION_PRICES } from '../../types';
+import { Host, Apartment, Booking, SubscriptionType, BookingStatus, SUBSCRIPTION_PRICES } from '../../types.ts';
 import { CreditCard, Percent, Globe, Layers } from 'lucide-react';
-import StatCard from '../host-dashboard/StatCard';
+import StatCard from '../host-dashboard/StatCard.tsx';
 
 interface AdminStatsProps {
   hosts: Host[];
@@ -11,7 +11,11 @@ interface AdminStatsProps {
 
 const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) => {
   const stats = useMemo(() => {
-    const monthlySubRev = hosts.reduce((acc, h) => acc + (SUBSCRIPTION_PRICES[h.subscriptionType] || 0), 0);
+    const monthlySubRev = hosts.reduce((acc, h) => {
+      const price = SUBSCRIPTION_PRICES[h.subscriptionType] || 0;
+      return acc + price;
+    }, 0);
+    
     const totalCommission = hosts.reduce((acc, h) => {
       const hostApts = apartments.filter(a => a.hostId === h.id && a.isActive).map(a => a.id);
       const hostVolume = bookings
@@ -19,6 +23,7 @@ const AdminStats: React.FC<AdminStatsProps> = ({ hosts, apartments, bookings }) 
         .reduce((sum, b) => sum + b.totalPrice, 0);
       return acc + (hostVolume * (h.commissionRate / 100));
     }, 0);
+
     return {
       monthlySubscriptionRevenue: monthlySubRev,
       totalCommission,

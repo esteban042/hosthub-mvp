@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 import fs from 'fs';
 
+import './services/cron.js';
 import { config, isProduction } from './config.js';
 import { query } from './dputils.js';
 import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './middleware/security.js';
@@ -12,7 +13,6 @@ import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
 import stripeWebhookRouter from './routes/api/stripe-webhooks.js';
 import { sendEmail } from './services/email.js';
-import './services/cron.js'; // Import to initialize cron jobs
 
 const rootPath = process.cwd();
 const clientPath = path.join(rootPath, 'dist/public');
@@ -54,7 +54,7 @@ app.use('/api/v1', apiLimiter, apiRoutes);
 
 app.use(express.static(clientPath, { index: false }));
 
-app.get('*', (req: Request, res: Response, next: NextFunction) => {
+app.get('/{*splat}', (req: Request, res: Response, next: NextFunction) => {
   if (req.path.startsWith('/api') || req.path.startsWith('/auth')) {
     return res.status(404).json({ error: 'Endpoint not found' });
   }

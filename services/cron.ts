@@ -1,6 +1,6 @@
 import cron from 'node-cron';
 import { getHosts } from './host.service.js';
-// import { syncHostIcal } from './importer.service.js';
+import { syncHostIcal } from './sync.service.js';
 
 // Schedule a task to run every 30 minutes
 cron.schedule('*/30 * * * *', async () => {
@@ -10,7 +10,7 @@ cron.schedule('*/30 * * * *', async () => {
     for (const host of hosts) {
       if (host.airbnbCalendarLink) {
         console.log(`Syncing calendar for host: ${host.name}`);
-        // await syncHostIcal(host.id, host.airbnbCalendarLink);
+        await syncHostIcal(host.id, host.airbnbCalendarLink);
       }
     }
     console.log('Airbnb calendar sync complete.');

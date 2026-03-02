@@ -43,6 +43,7 @@ const PrintableBooking: React.FC = () => {
     }
   });
 
+  const currencySymbol = booking.hostCurrency?.symbol || '$';
 
   return (
     <div className="bg-white p-8 max-w-2xl mx-auto my-10 font-sans">
@@ -61,6 +62,7 @@ const PrintableBooking: React.FC = () => {
             <div>
                 <h2 className="text-xl font-semibold text-gray-700 text-right">From</h2>
                 <p className="text-gray-600 text-right">{booking.hostBusinessName}</p>
+                <p className="text-gray-600 text-right">{booking.hostPhysicalAddress}</p>               
                 <p className="text-gray-600 text-right">{booking.hostEmail}</p>
                 <p className="text-gray-600 text-right">{booking.hostPhone}</p>
             </div>
@@ -78,7 +80,7 @@ const PrintableBooking: React.FC = () => {
                 dailyBreakdown.map(day => (
                   <tr key={day.date}>
                       <td className="p-3">{day.date}</td>
-                      <td className="text-right p-3">${day.price.toLocaleString()}</td>
+                      <td className="text-right p-3">{currencySymbol}{day.price.toLocaleString()}</td>
                   </tr>
                 ))
               }
@@ -87,19 +89,19 @@ const PrintableBooking: React.FC = () => {
 
         <div className="flex justify-between items-center bg-gray-200 p-4 rounded-lg">
             <p className="text-xl font-bold text-gray-800">Total</p>
-            <p className="text-xl font-bold text-green-600">${booking.totalPrice.toLocaleString()}</p>
+            <p className="text-xl font-bold ">{currencySymbol}{booking.totalPrice.toLocaleString()}</p>
         </div>
 
         {booking.depositAmount && booking.depositAmount > 0 && (
             <div className="flex justify-between items-center bg-gray-100 p-4 rounded-lg mt-4">
                 <p className="text-lg font-semibold text-gray-700">Deposit Paid</p>
-                <p className="text-lg font-semibold text-gray-700">-${booking.depositAmount.toLocaleString()}</p>
+                <p className="text-lg font-semibold text-gray-700">-{currencySymbol}{booking.depositAmount.toLocaleString()}</p>
             </div>
         )}
 
         <div className="flex justify-between items-center bg-gray-300 p-4 rounded-lg mt-4">
             <p className="text-xl font-bold text-sky-700">Balance Due</p>
-            <p className="text-xl font-bold text-cyan-600">${(booking.totalPrice - (booking.hostPayment || 0)).toLocaleString()}</p>
+            <p className="text-xl font-bold text-cyan-600">{currencySymbol}{(booking.totalPrice - (booking.hostPayout || 0)).toLocaleString()}</p>
         </div>
 
         <footer className="text-center mt-10 text-gray-500">

@@ -38,6 +38,7 @@ export const MOCK_HOSTS: Host[] = [
     conditions: 'Conditions content',
     faq: 'FAQ content',
     currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
+    houseRules: 'No smoking, no parties or events.'
   },
   {
     id: 'host-2',
@@ -64,6 +65,7 @@ export const MOCK_HOSTS: Host[] = [
     faq: 'FAQ content',
     premiumConfig: null,
     currency: { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
+    houseRules: 'No shoes inside, please.'
   },
   {
     id: 'host-3',
@@ -90,6 +92,7 @@ export const MOCK_HOSTS: Host[] = [
     faq: 'FAQ content',
     premiumConfig: null,
     currency: { name: 'Euro', code: 'EUR', symbol: '€' },
+    houseRules: 'Respect the historical nature of the property.'
   },
   {
     id: 'host-4',
@@ -116,6 +119,7 @@ export const MOCK_HOSTS: Host[] = [
     faq: 'FAQ content',
     premiumConfig: null,
     currency: { name: 'US Dollar', code: 'USD', symbol: '$' },
+    houseRules: 'No glass by the pool area.'
   }
 ];
 
