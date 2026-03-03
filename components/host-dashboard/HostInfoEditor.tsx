@@ -12,9 +12,14 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
   const [editingHost, setEditingHost] = useState<Partial<Host>>(host);
   const [isSaving, setIsSaving] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [icalUrl, setIcalUrl] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     setEditingHost(host);
+    if (host && host.id) {
+      setIcalUrl(`${window.location.origin}/api/v1/ical/host/${host.id}`);
+    }
   }, [host]);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -40,6 +45,12 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
         [platform]: value
       }
     }));
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(icalUrl);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
@@ -152,6 +163,16 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
         <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">FAQ</label>
             <textarea value={editingHost.faq || ''} onChange={e => setEditingHost({...editingHost, faq: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm h-[126px] resize-none focus:ring-1 focus:ring-sky-accent outline-none" />
+        </div>
+      </div>
+
+      <div className="space-y-8 pt-8 border-t border-stone-200/60">
+        <h2 className="text-xl font-bold font-serif text-charcoal">iCal Feed</h2>
+        <div className="relative">
+          <input type="text" readOnly value={icalUrl} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-4 text-sm focus:ring-1 focus:ring-sky-accent transition-all outline-none" />
+          <button type="button" onClick={handleCopy} className="absolute right-2 top-1/2 -translate-y-1/2 bg-sky-700 text-white px-4 py-2 rounded-lg text-xs font-bold uppercase hover:bg-sky-800 transition-all">
+            {isCopied ? 'Copied!' : 'Copy'}
+          </button>
         </div>
       </div>
 

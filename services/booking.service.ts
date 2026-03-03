@@ -59,6 +59,17 @@ export async function getAllBookings(): Promise<Booking[]> {
     return result.rows;
 }
 
+export async function getBookingsByHostId(hostId: string): Promise<Booking[]> {
+    const result = await query<Booking>(
+        `SELECT b.* FROM bookings b
+         JOIN apartments a ON b.apartment_id = a.id
+         WHERE a.host_id = $1 AND b.status != 'canceled'
+         ORDER BY b.created_at DESC`,
+        [hostId]
+    );
+    return result.rows;
+}
+
 const calculateBookingPrices = (hostNetTotal: number, host: Host) => {
     // If no Stripe, we still need to round the total to an integer for the DB.
     let finalPrice = Math.round(hostNetTotal);
@@ -192,14 +203,25 @@ export async function createBooking(bookingData: Omit<Booking, 'id' | 'customBoo
         
         if (newBooking.status === BookingStatus.CONFIRMED) {
           try {
+            // Email to the guest
+            await sendEmail(
+              newBooking.guestEmail,
+              'Your Booking Confirmation',
+              'BookingConfirmation',
+              { booking: newBooking, apartment, host }
+            );
+
+            // Email to the host
+            if (host.contactEmail) {
               await sendEmail(
-                  newBooking.guestEmail,
-                  'Your Booking Confirmation',
-                  'BookingConfirmation',
-                  { booking: newBooking, apartment, host }
+                host.contactEmail,
+                `New Booking for ${apartment.title}`,
+                'BookingConfirmation', // We can reuse the same template
+                { booking: newBooking, apartment, host }
               );
+            }
           } catch (emailError) {
-              console.error('Failed to send confirmation email:', emailError);
+            console.error('Failed to send confirmation email(s):', emailError);
           }
         }
         
@@ -305,7 +327,7 @@ export async function updateBookings(updatedBookings: Booking[], user: User): Pr
                         { booking: updatedBooking, apartment, host }
                     );
                 } catch (emailError) {
-                    console.error(`Failed to send cancellation email for booking ${id}:`, emailError);
+                    console.error(`Failed to cancellation email for booking ${id}:`, emailError);
                 }
             }
         }

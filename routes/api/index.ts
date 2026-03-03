@@ -22,6 +22,7 @@ import stripeRouter from './stripe.js';
 import importerRouter from './importer.js';
 import miscRouter from './misc.js';
 import filesRouter from '../files.js';
+import icalRouter from './ical.js';
 
 const router = Router();
 
@@ -38,6 +39,7 @@ router.use('/stripe', stripeRouter);
 router.use('/importer', importerRouter);
 router.use('/files', filesRouter);
 router.use('/misc', miscRouter);
+router.use('/ical', icalRouter);
 
 
 // --- Routes originally from misc.ts ---

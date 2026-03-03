@@ -44,6 +44,7 @@ const PrintableBooking: React.FC = () => {
   });
 
   const currencySymbol = booking.hostCurrency?.symbol || '$';
+  const serviceFee = (booking.platformFee || 0) + (booking.stripeFee || 0);
 
   return (
     <div className="bg-white p-8 max-w-2xl mx-auto my-10 font-sans">
@@ -71,19 +72,25 @@ const PrintableBooking: React.FC = () => {
         <table className="w-full mb-8">
             <thead>
                 <tr className="bg-gray-100">
-                    <th className="text-left p-3">Date</th>
-                    <th className="text-right p-3">Nightly Rate</th>
+                    <th className="text-left p-3">Description</th>
+                    <th className="text-right p-3">Amount</th>
                 </tr>
             </thead>
             <tbody>
               {
                 dailyBreakdown.map(day => (
                   <tr key={day.date}>
-                      <td className="p-3">{day.date}</td>
+                      <td className="p-3">Nightly stay on {day.date}</td>
                       <td className="text-right p-3">{currencySymbol}{day.price.toLocaleString()}</td>
                   </tr>
                 ))
               }
+               {serviceFee > 0 && (
+                <tr>
+                  <td className="p-3">Service Fee</td>
+                  <td className="text-right p-3">{currencySymbol}{serviceFee.toLocaleString()}</td>
+                </tr>
+              )}
             </tbody>
         </table>
 
@@ -101,7 +108,7 @@ const PrintableBooking: React.FC = () => {
 
         <div className="flex justify-between items-center bg-gray-300 p-4 rounded-lg mt-4">
             <p className="text-xl font-bold text-sky-700">Balance Due</p>
-            <p className="text-xl font-bold text-cyan-600">{currencySymbol}{(booking.totalPrice - (booking.hostPayout || 0)).toLocaleString()}</p>
+            <p className="text-xl font-bold text-cyan-600">{currencySymbol}{(booking.totalPrice - (booking.depositAmount || 0)).toLocaleString()}</p>
         </div>
 
         <footer className="text-center mt-10 text-gray-500">

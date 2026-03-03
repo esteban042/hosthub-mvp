@@ -34,7 +34,7 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
       <StatCard
         icon={CORE_ICONS.Dollar("w-8 h-8")}
         label="Annual Revenue"
-        value={`$${stats.revenueYear.toLocaleString()}`}
+        value={`${stats.revenueYear.toLocaleString()}`}
       />
       <StatCard
         icon={<Eye className="w-8 h-8" />}

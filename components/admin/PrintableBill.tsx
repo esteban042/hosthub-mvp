@@ -27,7 +27,7 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
   useEffect(() => {
     const fetchCompanyInfo = async () => {
       try {
-        const info = await sanctumApi.get('/misc/company-info');
+        const info = await sanctumApi.get('/api/v1/misc/company-info');
         setCompanyInfo(info);
       } catch (error) {
         console.error("Error fetching company info:", error);

@@ -36,7 +36,6 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
             const charge = paymentIntent.latest_charge as Stripe.Charge;
             
             let stripeFee = 0;
-            // Correctly retrieve the fee from the balance transaction
             if (charge && charge.balance_transaction) {
               const balanceTransaction = typeof charge.balance_transaction === 'string' ? await stripe.balanceTransactions.retrieve(charge.balance_transaction) : charge.balance_transaction;
               if(balanceTransaction) {
@@ -44,8 +43,9 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
               }
             }
             
-            const platformFee = originalBooking.totalPrice * (originalBooking.platformFee / originalBooking.totalPrice);
-            const hostPayout = originalBooking.totalPrice - platformFee - stripeFee;
+            const totalPrice = charge.amount_captured / 100;
+            const hostPayout = charge.transfer_data?.amount ? charge.transfer_data.amount / 100 : 0;
+            const platformFee = totalPrice - hostPayout - stripeFee;
 
             const updatedBooking: Booking = {
               ...originalBooking,
@@ -53,7 +53,8 @@ router.post('/', raw({ type: 'application/json' }), async (req: Request, res: Re
               status: BookingStatus.PAID,
               stripeFee,
               platformFee,
-              hostPayout
+              hostPayout,
+              totalPrice,
             }
             await updateBookings([updatedBooking], {
               id: bookingDetails.hostUserId,

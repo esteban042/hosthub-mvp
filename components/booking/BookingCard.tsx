@@ -12,6 +12,8 @@ const getStatusBadgeStyle = (status: BookingStatus) => {
       return 'bg-emerald-accent/10 text-green-600 border-green-600';
     case BookingStatus.CONFIRMED:
       return 'bg-sky-700/10 text-sky-700 border-sky-700/60';
+    case BookingStatus.PENDING_PAYMENT:
+      return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
     default:
       return 'bg-rose-500/10 text-rose-400 border-rose-500/20';
   }
@@ -118,7 +120,7 @@ const BookingCard: React.FC<{
                     </ActionButton>
                     </>
                 )}
-                {statusFilter !== 'past' && b.status === BookingStatus.PAID && (
+                {statusFilter !== 'past' && (b.status === BookingStatus.PAID || b.status === BookingStatus.PENDING_PAYMENT) && (
                     <ActionButton 
                       onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
                       className="w-full bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white"

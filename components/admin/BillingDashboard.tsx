@@ -121,11 +121,11 @@ const BillingDashboard: React.FC<BillingDashboardProps> = ({ hosts, apartments, 
                     </div>
                     <div className="flex justify-between">
                         <span className="text-gray-600">Subscription:</span>
-                        <span className="font-bold text-gray-800">{currencySymbol}{data.subscriptionPrice.toFixed(2)}</span>
+                        <span className="font-bold text-gray-800">${data.subscriptionPrice.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between border-t pt-2 mt-2">
                         <span className="font-bold text-gray-600">Total Due:</span>
-                        <span className="font-bold text-lg text-gray-900">{currencySymbol}{data.totalDue.toFixed(2)}</span>
+                        <span className="font-bold text-lg text-gray-900">${data.totalDue.toFixed(2)}</span>
                     </div>
                 </div>
                 <button 

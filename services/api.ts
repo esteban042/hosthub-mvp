@@ -1,3 +1,4 @@
+
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
 import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
@@ -185,6 +186,8 @@ export const sanctumApi = {
   },
 
   // Generic methods for API calls
+  get: (endpoint: string) => fetchApi(endpoint),
+
   post: (endpoint: string, body: any) => fetchApi(endpoint, {
     method: 'POST',
     body: JSON.stringify(body),

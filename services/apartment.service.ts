@@ -10,6 +10,14 @@ export async function getAllApartments(): Promise<Apartment[]> {
 }
 
 /**
+ * Fetches all apartments for a given host ID.
+ */
+export async function getApartmentsByHostId(hostId: string): Promise<Apartment[]> {
+    const result = await query<Apartment>('SELECT * FROM apartments WHERE host_id = $1', [hostId]);
+    return result.rows;
+}
+
+/**
  * Creates a new apartment.
  */
 export async function createApartment(apartmentData: Omit<Apartment, 'id' | 'hostId' | 'createdAt' | 'updatedAt'>, user: User): Promise<Apartment> {

@@ -8,9 +8,9 @@ interface ApartmentStatsProps {
 
 const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
   const stats = [
-    { icon: CORE_ICONS.Bed("w-8 h-8 text-sky-700"), label: 'Beds', value: apartment.guests },
+    { icon: CORE_ICONS.Bed("w-8 h-8 text-sky-700"), label: 'Beds', value: apartment.bedrooms },
     { icon: CORE_ICONS.Bath("w-8 h-8 text-sky-700"), label: 'Baths', value: apartment.bathrooms },
-    { icon: CORE_ICONS.Guests("w-7 h-7 text-sky-700"), label: 'Guests', value: apartment.capacity },
+    { icon: CORE_ICONS.Guests("w-8 h-8 text-sky-600"), label: 'Guests', value: apartment.capacity },
   ];
 
   return (

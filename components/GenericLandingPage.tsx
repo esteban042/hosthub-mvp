@@ -68,7 +68,7 @@ const Hero: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => (
                 Escape the 15% commission trap. Sanctum puts you on the map—literally. Get a stunning, independent booking website that syncs with everything, automates your guest communication, and takes payments directly. We help you appear on Google Maps independently from Airbnb and capture direct bookings at lower commission.
             </p>
             <div className="flex justify-center items-center gap-4">
-                 <button onClick={onSignIn} className="group relative inline-block text-lg font-bold text-stone-100 focus:outline-none">
+                 <button onClick={() => window.location.href = 'mailto:sanctum@geobit.online'} className="group relative inline-block text-lg font-bold text-stone-100 focus:outline-none">
                     <span className="absolute inset-0 border-2 border-emerald-400 rounded-lg"></span>
                     <span className="block border-2 border-emerald-400 rounded-lg bg-emerald-700 px-8 py-3 transition-transform group-hover:-translate-x-1.5 group-hover:-translate-y-1.5">
                         Claim Your Independence
@@ -197,7 +197,7 @@ const PricingSection: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
         <ul className="space-y-4 mb-8 text-stone-400">
             {features.map(f => <li key={f} className="flex items-center"><CheckCircle className={`w-5 h-5 mr-3 ${isPopular ? 'text-emerald-400' : 'text-emerald-500'}`} />{f}</li>)}
         </ul>
-        <button onClick={onSignIn} className={`w-full mt-auto font-bold py-3 px-6 rounded-xl transition-colors text-lg ${isPopular ? 'bg-emerald-700 text-stone-100 hover:bg-emerald-600' : 'bg-stone-700 text-stone-100 hover:bg-stone-600'}`}>Choose Plan</button>
+        <button onClick={() => window.location.href = 'mailto:sanctum@geobit.online'} className={`w-full mt-auto font-bold py-3 px-6 rounded-xl transition-colors text-lg ${isPopular ? 'bg-emerald-700 text-stone-100 hover:bg-emerald-600' : 'bg-stone-700 text-stone-100 hover:bg-stone-600'}`}>Choose Plan</button>
     </div>
   );
 

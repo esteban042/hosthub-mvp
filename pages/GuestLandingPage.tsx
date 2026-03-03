@@ -140,7 +140,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             Your Perfect Escape <br/>
             <span className="text-sky-700 italic">Awaits</span>
           </h1>
-          <p className="mt-8 text-xl md:text-2xl text-stone-300 max-w-3xl mx-auto font-medium leading-relaxed">
+          <p className="mt-8 text-xl md:text-2xl text-stone-700 max-w-3xl mx-auto font-medium leading-relaxed">
           Discover a place to truly unwind. A villa for your next unforgettable holiday, where comfort meets hospitality.
           </p>
 

@@ -1,21 +1,16 @@
-
-const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-
-puppeteer.use(StealthPlugin());
+import { chromium } from 'playwright';
 
 const VIEWPORT = { width: 1280, height: 720 };
 
 export const scrapeAirbnbListing = async (url: string) => {
-  const browser = await puppeteer.launch({ 
+  const browser = await chromium.launch({
     headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
   const page = await browser.newPage();
-  await page.setViewport(VIEWPORT);
+  await page.setViewportSize(VIEWPORT);
 
   try {
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
 
     await page.waitForSelector('script[type="application/ld+json"]');
 
