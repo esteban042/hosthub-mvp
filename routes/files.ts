@@ -22,7 +22,6 @@ const upload = multer({
 });
 
 router.post('/upload', protect, upload.single('file'), async (req: AuthRequest, res) => {
-    // FIX: Check if the service key is configured before attempting to upload.
     if (!config.supabaseServiceKey) {
         console.error('Supabase Service Key is not configured. File upload is disabled.');
         return res.status(503).json({ error: 'File upload is not configured on the server. Please contact an administrator.' });
@@ -33,7 +32,22 @@ router.post('/upload', protect, upload.single('file'), async (req: AuthRequest, 
     }
 
     const file = req.file;
-    const fileName = `${uuidv4()}${extname(file.originalname)}`;
+    const uploadType = req.body.type || 'apartment'; // default to apartment
+    let uploadPath = '';
+
+    switch (uploadType) {
+        case 'avatar':
+            uploadPath = 'avatars';
+            break;
+        case 'landing-page':
+            uploadPath = 'landing-pages';
+            break;
+        default:
+            uploadPath = 'apartments';
+            break;
+    }
+
+    const fileName = `${uploadPath}/${uuidv4()}${extname(file.originalname)}`;
 
     try {
         const supabase = createClient(config.supabaseUrl, config.supabaseServiceKey);

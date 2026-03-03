@@ -93,7 +93,7 @@ router.put('/:hostId',
       }
 
       // Only admins can update the currency
-      if (updatedFields.currency && req.user?.role !== UserRole.ADMIN) {
+      if (updatedFields.currency && updatedFields.currency !== host.currency && req.user?.role !== UserRole.ADMIN) {
         return res.status(403).json({ error: 'You are not authorized to update the currency.' });
       }
 

@@ -80,6 +80,7 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
           <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Bill To</h3>
           <div className="mt-2">
             <p className="text-lg font-bold text-gray-900">{host.name}</p>
+            <p className="text-gray-600">{host.businessName}</p>
             <p className="text-gray-600">{host.contactEmail}</p>
             {host.physicalAddress && <p className="text-gray-600">{host.physicalAddress}</p>}
           </div>
@@ -126,11 +127,11 @@ const PrintableBill: React.FC<PrintableBillProps> = ({
                 </tr>
                 <tr className="font-medium">
                   <td className="py-2">Subscription Fee</td>
-                  <td className="py-2 text-right">{currencySymbol}{subscriptionPrice.toFixed(2)}</td>
+                  <td className="py-2 text-right">${subscriptionPrice.toFixed(2)}</td>
                 </tr>
                 <tr className="font-bold text-xl border-t-2 border-charcoal mt-4">
                   <td className="py-4">Amount Due</td>
-                  <td className="py-4 text-right">{currencySymbol}{totalDue.toFixed(2)}</td>
+                  <td className="py-4 text-right">${totalDue.toFixed(2)}</td>
                 </tr>
               </tbody>
             </table>

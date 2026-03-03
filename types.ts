@@ -13,7 +13,7 @@ export enum SubscriptionType {
 export const SUBSCRIPTION_PRICES = {
   [SubscriptionType.BASIC]: 29,
   [SubscriptionType.PRO]: 9,
-  [SubscriptionType.PREMIUM]: 19,
+  [SubscriptionType.PREMIUM]: 25,
 };
 
 export enum BookingStatus {

@@ -49,10 +49,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
         <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-transparent border border-sky-accent rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-sky-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
-            </div>
-            <h1 className="text-2xl font-serif font-bold text-sky-accent">Sanctum</h1>
+            <img src="/images/logo.svg" alt="Sanctum Logo" className="h-10" />
           </div>
           
           <div className="flex items-center space-x-4">
@@ -82,7 +79,7 @@ export const Layout: React.FC<LayoutProps> = ({
 
       <footer className="bg-alabaster border-t border-charcoal/10 py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
-          <h2 className="text-xl font-serif font-bold text-sky-accent">Sanctum</h2>
+          <img src="/images/logo.svg" alt="Sanctum Logo" className="h-8" />
           <p className="text-charcoal/60 text-sm">© 2026 Sanctum Platform. All rights reserved.</p>
           <div className="flex space-x-6 text-sm text-charcoal font-medium">
              <button onClick={() => setActiveLegal('privacy')} className="hover:text-terracotta cursor-pointer transition-colors">Privacy</button>
@@ -98,7 +95,7 @@ export const Layout: React.FC<LayoutProps> = ({
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">1. Data Collection</h4>
           <p>We collect personal information necessary for processing your requests, including name, email, and payment preferences. This data is curated with the highest regard for discretion and security.</p>
         </section>
-        <section className="space-y-4">
+        <section className_="space-y-4">
           <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">2. Use of Information</h4>
           <p>Your information is used exclusively to facilitate bookings, communicate with hosts, and enhance your personalized travel experience. We never share your details with third-party advertisers.</p>
         </section>

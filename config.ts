@@ -1,3 +1,4 @@
+
 const getEnvVar = (key: string, defaultValue?: string): string => {
   const value = process.env[key] || defaultValue;
   if (value === undefined) {
@@ -41,6 +42,13 @@ export const config = {
     'http://localhost:3000',
     'http://localhost:5173',
   ],
+  company: {
+    name: getEnvVar("COMPANY_NAME", "Your Company Name"),
+    addressLine1: getEnvVar("COMPANY_ADDRESS_LINE_1", "123 Business St, Suite 101"),
+    addressLine2: getEnvVar("COMPANY_ADDRESS_LINE_2", "Business City, 12345"),
+    email: getEnvVar("COMPANY_EMAIL", "contact@yourcompany.com"),
+    website: getEnvVar("COMPANY_WEBSITE", "www.yourcompany.com"),
+  }
 };
 
 export const isProduction = config.nodeEnv === 'production';

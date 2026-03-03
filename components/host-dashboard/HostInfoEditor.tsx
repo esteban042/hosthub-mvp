@@ -22,11 +22,30 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
     }
   }, [host]);
 
+  const handleFileUpload = async (file: File, type: 'avatar' | 'landing-page') => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('type', type);
+
+    try {
+      const response = await sanctumApi.uploadFile(formData);
+      const { url } = response;
+      if (type === 'avatar') {
+        setEditingHost({ ...editingHost, avatar: url });
+      } else {
+        setEditingHost({ ...editingHost, landingPagePicture: url });
+      }
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+    }
+  };
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
     try {
-      await sanctumApi.updateHost(editingHost as Host);
+      const { currency, ...hostData } = editingHost as Host;
+      await sanctumApi.updateHost(hostData as Host);
       onHostUpdate(editingHost as Host);
       setIsSaved(true);
       setTimeout(() => setIsSaved(false), 2000);
@@ -62,8 +81,14 @@ const HostInfoEditor: React.FC<HostInfoEditorProps> = ({ host, onHostUpdate }) =
             <input type="text" required value={editingHost.name || ''} onChange={e => setEditingHost({...editingHost, name: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
           </div>
           <div>
-            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Avatar Image URL</label>
-            <input type="url" value={editingHost.avatar || ''} onChange={e => setEditingHost({...editingHost, avatar: e.target.value})} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Avatar Image</label>
+            <input type="file" onChange={e => e.target.files && handleFileUpload(e.target.files[0], 'avatar')} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
+            {editingHost.avatar && <img src={editingHost.avatar} alt="Avatar" className="w-32 h-32 mt-4" />}
+          </div>
+          <div>
+            <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Landing Page Picture</label>
+            <input type="file" onChange={e => e.target.files && handleFileUpload(e.target.files[0], 'landing-page')} className="w-full bg-white/50 border border-stone-300 rounded-2xl p-5 text-sm focus:ring-1 focus:ring-sky-accent outline-none" />
+            {editingHost.landingPagePicture && <img src={editingHost.landingPagePicture} alt="Landing Page" className="w-full h-auto mt-4" />}
           </div>
           <div>
             <label className="block text-[10px] font-black uppercase tracking-widest text-charcoal/80 mb-3">Host Bio (Public)</label>

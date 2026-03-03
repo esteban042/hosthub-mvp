@@ -185,6 +185,22 @@ export const sanctumApi = {
     return sanctumApi.post('/api/v1/importer/listing', data);
   },
 
+  uploadFile: async (formData: FormData) => {
+    const response = await fetch('/api/v1/files/upload', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.error || `Request failed with status ${response.status}`;
+        throw new Error(errorMessage);
+    }
+
+    return response.json();
+  },
+
   // Generic methods for API calls
   get: (endpoint: string) => fetchApi(endpoint),
 

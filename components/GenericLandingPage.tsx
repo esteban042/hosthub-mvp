@@ -25,8 +25,7 @@ const Header: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
     <header className="bg-stone-950/80 backdrop-blur-lg sticky top-0 z-50 w-full border-b border-stone-800/50">
       <div className="container mx-auto px-6 py-4 flex justify-between items-center">
         <div className="flex items-center space-x-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <Aperture className="w-7 h-7 text-emerald-400" />
-            <span className="text-2xl font-bold text-stone-100">SANCTUM</span>
+            <img src="/images/logo.svg" alt="Sanctum Logo" className="h-10 text-sky-700" />
         </div>
         <nav className="hidden md:flex items-center space-x-8">
           {navLinks.map(link => (
@@ -65,7 +64,7 @@ const Hero: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => (
               Own your visibility. Own your guests.
             </h1>
             <p className="text-lg md:text-xl text-stone-400 leading-relaxed max-w-3xl mx-auto mb-10">
-                Escape the 15% commission trap. Sanctum puts you on the map—literally. Get a stunning, independent booking website that syncs with everything, automates your guest communication, and takes payments directly. We help you appear on Google Maps independently from Airbnb and capture direct bookings at lower commission.
+                Escape the 15% commission trap. Sanctum puts you on the map—literally. Get a stunning, independent booking website that syncs with everything, automates your guest communication and takes payments directly. We help you appear on Google Maps independently from Airbnb and capture direct bookings at lower commission.
             </p>
             <div className="flex justify-center items-center gap-4">
                  <button onClick={() => window.location.href = 'mailto:sanctum@geobit.online'} className="group relative inline-block text-lg font-bold text-stone-100 focus:outline-none">
@@ -125,7 +124,7 @@ const FeaturesSection: React.FC = () => (
                 <FeatureCard icon={<TrendingUp size={24}/>} title="Build Your Brand, Not Theirs">
                     Every direct booking is a customer you own. Build a brand that guests trust and a direct booking channel that grows over time.
                 </FeatureCard>
-                <FeatureCard icon={<TrendingUp size={24}/>} title="Build Your Brand, Not Theirs">
+                <FeatureCard icon={<TrendingUp size={24}/>} title="Ready2go">
                     No technical overhead, no high effort needed - we set everything up for you and your plattform is ready to go from day 1. Only functions you need, in a clean design.
                 </FeatureCard>
             </div>
@@ -212,7 +211,7 @@ const PricingSection: React.FC<{ onSignIn: () => void }> = ({ onSignIn }) => {
             <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
                 <PriceCard plan={SubscriptionType.BASIC} price={SUBSCRIPTION_PRICES.Basic} features={['Up to 3 Properties', 'Direct Booking Website', 'Google Maps Setup', 'Standard Email Support', 'Automated Guest Messaging', 'Calendar Sync', 'No Commission' ]} />
                 <PriceCard plan={SubscriptionType.PRO} price={SUBSCRIPTION_PRICES.Pro} features={['Up to 8 Properties', 'Stripe Payment Integration', 'Automated Guest Messaging', 'Calendar Sync', 'Priority Support', '4% commission']} isPopular />
-                <PriceCard plan={SubscriptionType.PREMIUM} price={SUBSCRIPTION_PRICES.Premium} features={['Unlimited Properties', 'Custom Branding & Landing Page', 'Dedicated Account Manager', 'Advanced Analytics', 'Phone & Video Support', '4% commission']} />
+                <PriceCard plan={SubscriptionType.PREMIUM} price={SUBSCRIPTION_PRICES.Premium} price={SUBSCRIPTION_PRICES.Premium} features={['Unlimited Properties', 'Custom Branding & Landing Page', 'Dedicated Account Manager', 'Advanced Analytics', 'Phone & Video Support', '4% commission']} />
             </div>
         </div>
     </section>

@@ -6,6 +6,7 @@ import { keysToCamel } from '../../dputils.js';
 import { validate } from '../../middleware/validation.js';
 import { protect, AuthRequest } from '../../middleware/auth.js';
 import { sendEmail } from '../../services/email.js';
+import { config } from '../../config.js';
 
 const router = Router();
 
@@ -102,14 +103,7 @@ router.get('/public-hosts',
 
 // Endpoint to get company information
 router.get('/company-info', protect, (req, res) => {
-  const companyInfo = {
-    name: process.env.COMPANY_NAME || "Your Company Name",
-    addressLine1: process.env.COMPANY_ADDRESS_LINE_1 || "123 Business St, Suite 101",
-    addressLine2: process.env.COMPANY_ADDRESS_LINE_2 || "Business City, 12345",
-    email: process.env.COMPANY_EMAIL || "contact@yourcompany.com",
-    website: process.env.COMPANY_WEBSITE || "www.yourcompany.com",
-  };
-  res.json(companyInfo);
+  res.json(config.company);
 });
 
 export default router;

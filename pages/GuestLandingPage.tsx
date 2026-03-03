@@ -123,7 +123,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   return (
     <div className="min-h-screen bg-alabaster text-charcoal">
        <section
-        className="relative h-[100vh] flex flex-col items-center justify-center text-center px-6 bg-cover bg-center"
+        className="relative h-[100vh] flex flex-col items-center justify-start md:justify-center text-center px-6 bg-cover bg-center pt-24 md:pt-0"
         style={{
           backgroundImage: `linear-gradient(rgba(242, 240, 230, 0.1), rgba(242, 240, 230, 0.8)), url(${host.premiumConfig?.heroImage || 'https://images.unsplash.com/photo-1652407782785-7a1006fc114d?q=80&w=2670&auto=format&fit=crop'})`,
         }}
@@ -216,7 +216,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
       <FeaturedStays apartments={hostApartments} onSelectApartment={onSelectApartment} />
 
-      {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} hostName={host.name} />}
+      {host.premiumConfig && <PremiumLandingExtension config={host.premiumConfig} host={host} />}
 
       <footer className="bg-alabaster text-charcoal py-12">
         <div className="container mx-auto text-center">

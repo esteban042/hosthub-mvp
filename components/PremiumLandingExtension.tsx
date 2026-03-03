@@ -1,8 +1,8 @@
 import React from 'react';
-import { PremiumConfig, PremiumSection } from '../types';
+import { PremiumConfig, PremiumSection, Host } from '../types';
 import { SKY_ACCENT, TEXT_COLOR } from '../constants';
 
-const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: string }> = ({ config, hostName }) => {
+const PremiumLandingExtension: React.FC<{ config: PremiumConfig, host: Host }> = ({ config, host }) => {
   if (!config.isEnabled) return null;
 
   return (
@@ -20,7 +20,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, hostName: strin
       <div className="space-y-32">
         {config.sections.map((section: PremiumSection, idx: number) => {
           const isEven = idx % 2 === 0;
-          const imageUrl = config.images[idx % config.images.length];
+          const imageUrl = host.landingPagePicture || config.images[idx % config.images.length];
           const secondImageUrl = config.images[(idx + 1) % config.images.length];
 
           return (
