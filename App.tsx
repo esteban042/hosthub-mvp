@@ -81,7 +81,7 @@ const App: React.FC = () => {
     }
 
     if (hosts.length > 0) {
-      return <GenericLandingPage hosts={hosts} onSignIn={() => setShowLogin(true)} />;
+      return <GenericLandingPage />;
     }
 
     return (

@@ -132,3 +132,10 @@ export async function getApartmentById(apartmentId: string): Promise<Apartment |
     const apartments = await query<Apartment>('SELECT * FROM apartments WHERE id = $1', [apartmentId]);
     return apartments.rows.length > 0 ? apartments.rows[0] : null;
 }
+
+
+// Create and export the apartmentService object to be compatible with newer modules.
+export const apartmentService = {
+  findAll: getAllApartments, // cron.ts uses findAll
+  findById: getApartmentById, // ical.ts uses findById
+};

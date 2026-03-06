@@ -38,7 +38,6 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
     country,
     phoneNumber,
     landingPagePicture,
-    airbnbCalendarLink,
     premiumConfig,
     paymentInstructions,
     vat,
@@ -56,7 +55,7 @@ export async function createHost(hostData: Omit<Host, 'id'>): Promise<Host> {
 
   const sql = `
     INSERT INTO hosts
-      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, airbnb_calendar_link, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id, currency, house_rules)
+      (name, slug, bio, avatar, subscription_type, commission_rate, business_name, contact_email, physical_address, country, phone_number, landing_page_picture, premium_config, payment_instructions, vat, business_id, check_in_time, check_out_time, check_in_info, check_in_message, welcome_message, checkout_message, user_id, currency, house_rules)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26)
     RETURNING *
   `;

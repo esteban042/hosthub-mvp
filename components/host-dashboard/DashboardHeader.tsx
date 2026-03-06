@@ -35,7 +35,7 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ hostSlug, onAddUnit, 
             onClick={() => setIsShareModalOpen(true)}
             className="rounded-2xl flex items-center justify-center w-full sm:w-auto"
           >
-            <div className="w-10 h-10 rounded-xl border border-sky-700/60 flex items-center justify-center text-sky-700">
+            <div className="w-10 h-10 rounded-xl border border-sky-700/60 flex items-center justify-center text-sky-700 hover:bg-sky-700 hover:text-white">
               <Share2 className="w-5 h-5" />
             </div>
           </button>

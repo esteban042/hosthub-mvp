@@ -89,7 +89,7 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
 
                     cells.push(
                       <div key={day.toString()} className="p-1 border-t border-stone-300" style={{ gridColumn: `span ${clampedDuration}` }}>
-                        <div className="bg-sky-500 rounded-lg p-2 text-sm truncate h-full flex items-center text-white">
+                        <div className="bg-sky-500/20 border border-sky-700 rounded-lg p-2 text-sm truncate h-full flex items-center text-white">
                           {booking.guestName}
                         </div>
                       </div>

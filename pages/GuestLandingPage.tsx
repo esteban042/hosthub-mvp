@@ -39,7 +39,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
 
   const hostApartments = useMemo(() => 
     apartments
-      .filter(apt => apt.hostId === host.id)
+      .filter(apt => apt.hostId === host.id && apt.isActive)
       .map(apt => ({ ...apt, currency: host.currency })), 
     [apartments, host.id, host.currency]
   );

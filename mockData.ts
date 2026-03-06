@@ -1,4 +1,4 @@
-import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType } from './types.js';
+import { Host, Apartment, UserRole, BookingStatus, Booking, SubscriptionType, ICalSource } from './types.js';
 
 export const MOCK_HOSTS: Host[] = [
   {
@@ -15,7 +15,6 @@ export const MOCK_HOSTS: Host[] = [
     country: 'Switzerland',
     phoneNumber: '+41 79 123 45 67',
     notes: 'Premium host with strong performance in winter bookings.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/12345.ics?s=5a0d31b0e3e26f5d6f7b11d3',
     paymentInstructions: 'To confirm your booking, please transfer a 50% deposit of the total amount to the following IBAN: CH93 0076 2011 6238 5295 7. Please include your Booking ID in the payment reference. The remaining balance is due upon arrival.',
     premiumConfig: {
       isEnabled: true,
@@ -54,7 +53,6 @@ export const MOCK_HOSTS: Host[] = [
     country: 'Japan',
     phoneNumber: '+81 90 9876 5432',
     notes: 'Focus on high-tech amenities and modern design. Exploring expansion to Osaka.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/67890.ics?s=c8f2a1e7d9b4c0a5f1e6b3a2',
     paymentInstructions: 'A deposit of 25% is required. Please use the following link to pay via Stripe: [link]. The balance can be paid in cash (JPY) or via credit card upon check-in.',
     vat: 10,
     businessName: 'Urban Retreats',
@@ -81,7 +79,6 @@ export const MOCK_HOSTS: Host[] = [
     country: 'Italy',
     phoneNumber: '+39 333 1122334',
     notes: 'Manages several high-end villas. Looking to add more properties in Umbria next year.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/11223.ics?s=a9b8c7d6e5f4a3b2c1d0e9f8',
     paymentInstructions: 'Payment details will be sent in a separate email. We accept wire transfers and all major credit cards. A 30% deposit is required within 48 hours of booking confirmation.',
     vat: 22,
     businessName: 'Tuscan Sun',
@@ -108,7 +105,6 @@ export const MOCK_HOSTS: Host[] = [
     country: 'USA',
     phoneNumber: '+1 305 555 1234',
     notes: 'Specializes in luxury beach houses. Considers offering additional services like private chef.',
-    airbnbCalendarLink: 'https://www.airbnb.com/calendar/ical/44556.ics?s=f0e1d2c3b4a5f6e7d8c9b0a1',
     paymentInstructions: 'To finalize your booking, a 50% deposit is required. You can pay via Zelle using the email address maya.singh@coastal.com or by credit card through the link we will send you. Please mention your Booking ID.',
     vat: 0,
     businessName: 'Coastal Escapes',
@@ -143,6 +139,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     minStayNights: 2,
     maxStayNights: 30,
     currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
+    icalUrls: [{ url: 'https://demo-ical.com/calendar.ics', source: ICalSource.AIRBNB }],
+    airbnbCalendarDates: [],
   },
   {
     id: 'apt-2',
@@ -163,6 +161,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     minStayNights: 1,
     maxStayNights: 14,
     currency: { name: 'Swiss Franc', code: 'CHF', symbol: 'CHF' },
+    icalUrls: [],
+    airbnbCalendarDates: [],
   },
   {
     id: 'apt-3',
@@ -183,6 +183,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     minStayNights: 3,
     maxStayNights: 90,
     currency: { name: 'Japanese Yen', code: 'JPY', symbol: '¥' },
+    icalUrls: [],
+    airbnbCalendarDates: [],
   },
   {
     id: 'apt-4',
@@ -203,6 +205,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     minStayNights: 7,
     maxStayNights: 60,
     currency: { name: 'Euro', code: 'EUR', symbol: '€' },
+    icalUrls: [],
+    airbnbCalendarDates: [],
   },
   {
     id: 'apt-5',
@@ -223,6 +227,8 @@ export const MOCK_APARTMENTS: Apartment[] = [
     minStayNights: 5,
     maxStayNights: 45,
     currency: { name: 'US Dollar', code: 'USD', symbol: '$' },
+    icalUrls: [],
+    airbnbCalendarDates: [],
   }
 ];
 

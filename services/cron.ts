@@ -1,20 +1,22 @@
 import cron from 'node-cron';
-import { getHosts } from './host.service.js';
-import { syncHostIcal } from './sync.service.js';
+import { apartmentService } from './apartment.service.js';
+import { iCalService } from './ical.service.js';
 
-// Schedule a task to run every 30 minutes
-cron.schedule('*/30 * * * *', async () => {
-  console.log('Running Airbnb calendar sync...');
+cron.schedule('0 * * * *', async () => {
+  console.log('Running hourly iCal sync...');
+
   try {
-    const hosts = await getHosts();
-    for (const host of hosts) {
-      if (host.airbnbCalendarLink) {
-        console.log(`Syncing calendar for host: ${host.name}`);
-        await syncHostIcal(host.id, host.airbnbCalendarLink);
+    const apartments = await apartmentService.findAll();
+
+    for (const apartment of apartments) {
+      if (apartment.icalUrls && apartment.icalUrls.length > 0) {
+        console.log(`Syncing iCal for apartment: ${apartment.title}`);
+        await iCalService.syncApartment(apartment.id, apartment.icalUrls);
       }
     }
-    console.log('Airbnb calendar sync complete.');
+
+    console.log('Hourly iCal sync finished.');
   } catch (error) {
-    console.error('Error during Airbnb calendar sync:', error);
+    console.error('Error during hourly iCal sync:', error);
   }
 });

@@ -92,4 +92,40 @@ router.get('/:id',
     }
 );
 
+// FIX: Add route for updating a single apartment
+router.put('/:id',
+    protect,
+    [
+        param('id').isString().notEmpty(),
+        body().isObject(), // Ensure the body is an object
+    ],
+    validate,
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const { id } = req.params;
+        const updatedApartmentData = req.body;
+
+        // The existing `updateApartments` service function expects an array.
+        // We can reuse its transactional and authorization logic by wrapping the single apartment in an array.
+        const apartmentToUpdate = { ...updatedApartmentData, id: id as string };
+
+        try {
+            await updateApartments([apartmentToUpdate], req.user!);
+            // FIX: Ensure ID is a string before fetching the updated record
+            const apartmentId = Array.isArray(id) ? id[0] : id;
+            if (!apartmentId) {
+                return res.status(400).json({ error: 'Apartment ID is missing' });
+            }
+            const updatedApartment = await getApartmentById(apartmentId);
+            res.status(200).json(updatedApartment);
+        } catch (err: any) {
+            if (err.message.includes('not authorized') || err.message.includes('host profile')) {
+                return res.status(403).json({ error: err.message });
+            } else if (err.message.includes('not found')) {
+                return res.status(404).json({ error: err.message });
+            }
+            next(err);
+        }
+    }
+);
+
 export default router;

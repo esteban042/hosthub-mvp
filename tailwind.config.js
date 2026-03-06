@@ -1,22 +1,22 @@
-const { TEXT_COLOR, BACKGROUND_COLOR, SKY_ACCENT } = require('./constants');
-
 module.exports = {
   theme: {
     extend: {
       colors: {
-        alabaster: BACKGROUND_COLOR,
-        charcoal: TEXT_COLOR,
-        'charcoal-darker': '#1c1a19',
-        'emerald-accent': '#34D399',
+        brand-green: '#00684A',
+        'brand-orange': '#FF5A00',
+        brand-background: '#F9F7F4',
+        charcoal: '#333333',
+        charcoal-darker: '#1c1a19',
         terracotta: '#E2725B',
-        'sky-accent': SKY_ACCENT,
-        'light-gray': '#EAEAEB',
-        'medium-gray': '#8A8A8E',
-        'charcoal-border': '',#4A4A4A
+        light-gray: '#EAEAEB',
+        medium-gray: '#8A8A8E',
+        charcoal-border: '#4A4A4A',
+        alabaster: '#EDEADE',
       },
       fontFamily: {
         sans: ['Roboto', 'sans-serif'],
         serif: ['Playfair Display', 'serif'],
+        dm: ['DM Sans', 'sans-serif'],
       },
       animation: {
         'breathing': 'breathing 3s ease-in-out infinite',
@@ -29,5 +29,9 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/forms'),
+    require('tailwindcss-animate'),
+  ],
 }

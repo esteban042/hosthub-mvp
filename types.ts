@@ -24,6 +24,18 @@ export enum BookingStatus {
     PENDING_PAYMENT = 'pending_payment',
 }
 
+export enum ICalSource {
+  AIRBNB = 'Airbnb',
+  BOOKING = 'Booking.com',
+  VRBO = 'VRBO',
+  OTHER = 'Other',
+}
+
+export interface ICalUrl {
+  url: string;
+  source: ICalSource;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -52,7 +64,6 @@ export interface Host {
   country: string;
   phoneNumber: string;
   notes: string | null;
-  airbnbCalendarLink: string | null;
   paymentInstructions: string | null;
   businessName: string | null;
   businessId: string | null;
@@ -104,6 +115,8 @@ export interface Apartment {
   maxStayNights: number;
   pageViews?: number;
   currency: Currency;
+  icalUrls?: ICalUrl[];
+  airbnbCalendarDates?: string[];
 }
 
 export interface Booking {

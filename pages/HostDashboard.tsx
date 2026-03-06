@@ -107,6 +107,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       amenities: processedApt.amenities || [],
       photos: processedApt.photos || ['https://images.unsplash.com/photo-1518780664697-55e3ad937233?auto=format&fit=crop&q=80&w=800&h=600'],
       priceOverrides: processedApt.priceOverrides || [],
+      icalUrls: processedApt.icalUrls || [],
       isActive: processedApt.isActive === undefined ? true : processedApt.isActive,
     };
 

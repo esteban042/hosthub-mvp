@@ -7,7 +7,7 @@ import ApartmentInfo from '../components/apartment/ApartmentInfo.js';
 import CheckInInfo from '../components/apartment/CheckInInfo.js';
 import BookingSection from '../components/booking/BookingSection.js';
 import { sanctumApi } from '../services/api.js';
-import { Clock, Home, Info } from 'lucide-react';
+import { Clock, Home, Info, XCircle } from 'lucide-react';
 
 interface ApartmentDetailPageProps {
   apartment: Apartment;
@@ -34,7 +34,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   useEffect(() => {
     window.scrollTo(0, 0);
 
-    if (apartment.id) {
+    if (apartment.id && apartment.isActive) {
       sanctumApi.trackApartmentView(apartment.id);
     }
 
@@ -53,11 +53,24 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     };
 
     fetchHostDetails();
-  }, [initialHost, apartment.id]);
+  }, [initialHost, apartment.id, apartment.isActive]);
 
   const handleNewBooking = (booking: Booking) => {
     onNewBooking(booking);
     setConfirmedBooking(booking);
+  }
+
+  if (!apartment.isActive) {
+    return (
+      <div className="pt-48 pb-24 w-full max-w-lg mx-auto px-6 text-center animate-in fade-in duration-700">
+          <XCircle className="w-24 h-24 text-red-400 mx-auto mb-6" />
+          <h2 className="text-3xl font-bold text-charcoal mb-4">Apartment Not Available</h2>
+          <p className="text-charcoal/70">This apartment is not currently active and cannot be booked.</p>
+          <button onClick={onBack} className="mt-8 px-6 py-3 rounded-xl bg-sky-700 text-white font-bold hover:bg-sky-800 transition-colors">
+            Return to Listings
+          </button>
+      </div>
+    );
   }
 
   return (

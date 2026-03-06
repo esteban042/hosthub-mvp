@@ -21,6 +21,8 @@ This document provides an overview of the database tables and their fields.
 - `min_stay_nights`: integer
 - `max_stay_nights`: integer
 - `page_views`: integer
+- `ical_urls`: jsonb
+- `airbnb_calendar_dates`: jsonb
 
 ## `public.blocked_dates`
 - `id`: text (Primary Key)
@@ -60,7 +62,6 @@ This document provides an overview of the database tables and their fields.
 - `country`: text
 - `phone_number`: text
 - `notes`: text
-- `airbnb_calendar_link`: text
 - `premium_config`: jsonb
 - `payment_instructions`: text
 - `business_name`: text
@@ -117,6 +118,8 @@ CREATE TABLE public.apartments (
   min_stay_nights integer,
   max_stay_nights integer,
   page_views integer DEFAULT 0,
+  ical_urls jsonb,
+  airbnb_calendar_dates jsonb,
   CONSTRAINT apartments_pkey PRIMARY KEY (id),
   CONSTRAINT apartments_host_id_fkey FOREIGN KEY (host_id) REFERENCES public.hosts(id)
 );
@@ -161,7 +164,6 @@ CREATE TABLE public.hosts (
   country text,
   phone_number text,
   notes text,
-  airbnb_calendar_link text,
   premium_config jsonb,
   payment_instructions text,
   business_name text,
