@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Host, Apartment, Booking, BookingStatus, BlockedDate } from '../types.js';
+import { Host, Apartment, Booking, BookingStatus, BlockedDate, ICalUrl } from '../types.js';
 import { fetchApi } from '../services/api.js';
 import StatisticsDashboard from '../components/host-dashboard/StatisticsDashboard.js';
 import DashboardHeader from '../components/host-dashboard/DashboardHeader.js';
@@ -17,6 +17,7 @@ interface HostDashboardProps {
   apartments: Apartment[];
   bookings: Booking[];
   blockedDates: BlockedDate[];
+  refreshData: () => void;
   onUpdateBookings: (bookings: Booking[]) => void;
   onBlockedDatesChange: () => void;
   onUpdateApartments: (apartments: Apartment[]) => void;
@@ -26,7 +27,7 @@ interface HostDashboardProps {
 }
 
 const HostDashboard: React.FC<HostDashboardProps> = ({ 
-  host, apartments, bookings, blockedDates, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, onImportListingFromAirbnb, loadingAirbnbIcal 
+  host, apartments, bookings, blockedDates, refreshData, onUpdateBookings, onBlockedDatesChange, onUpdateApartments, onHostUpdate, onImportListingFromAirbnb, loadingAirbnbIcal 
 }) => {
   const [activeTab, setActiveTab] = useState<'current-bookings' | 'bookings' | 'calendar' | 'apartments'| 'statistics' | 'general-info'>('current-bookings');
   const [showAptModal, setShowAptModal] = useState<boolean>(false);
@@ -134,6 +135,18 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
     }
   };
 
+  const handleIcalUrlsChange = async (apartmentId: string, icalUrls: ICalUrl[]) => {
+    try {
+        await fetchApi(`/api/v1/apartments/${apartmentId}/ical-urls`, {
+            method: 'PUT',
+            body: JSON.stringify(icalUrls),
+        });
+        refreshData();
+    } catch (error) {
+        console.error('Failed to update iCal URLs:', error);
+    }
+  };
+
   if (!host) {
     return <div>Loading...</div>;
   }
@@ -150,7 +163,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
       {activeTab === 'current-bookings' && <CurrentBookings bookings={myBookings} apartments={myApartments} onUpdateStatus={handleUpdateStatus} />}
       {activeTab === 'bookings' && <Bookings bookings={myBookings} apartments={myApartments} host={host} onUpdateBooking={handleUpdateStatus} />}
       {activeTab === 'calendar' && <Calendar />}
-      {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
+      {activeTab === 'apartments' && <ApartmentsList apartments={myApartments} host={host} onConfigure={(apt) => { setEditingApt(apt); setShowAptModal(true); }} />}
       {activeTab === 'statistics' && <StatisticsDashboard myApartments={myApartments} myBookings={myBookings} />}
       {activeTab === 'general-info' && <HostInfoEditor host={host} onHostUpdate={onHostUpdate} />}
 
@@ -160,7 +173,7 @@ const HostDashboard: React.FC<HostDashboardProps> = ({
           host={host}
           onSave={handleSaveApartment} 
           onClose={() => { setShowAptModal(false); setEditingApt(null); }} 
-        />
+          onIcalUrlsChange={handleIcalUrlsChange}        />
       )}
 
 

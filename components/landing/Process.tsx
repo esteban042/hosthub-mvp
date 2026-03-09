@@ -3,15 +3,15 @@ import { Globe, CreditCard, Calendar, MessageCircle, BarChart2, Shield, Rocket }
 
 const Feature: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => {
   return (
-    <div className="bg-white/80 p-6 rounded-lg shadow-md text-center">
+    <div className="bg-[#333333]/90 p-6 rounded-lg shadow-md text-center">
       <div className="flex justify-center mb-4">
-        <div className="bg-brand-green/10 text-brand-green rounded-lg p-3">
+        <div className="border border-cyan-700 text-cyan-700 rounded-lg p-3">
           {icon}
         </div>
       </div>
       <div>
-        <h3 className="text-xl font-bold text-charcoal mb-2">{title}</h3>
-        <p className="text-charcoal/80">{children}</p>
+        <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+        <p className="text-white/80">{children}</p>
       </div>
     </div>
   );
@@ -32,7 +32,7 @@ const Process: React.FC = () => {
     >
       <div className="container mx-auto px-6">
         <div className="text-center mb-16">
-          <h2 className="text-sm font-bold uppercase text-brand-green tracking-widest">THE ULTIMATE TOOLKIT</h2>
+          <h2 className="text-sm font-bold uppercase tracking-widest">THE ULTIMATE TOOLKIT</h2>
           <p className="mt-4 text-4xl sm:text-5xl font-extrabold text-charcoal tracking-tight">All-in-One Property Management</p>
           <p className="mt-6 text-xl text-charcoal/80 max-w-3xl mx-auto">Escape the 15% commission trap. Sanctum puts you on the map—literally. Get a stunning, independent booking website that syncs with everything, automates your guest communication and takes payments directly. We help you appear on Google Maps independently from Airbnb and capture direct bookings at lower commission.</p>
         </div>
@@ -52,9 +52,9 @@ const Process: React.FC = () => {
           <Feature icon={<BarChart2 size={24} />} title="Dynamic Pricing">
             Take control of your revenue. Set custom price ranges for different dates, seasons, or events to maximize your occupancy and profit.
           </Feature>
-          <Feature icon={<Shield size={24} />} title="Build Your Brand, Not Theirs">
+          {/* <Feature icon={<Shield size={24} />} title="Build Your Brand, Not Theirs">
             Every direct booking is a customer you own. Build a brand that guests trust and a direct booking channel that grows over time.
-          </Feature>
+          </Feature> */}
           <Feature icon={<Rocket size={24} />} title="Ready2go">
              No technical overhead, no high effort needed - we set everything up for you and your plattform is ready to go from day 1. Only functions you need, in a clean design.
           </Feature>

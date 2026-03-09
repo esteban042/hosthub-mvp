@@ -9,7 +9,7 @@ const ROI: React.FC = () => {
   const yearlySavings = Math.round(sliderValue * (airbnbFee - (sanctumFee + stripeFee)));
 
   return (
-    <div id="roi-calculator" className="bg-[#F9F7F4] py-24 sm:py-32">
+    <div id="roi" className="bg-[#F9F7F4] py-24 sm:py-32">
       <div className="container mx-auto px-6">
         <div className="bg-[#333333] text-white rounded-3xl p-6 md:p-16">
             <div className="grid md:grid-cols-2 gap-12 items-center">
@@ -29,7 +29,7 @@ const ROI: React.FC = () => {
                         onChange={(e) => setSliderValue(Number(e.target.value))}
                         className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer thumb:bg-white"
                         style={{
-                          background: `linear-gradient(to right, #047857 0%, #047857 ${((sliderValue - 2000) / 198000) * 100}%, rgba(255,255,255,0.2) ${((sliderValue - 2000) / 198000) * 100}%, rgba(255,255,255,0.2) 100%)`
+                          background: `linear-gradient(to right, #47b5fa 0%, #024168 ${((sliderValue - 2000) / 198000) * 100}%, rgba(255,255,255,0.2) ${((sliderValue - 2000) / 198000) * 100}%, rgba(255,255,255,0.2) 100%)`
                         }}
                     />
                     <div className="mt-8 text-center">

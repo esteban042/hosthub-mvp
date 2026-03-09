@@ -3,10 +3,10 @@ import { Check } from 'lucide-react';
 
 const PricingCard: React.FC<{ plan: string, price: string, priceDescription?: string, features: string[], isPopular?: boolean, commission: string }> = ({ plan, price, priceDescription, features, isPopular, commission }) => {
   return (
-    <div className={`border rounded-2xl p-8 flex flex-col ${isPopular ? 'bg-white shadow-2xl' : 'bg-white/50'}`}>
+    <div className={`border rounded-2xl p-8 flex flex-col ${isPopular ? 'bg-cyan-700 text-white shadow-2xl' : 'bg-[#333333]/90 text-white'}`}>
         {isPopular && (
             <div className="text-center mb-4">
-                <span className="bg-teal-800 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Most Popular</span>
+                <span className="bg-cyan-700 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Promotion Rate</span>
             </div>
         )}
         <h3 className="text-2xl font-bold text-charcoal text-center">{plan}</h3>
@@ -20,9 +20,7 @@ const PricingCard: React.FC<{ plan: string, price: string, priceDescription?: st
                 </li>
             ))}
         </ul>
-        <a href="#" className={`w-full block text-center font-bold py-4 px-6 rounded-full transition-all text-sm uppercase tracking-wider ${isPopular ? 'bg-brand-green text-white hover:bg-brand-green/90' : 'bg-charcoal text-white hover:bg-charcoal/90'} active:scale-95`}>
-            Get Started
-        </a>
+  
     </div>
   );
 };
@@ -31,7 +29,7 @@ const Pricing: React.FC = () => {
   const plans = [
     { 
       plan: 'Basic', 
-      price: '$29', 
+      price: '$19', 
       commission: 'No Commission',
       features: ['Up to 3 Properties', 'Direct Booking Website', 'Google Maps Setup', 'Standard Email Support', 'Automated Guest Messaging', 'Calendar Sync']
     },
@@ -39,14 +37,14 @@ const Pricing: React.FC = () => {
       plan: 'Pro', 
       price: '$9', 
       commission: '4% commission',
-      features: ['Up to 8 Properties', 'Stripe Payment Integration', 'Automated Guest Messaging', 'Calendar Sync', 'Priority Support'],
+      features: ['Up to 8 Properties', 'Stripe Payment Integration', 'Commission added on top of nightly rate', 'Calendar Sync', 'Priority Support'],
       isPopular: true
     },
     { 
       plan: 'Premium', 
-      price: '$25', 
+      price: '$19', 
       commission: '4% commission',
-      features: ['Unlimited Properties', 'Custom Branding & Landing Page', 'Dedicated Account Manager', 'Advanced Analytics', 'Phone & Video Support']
+      features: ['Unlimited Properties', 'Custom Branding & Landing Page', 'Private Domain', 'Phone & Video Support', 'Dedicated Account Manager']
     }
   ];
   

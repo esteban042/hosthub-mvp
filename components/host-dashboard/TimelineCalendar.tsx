@@ -26,11 +26,23 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
-  const isBlocked = (day: Date, apartmentId: string) => {
-    return blockedDates.some(blockedDate =>
-      blockedDate.apartmentId === apartmentId &&
-      format(new Date(blockedDate.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
+  const getBlockInfo = (day: Date, apartmentId: string) => {
+    const isManuallyBlocked = blockedDates.some(blockedDate =>
+        blockedDate.apartmentId === apartmentId &&
+        format(new Date(blockedDate.date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd')
     );
+    if (isManuallyBlocked) {
+        return { isBlocked: true, isIcal: false };
+    }
+
+    const apartment = apartments.find(apt => apt.id === apartmentId);
+    const isIcalBlocked = apartment?.airbnbCalendarDates?.some(date => format(new Date(date), 'yyyy-MM-dd') === format(day, 'yyyy-MM-dd'));
+
+    if (isIcalBlocked) {
+        return { isBlocked: true, isIcal: true };
+    }
+    
+    return { isBlocked: false, isIcal: false };
   };
 
   return (
@@ -96,7 +108,7 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
                     );
                     i += clampedDuration;
                   } else {
-                    const blocked = isBlocked(day, apt.id);
+                    const { isBlocked, isIcal } = getBlockInfo(day, apt.id);
                     const cellClasses = [
                         "border-t",
                         "border-stone-300",
@@ -105,7 +117,8 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
                         "duration-150",
                         "ease-in-out",
                         "relative",
-                        blocked ? "bg-red-200/50 hover:bg-red-300/60" : "hover:bg-stone-200",
+                        isBlocked && isIcal ? "bg-yellow-200/50 hover:bg-yellow-300/60" : 
+                        isBlocked ? "bg-red-200/50 hover:bg-red-300/60" : "hover:bg-stone-200",
                     ].filter(Boolean).join(" ");
 
                     cells.push(
@@ -114,9 +127,9 @@ const TimelineCalendar: React.FC<TimelineCalendarProps> = ({ apartments, booking
                             className={cellClasses}
                             onClick={() => onToggleBlock(apt.id, day)}
                         >
-                          {blocked && (
+                          {isBlocked && (
                               <div className="absolute inset-0 flex items-center justify-center">
-                                  <XMarkIcon className="h-5 w-5 text-red-800/70" />
+                                  <XMarkIcon className={`h-5 w-5 ${isIcal ? 'text-yellow-800/70' : 'text-red-800/70'}`} />
                               </div>
                           )}
                         </div>

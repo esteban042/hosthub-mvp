@@ -15,9 +15,10 @@ interface ApartmentEditorProps {
   host: Host | null;
   onSave: (apartment: Partial<Apartment>) => void;
   onClose: () => void;
+  onIcalUrlsChange: (apartmentId: string, icalUrls: ICalUrl[]) => Promise<void>;
 }
 
-const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onSave, onClose }) => {
+const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onSave, onClose, onIcalUrlsChange }) => {
   const [apt, setApt] = useState<Partial<Apartment> | null>(editingApt);
 
   if (!apt) return null;
@@ -86,6 +87,9 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
   };
 
   const handleIcalUrlsChange = (newIcalUrls: ICalUrl[]) => {
+    if (apt?.id) {
+        onIcalUrlsChange(apt.id, newIcalUrls);
+    }
     setApt(prev => (prev ? { ...prev, icalUrls: newIcalUrls } : null));
   };
 

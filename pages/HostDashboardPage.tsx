@@ -8,7 +8,7 @@ interface HostDashboardPageProps {
   onLogout: () => void;
 }
 
-export const HostDashboardPage: React.FC<HostDashboardPageProps> = ({ host, onLogout }) => {
+export const HostDashboardPage: React.FC<HostDashboardPageProps> = ({ host, apartments, bookings, onLogout }) => {
   return (
     <div className="min-h-screen bg-alabaster text-charcoal p-8">
       <header className="flex justify-between items-center mb-12">

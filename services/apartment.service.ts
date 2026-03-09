@@ -1,5 +1,5 @@
 import { query, execute } from '../dputils.js';
-import { Apartment, User, UserRole } from '../types.js';
+import { Apartment, User, UserRole, ICalUrl } from '../types.js';
 
 /**
  * Fetches all apartments from the database.
@@ -133,9 +133,31 @@ export async function getApartmentById(apartmentId: string): Promise<Apartment |
     return apartments.rows.length > 0 ? apartments.rows[0] : null;
 }
 
+export async function updateApartmentIcalUrls(apartmentId: string, icalUrls: ICalUrl[], user: User): Promise<Apartment> {
+    const aptRes = await query<{ host_id: string }>('SELECT host_id FROM apartments WHERE id = $1', [apartmentId]);
+    if (aptRes.rows.length === 0) {
+        throw new Error(`Apartment with id ${apartmentId} not found.`);
+    }
+
+    if (user.role !== UserRole.ADMIN) {
+        const hostRes = await query<{ id: string }>('SELECT id FROM hosts WHERE user_id = $1', [user.id]);
+        if (hostRes.rows.length === 0 || String(aptRes.rows[0].host_id) !== String(hostRes.rows[0].id)) {
+            throw new Error(`You are not authorized to update apartment with id ${apartmentId}.`);
+        }
+    }
+
+    const result = await query<Apartment>(
+        'UPDATE apartments SET ical_urls = $1 WHERE id = $2 RETURNING *',
+        [JSON.stringify(icalUrls), apartmentId]
+    );
+
+    return result.rows[0];
+}
+
 
 // Create and export the apartmentService object to be compatible with newer modules.
 export const apartmentService = {
   findAll: getAllApartments, // cron.ts uses findAll
   findById: getApartmentById, // ical.ts uses findById
+  updateIcalUrls: updateApartmentIcalUrls,
 };

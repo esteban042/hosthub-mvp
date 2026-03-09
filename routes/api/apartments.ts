@@ -6,7 +6,8 @@ import {
     getAllApartments, 
     createApartment, 
     updateApartments, 
-    getApartmentById 
+    getApartmentById,
+    updateApartmentIcalUrls
 } from '../../services/apartment.service.js';
 import { UserRole } from '../../types.js';
 
@@ -117,6 +118,31 @@ router.put('/:id',
             }
             const updatedApartment = await getApartmentById(apartmentId);
             res.status(200).json(updatedApartment);
+        } catch (err: any) {
+            if (err.message.includes('not authorized') || err.message.includes('host profile')) {
+                return res.status(403).json({ error: err.message });
+            } else if (err.message.includes('not found')) {
+                return res.status(404).json({ error: err.message });
+            }
+            next(err);
+        }
+    }
+);
+
+router.put('/:id/ical-urls',
+    protect,
+    [
+        param('id').isString().notEmpty(),
+        body().isArray(),
+    ],
+    validate,
+    async (req: AuthRequest, res: Response, next: NextFunction) => {
+        const { id } = req.params;
+        const icalUrls = req.body;
+
+        try {
+            const apartment = await updateApartmentIcalUrls(id as string, icalUrls, req.user!);
+            res.status(200).json(apartment);
         } catch (err: any) {
             if (err.message.includes('not authorized') || err.message.includes('host profile')) {
                 return res.status(403).json({ error: err.message });

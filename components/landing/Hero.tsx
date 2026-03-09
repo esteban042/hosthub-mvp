@@ -11,17 +11,12 @@ const Hero: React.FC = () => {
         minHeight: '70vh' 
       }}
     >
-      <div className="container mx-auto px-6 py-16 sm:py-24 flex items-center h-full">
-        <div className="text-left">
-          <h1 className="text-4xl sm:text-6xl font-bold text-brand-green tracking-tight">
-            Own your visibility. <br />
-            <span className="text-charcoal">Own your guests.</span>
+      <div className="container mx-auto px-25 py-24 sm:py-24 flex items-center h-full">
+        <div className="text-left px-10">
+          <h1 className="text-4xl sm:text-6xl px-10 font-serif tracking-tight">
+            Own your visibility <br />
+            <span className=" py-28">Own your guests</span>
           </h1>
-          <div className="mt-8 flex justify-start gap-4">
-            <a href="#pricing" className="bg-brand-green text-white font-bold py-3 px-6 sm:py-4 sm:px-8 rounded-full transition-all text-xs sm:text-sm uppercase tracking-wider hover:bg-brand-green/90 active:scale-95">
-              See Plans
-            </a>
-          </div>
         </div>
       </div>
     </div>
