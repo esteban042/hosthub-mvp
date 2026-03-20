@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Booking, BookingStatus } from '../../types.js';
 import { Building, CalendarDays, Users, DollarSign, Mail, Phone, MessageSquare, Printer } from 'lucide-react';
 import { formatBookingRange } from '../../utils/formatBookingRange.js';
@@ -38,6 +39,7 @@ const BookingCard: React.FC<{
   showButtons?: boolean;
   isUpdating?: boolean;
 }> = ({ booking: b, apartmentTitle, onUpdateStatus: handleUpdateStatus, onSendMessage, onSendCheckInMessage, onSendWelcomeMessage, onSendCheckoutMessage, statusFilter, showButtons = true, isUpdating = false }) => {
+  const { t } = useTranslation();
   const [isMessageMenuOpen, setIsMessageMenuOpen] = useState(false);
   const guestDisplayName = getGuestDisplayName(b.guestName, b.guestEmail);
 
@@ -51,6 +53,19 @@ const BookingCard: React.FC<{
     </button>
   );
 
+  const getStatusText = (status: BookingStatus) => {
+    switch (status) {
+      case BookingStatus.PAID:
+        return t('booking_status.paid');
+      case BookingStatus.CONFIRMED:
+        return t('booking_status.confirmed');
+      case BookingStatus.PENDING_PAYMENT:
+        return t('booking_status.pending_payment');
+      default:
+        return t('booking_status.canceled');
+    }
+  };
+
   return (
     <div key={b.id} className="bg-white/50 rounded-2xl overflow-hidden shadow-xl border flex flex-col hover:border-emerald-accent/30 transition-all border-charcoal/10">
       <div className="p-6 flex-grow">
@@ -61,7 +76,7 @@ const BookingCard: React.FC<{
                 <Printer className="w-5 h-5" />
             </Link>
             <span className={`px-4 py-1.5 rounded-full text-[9px] uppercase tracking-widest font-black border ${getStatusBadgeStyle(b.status)}`}>
-                {b.status}
+                {getStatusText(b.status)}
             </span>
           </div>
         </div>
@@ -75,8 +90,8 @@ const BookingCard: React.FC<{
 
         <div className="space-y-3 text-sm text-charcoal/60">
           <BookingInfoLine icon={<CalendarDays className="w-4 h-4 flex-shrink-0" />} text={formatBookingRange(b.startDate, b.endDate)} isBold />
-          <BookingInfoLine icon={<Users className="w-4 h-4 flex-shrink-0" />} text={`${b.numGuests || 1} Guests`} />
-          <BookingInfoLine icon={<DollarSign className="w-4 h-4 flex-shrink-0" />} text={`$${b.totalPrice.toLocaleString()} Total`} />
+          <BookingInfoLine icon={<Users className="w-4 h-4 flex-shrink-0" />} text={t('booking_card.guests', { count: b.numGuests || 1 })} />
+          <BookingInfoLine icon={<DollarSign className="w-4 h-4 flex-shrink-0" />} text={`$${b.totalPrice.toLocaleString()} ${t('booking_card.total')}`} />
           <BookingInfoLine icon={<Mail className="w-4 h-4 flex-shrink-0" />} text={<span className="truncate">{b.guestEmail}</span>} />
           {b.guestPhone && <BookingInfoLine icon={<Phone className="w-4 h-4 flex-shrink-0" />} text={b.guestPhone} />}
         </div>
@@ -109,14 +124,14 @@ const BookingCard: React.FC<{
                       className="bg-transparent border border-green-600 text-green-600"
                       disabled={isUpdating}
                     >
-                      Mark as Paid
+                      {t('booking_card.mark_as_paid')}
                     </ActionButton>
                     <ActionButton 
                       onClick={() => handleUpdateStatus(b, BookingStatus.CANCELED)} 
                       className="bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white"
                       disabled={isUpdating}
                     >
-                      Cancel
+                      {t('booking_card.cancel')}
                     </ActionButton>
                     </>
                 )}
@@ -126,7 +141,7 @@ const BookingCard: React.FC<{
                       className="w-full bg-transparent border border-rose-600 text-rose-600 hover:bg-rose-600 hover:text-white"
                       disabled={isUpdating}
                     >
-                      Cancel
+                      {t('booking_card.cancel')}
                     </ActionButton>
                 )}
             </div>

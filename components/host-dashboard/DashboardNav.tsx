@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BookMarked, CalendarDays, Building, BarChart2, Info, Activity } from 'lucide-react';
 
 interface DashboardNavProps {
@@ -7,13 +8,14 @@ interface DashboardNavProps {
 }
 
 const DashboardNav: React.FC<DashboardNavProps> = ({ activeTab, onTabChange }) => {
+  const { t } = useTranslation();
   const tabs = [
-    { id: 'current-bookings', label: 'Current', icon: <Activity className="w-5 h-5" /> },
-    { id: 'bookings', label: 'All Bookings', icon: <BookMarked className="w-5 h-5" /> },
-    { id: 'calendar', label: 'Calendar', icon: <CalendarDays className="w-5 h-5" /> },
-    { id: 'apartments', label: 'Units', icon: <Building className="w-5 h-5" /> },
-    { id: 'statistics', label: 'Statistics', icon: <BarChart2 className="w-5 h-5" /> },
-    { id: 'general-info', label: 'Settings', icon: <Info className="w-5 h-5" /> }
+    { id: 'current-bookings', label: t('host_dashboard.nav.current'), icon: <Activity className="w-5 h-5" /> },
+    { id: 'bookings', label: t('host_dashboard.nav.all_bookings'), icon: <BookMarked className="w-5 h-5" /> },
+    { id: 'calendar', label: t('host_dashboard.nav.calendar'), icon: <CalendarDays className="w-5 h-5" /> },
+    { id: 'apartments', label: t('host_dashboard.nav.units'), icon: <Building className="w-5 h-5" /> },
+    { id: 'statistics', label: t('host_dashboard.nav.statistics'), icon: <BarChart2 className="w-5 h-5" /> },
+    { id: 'general-info', label: t('host_dashboard.nav.settings'), icon: <Info className="w-5 h-5" /> }
   ];
 
   return (

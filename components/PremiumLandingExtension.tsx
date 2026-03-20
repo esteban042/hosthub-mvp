@@ -1,19 +1,22 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { PremiumConfig, PremiumSection, Host } from '../types';
 import { SKY_ACCENT, TEXT_COLOR } from '../constants';
 
 const PremiumLandingExtension: React.FC<{ config: PremiumConfig, host: Host }> = ({ config, host }) => {
+  const { t } = useTranslation();
+
   if (!config.isEnabled) return null;
 
   return (
     <div className="mt-40 space-y-40 animate-in fade-in duration-1000">
       <div className="max-w-4xl mx-auto text-center space-y-8">
-        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-teal-600">Host Feature</span>
+        <span className="text-[10px] font-black uppercase tracking-[0.5em] text-teal-600">{t('premium_landing.host_feature')}</span>
         <h2 className="text-5xl md:text-7xl font-serif font-bold tracking-tight leading-tight" style={{ color: TEXT_COLOR }}>
-          Beyond the <span className="italic text-sky-700">Ordinary</span>
+          {t('premium_landing.beyond_the')} <span className="italic text-sky-700">{t('premium_landing.ordinary')}</span>
         </h2>
         <p className="text-xl text-charcoal/80 font-medium leading-relaxed max-w-2xl mx-auto">
-          We don't just provide accommodation; we curate environments where memories take root and flourish. Explore the heart of our hospitality.
+          {t('premium_landing.description')}
         </p>
       </div>
 
@@ -31,7 +34,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, host: Host }> =
                   <div className="absolute inset-0 bg-stone-950/10 hover:bg-transparent transition-colors duration-500" />
                 </div>
                 <div className={`absolute -bottom-12 ${isEven ? '-right-12' : '-left-12'} hidden lg:block w-48 h-64 rounded-2xl overflow-hidden border-4 border-white shadow-2xl z-20`}>
-                   <img src={secondImageUrl} className="w-full h-full object-cover" alt="Detail" />
+                   <img src={secondImageUrl} className="w-full h-full object-cover" alt={t('premium_landing.detail_alt')} />
                 </div>
               </div>
 
@@ -56,7 +59,7 @@ const PremiumLandingExtension: React.FC<{ config: PremiumConfig, host: Host }> =
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 h-[400px]">
             {config.images.slice(0, 4).map((img: string, i: number) => (
               <div key={i} className={`rounded-3xl overflow-hidden border border-stone-200 relative group h-full ${i % 2 === 0 ? 'mt-8' : 'mb-8'}`}>
-                <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={`Gallery ${i}`} />
+                <img src={img} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" alt={t('premium_landing.gallery_alt', { number: i })} />
               </div>
             ))}
           </div>

@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Menu, X } from 'lucide-react';
+import LanguageSwitcher from '../LanguageSwitcher';
 
 const Header: React.FC = () => {
+  const { t } = useTranslation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -37,10 +40,13 @@ const Header: React.FC = () => {
           </button>
         </div>
         <div className="hidden lg:flex lg:gap-x-12">
-          <NavLink href="#process">How it Works</NavLink>
-          <NavLink href="#pricing">Pricing</NavLink>
-          <NavLink href="#roi">ROI Calculator</NavLink>
-          <NavLink href="#demo">Live Demo</NavLink>
+          <NavLink href="#process">{t('landing_page.header.how_it_works')}</NavLink>
+          <NavLink href="#pricing">{t('landing_page.header.pricing')}</NavLink>
+          <NavLink href="#roi">{t('landing_page.header.roi_calculator')}</NavLink>
+          <NavLink href="#demo">{t('landing_page.header.live_demo')}</NavLink>
+        </div>
+        <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+          <LanguageSwitcher />
         </div>
 
       </nav>
@@ -65,13 +71,14 @@ const Header: React.FC = () => {
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
                 <div className="space-y-2 py-6">
-                  <a href="#process" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">How it Works</a>
-                  <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">Pricing</a>
-                  <a href="#roi" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">ROI Calculator</a>
-                  <a href="#demo" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">Live Demo</a>
+                  <a href="#process" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">{t('landing_page.header.how_it_works')}</a>
+                  <a href="#pricing" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">{t('landing_page.header.pricing')}</a>
+                  <a href="#roi" onClick={() => setIsMenuOpen(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">{t('landing_page.header.roi_calculator')}</a>
+                  <a href="#demo" onClick={() => setIsMenuOpe1n(false)} className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">{t('landing_page.header.live_demo')}</a>
                 </div>
+         
                 <div className="py-6">
-                  <a href="/login" className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-charcoal hover:bg-gray-50">Host Login</a>
+                  <LanguageSwitcher />
                 </div>
               </div>
             </div>

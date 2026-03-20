@@ -1,10 +1,12 @@
 
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment, Booking, BookingStatus } from '../../types.js';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 
 const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Booking[] }> = ({ myApartments, myBookings }) => {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
 
   const monthlyStats = useMemo(() => {
@@ -52,11 +54,11 @@ const StatisticsDashboard: React.FC<{ myApartments: Apartment[], myBookings: Boo
             <h5 className="text-lg font-bold text-charcoal mb-4">{stat.aptTitle}</h5>
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal/60">Bookings</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal/60">{t('host_dashboard.statistics.bookings')}</p>
                 <p className="text-2xl font-bold text-charcoal">{stat.bookingsCount}</p>
               </div>
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal/60 text-right">Revenue</p>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-charcoal/60 text-right">{t('host_dashboard.statistics.revenue')}</p>
                 <p className="text-2xl font-bold text-sky-700 text-right">${stat.totalRevenue.toLocaleString()}</p>
               </div>
             </div>

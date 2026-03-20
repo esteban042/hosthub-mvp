@@ -1,0 +1,683 @@
+{
+  "common": {
+    "not_available": "No disponible"
+  },
+  "landing_page": {
+    "demo": {
+      "title": "Ver en Acción",
+      "description": "Las palabras son baratas. Vea cómo se ve y se siente Sanctum desde la perspectiva de un huésped. Seleccione un anfitrión de demostración para explorar su sitio de reservas en vivo.",
+      "explore_showcase": "— Explorar un Escaparate —"
+    },
+    "footer": {
+      "all_rights_reserved": "Todos los derechos reservados"
+    },
+    "header": {
+      "how_it_works": "Cómo funciona",
+      "pricing": "Precios",
+      "roi_calculator": "Calculadora de ROI",
+      "live_demo": "Demostración en vivo",
+      "host_login": "Inicia sesión"
+    },
+    "search": {
+        "title1": "Poseer a tus reservas",
+        "title2": "Poseer a tus invitadas"
+    },
+    "pricing": {
+      "title": "Precios que tienen sentido",
+      "subtitle": "Empieza pequeño, crece grande. Nuestro éxito está ligado al tuyo. Todos los planes incluyen nuestro potente motor de reservas directas y una tarifa de reserva del 4%.",
+      "promotion_rate": "Tasa de Promoción",
+      "per_month": "/mes",
+      "plans": {
+        "basic": {
+          "name": "Básico",
+          "commission": "Sin Comisión",
+          "features": [
+            "Hasta 3 Propiedades",
+            "Sitio Web de Reservas Directas",
+            "Configuración de Google Maps",
+            "Soporte por Correo Electrónico Estándar",
+            "Mensajería Automatizada para Huéspedes",
+            "Sincronización de Calendario"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "commission": "4% de comisión",
+          "features": [
+            "Hasta 8 Propiedades",
+            "Integración de Pagos con Stripe",
+            "Comisión añadida sobre la tarifa nocturna",
+            "Sincronización de Calendario",
+            "Soporte Prioritario"
+          ]
+        },
+        "premium": {
+          "name": "Premium",
+          "commission": "4% de comisión",
+          "features": [
+            "Propiedades Ilimitadas",
+            "Marca y Página de Destino Personalizadas",
+            "Dominio Privado",
+            "Soporte por Teléfono y Video",
+            "Gerente de Cuenta Dedicado"
+          ]
+        }
+      }
+    },
+    "process": {
+      "ultimate_toolkit": "EL KIT DE HERRAMIENTAS DEFINITIVO",
+      "title": "Gestión de propiedades todo en uno",
+      "subtitle": "Escapa de la trampa de la comisión del 15%. Sanctum te pone en el mapa, literalmente. Obtén un sitio web de reservas independiente e impresionante que se sincroniza con todo, automatiza la comunicación con tus huéspedes y recibe pagos directamente. Te ayudamos a aparecer en Google Maps de forma independiente a Airbnb y a capturar reservas directas con una comisión más baja.",
+      "features": {
+        "direct_booking_site": {
+          "title": "Tu Sitio de Reservas Directas",
+          "description": "Aparece en Google Maps y en las búsquedas. Obtén un sitio web atractivo y compatible con dispositivos móviles que muestre tus propiedades y permita a los huéspedes reservar directamente."
+        },
+        "seamless_payments": {
+          "title": "Pagos sin Interrupciones",
+          "description": "La integración con el procesamiento de Stripe significa que recibes tu dinero de forma instantánea y segura. No más perseguir pagos, no más tarifas de plataforma."
+        },
+        "unified_calendar": {
+          "title": "Calendario Unificado",
+          "description": "Sincroniza automáticamente tus reservas y disponibilidad de Airbnb, Vrbo y más. Di adiós a las reservas duplicadas para siempre."
+        },
+        "automated_messaging": {
+          "title": "Mensajería Automatizada",
+          "description": "Servicio de cinco estrellas, en piloto automático. Envía confirmaciones de reserva automáticas, instrucciones de check-in y recordatorios de reseñas."
+        },
+        "dynamic_pricing": {
+          "title": "Precios Dinámicos",
+          "description": "Toma el control de tus ingresos. Establece rangos de precios personalizados para diferentes fechas, temporadas o eventos para maximizar tu ocupación y ganancias."
+        },
+        "ready_to_go": {
+          "title": "Listo para Usar",
+          "description": "Sin gastos técnicos, sin necesidad de grandes esfuerzos: nosotros configuramos todo para ti y tu plataforma está lista para funcionar desde el primer día. Solo las funciones que necesitas, en un diseño limpio."
+        }
+      }
+    },
+    "roi": {
+      "title": "Deja de Perder Dinero en Comisiones",
+      "subtitle": "Usa la calculadora para estimar tus ahorros anuales con un sitio web de reservas directas.",
+      "gross_revenue": "Tus Ingresos Brutos Anuales",
+      "yearly_savings": "Tus Ahorros Anuales Estimados",
+      "based_on": "Suficiente para unas vacaciones"
+    }
+  },
+  "host_dashboard": {
+    "statistics": {
+      "bookings": "Reservas",
+      "revenue": "Ingresos"
+    },
+    "header": {
+      "title": "Estudio del Anfitrión",
+      "subtitle": "Operaciones de Activos",
+      "share_modal": {
+        "title": "Comparte tu Enlace de Reserva",
+        "description": "Comparte este enlace con tus huéspedes para permitirles reservar directamente."
+      }
+    },
+    "stats": {
+      "active_units": "Unidades Activas",
+      "upcoming_stays": "Estancias Próximas",
+      "completed_stays": "Estancias Completadas",
+      "annual_revenue": "Ingresos Anuales",
+      "total_page_views": "Vistas de Página Totales"
+    },
+    "apartments_list": {
+      "base": "Base",
+      "configure": "Configurar"
+    },
+    "add_unit_menu": {
+      "add_unit": "Agregar Unidad"
+    },
+    "amenity_selector": {
+      "search_amenities": "Buscar servicios...",
+      "amenities": {
+        "wifi": "Wifi",
+        "tv": "TV",
+        "kitchen": "Cocina",
+        "air_conditioning": "Aire acondicionado",
+        "heating": "Calefacción",
+        "free_parking": "Aparcamiento gratuito",
+        "washer": "Lavadora",
+        "pool": "Piscina",
+        "coffee_maker": "Cafetera",
+        "bbq_grill": "Parrilla de barbacoa",
+        "fireplace": "Chimenea",
+        "beach_access": "Acceso a la playa",
+        "outdoor_shower": "Ducha al aire libre",
+        "free_wifi": "Wi-Fi gratis",
+        "flat_screen_tv": "Televisor de pantalla plana",
+        "cable_satellite_channels": "Canales por cable/satélite",
+        "mini_bar": "Mini bar",
+        "coffee_tea_maker": "Cafetera/tetera",
+        "in_room_safe": "Caja fuerte en la habitación",
+        "desk_workspace": "Escritorio/espacio de trabajo",
+        "balcony_or_terrace": "Balcón o terraza",
+        "private_bathroom": "Baño privado",
+        "shower": "Ducha",
+        "bathtub": "Bañera",
+        "toiletries": "Artículos de aseo",
+        "hairdryer": "Secador de pelo",
+        "bathrobes": "Albornoces",
+        "slippers": "Zapatillas",
+        "extra_pillows": "Almohadas adicionales",
+        "extra_blankets": "Mantas adicionales",
+        "room_service": "Servicio de habitaciones",
+        "daily_housekeeping": "Limpieza diaria",
+        "laundry_service": "Servicio de lavandería",
+        "iron_ironing_board": "Plancha/tabla de planchar",
+        "blackout_curtains": "Cortinas opacas",
+        "telephone": "Teléfono",
+        "alarm_clock": "Despertador",
+        "complimentary_bottled_water": "Agua embotellada de cortesía",
+        "welcome_snacks": "Bocadillos de bienvenida",
+        "soundproofing": "Insonorización",
+        "refrigerator": "Refrigerador",
+        "microwave": "Microondas",
+        "sofa_lounge_area": "Sofá/zona de estar",
+        "dining_area": "Comedor",
+        "closet_wardrobe": "Armario/guardarropa",
+        "hangers": "Perchas",
+        "luggage_rack": "Portaequipajes",
+        "safe_deposit_box": "Caja de seguridad",
+        "turndown_service": "Servicio de cobertura",
+        "complimentary_toiletries": "Artículos de aseo de cortesía",
+        "electric_kettle": "Hervidor eléctrico",
+        "usb_charging_ports": "Puertos de carga USB",
+        "multiple_power_outlets": "Múltiples tomas de corriente",
+        "tea_selection": "Selección de té",
+        "coffee_selection": "Selección de café",
+        "wine_glasses": "Copas de vino",
+        "outdoor_seating": "Asientos al aire libre",
+        "garden_access": "Acceso al jardín",
+        "private_pool": "Piscina privada",
+        "shared_pool_access": "Acceso a piscina compartida",
+        "hot_tub_jacuzzi": "Bañera de hidromasaje/Jacuzzi",
+        "fitness_center_access": "Acceso al gimnasio",
+        "spa_access": "Acceso al spa",
+        "fire_pit": "Fogon",
+        "water_sports_equipment": "Equipo para deportes acuáticos",
+        "bicycle_rental": "Alquiler de bicicletas",
+        "parking": "Aparcamiento",
+        "ev_charging_station": "Estación de carga de vehículos eléctricos",
+        "concierge_service": "Servicio de conserjería",
+        "tour_desk": "Mostrador de información turística",
+        "shuttle_service": "Servicio de transporte",
+        "airport_transfer": "Traslado al aeropuerto",
+        "pet_friendly_amenities": "Servicios para mascotas",
+        "baby_crib": "Cuna",
+        "high_chair": "Trona",
+        "childrens_play_area": "Zona de juegos para niños",
+        "board_games": "Juegos de mesa",
+        "books_magazines": "Libros/revistas",
+        "room_blackout_shades": "Cortinas opacas de la habitación",
+        "smart_home_controls": "Controles de hogar inteligente",
+        "bluetooth_speaker": "Altavoz Bluetooth",
+        "streaming_services": "Servicios de streaming",
+        "dvd_player": "Reproductor de DVD",
+        "yoga_mats": "Esterillas de yoga",
+        "mini_library": "Mini biblioteca",
+        "fire_extinguisher": "Extintor de incendios",
+        "first_aid_kit": "Botiquín de primeros auxilios",
+        "smoke_detector": "Detector de humo",
+        "carbon_monoxide_detector": "Detector de monóxido de carbono",
+        "umbrella": "Paraguas",
+        "beach_towels": "Toallas de playa",
+        "pool_towels": "Toallas de piscina"
+      }
+    },
+    "apartment_editor": {
+      "unit_configuration": "Configuración de la unidad",
+      "save_unit": "Guardar unidad",
+      "discard": "Descartar",
+      "apartment_import": {
+        "import_from_airbnb": "Importar desde Airbnb",
+        "paste_airbnb_url": "Pegar URL de Airbnb...",
+        "importing": "Importando...",
+        "import": "Importar",
+        "enter_airbnb_url_error": "Por favor, introduce una URL de Airbnb.",
+        "import_error": "Ocurrió un error durante la importación."
+      },
+      "apartment_basic_info": {
+        "unit_title": "Título de la unidad",
+        "city": "Ciudad",
+        "beds": "Camas",
+        "bathrooms": "Baños",
+        "guests": "Huéspedes"
+      },
+      "apartment_pricing": {
+        "base_price": "Precio base ({{symbol}})",
+        "base_price_placeholder": "p.ej. 150",
+        "min_stay": "Estancia mínima (noches)",
+        "max_stay": "Estancia máxima (noches)",
+        "seasonal_pricing": "Precios de temporada",
+        "add_rate_rule": "Añadir regla de tarifa",
+        "from_date": "Desde la fecha",
+        "until_date": "Hasta la fecha",
+        "nightly_price": "Precio por noche ({{symbol}})",
+        "no_rules_configured": "No hay reglas de precios de temporada configuradas."
+      },
+      "apartment_media": {
+        "map_embed_url": "URL de Inserción del Mapa",
+        "unit_photos": "Fotos de la Unidad",
+        "apartment_alt": "Apartamento",
+        "no_photos_added": "No se han agregado fotos para esta unidad."
+      },
+      "apartment_details": {
+        "description": "Descripción",
+        "amenities": "Comodidades"
+      },
+      "apartment_status": {
+        "unit_status": "Estado de la unidad",
+        "status_description": "Las unidades inactivas están ocultas para los huéspedes y no se pueden reservar.",
+        "use_setting": "Usar configuración"
+      },
+      "ical_sync": {
+        "title": "Sincronización iCal",
+        "description": "Mantén tu disponibilidad actualizada sincronizando tus calendarios de otras plataformas como Airbnb, Booking.com, etc.",
+        "paste_ical_url": "Pega la URL de iCal aquí...",
+        "add": "Añadir"
+      }
+    },
+    "bookings": {
+      "all_active": "Todos Activos",
+      "upcoming_30d": "Próximos (30d)",
+      "confirmed": "Confirmadas",
+      "paid": "Pagadas",
+      "past_stays": "Estancias Pasadas",
+      "canceled": "Canceladas",
+      "no_bookings": "No hay reservas que coincidan con esta selección."
+    },
+    "current_bookings": {
+      "current_stays": "Estancias Actuales",
+      "check_ins_today": "Llegadas Hoy",
+      "check_outs_today": "Salidas Hoy",
+      "currently_in_unit": "Actualmente en la Unidad",
+      "no_guests": "No hay huéspedes actualmente en las unidades.",
+      "unknown_unit": "Unidad Desconocida",
+      "no_check_ins": "No hay llegadas programadas para hoy.",
+      "no_check_outs": "No hay salidas programadas para hoy."
+    },
+    "nav": {
+      "current": "Actual",
+      "all_bookings": "Todas las Reservas",
+      "calendar": "Calendario",
+      "units": "Unidades",
+      "statistics": "Estadísticas",
+      "settings": "Configuración"
+    },
+    "host_info": {
+      "host_name": "Nombre del Anfitrión",
+      "avatar_image": "Imagen de Avatar",
+      "landing_page_picture": "Imagen de la Página de Destino",
+      "host_bio": "Biografía del Anfitrión (Pública)",
+      "business_name": "Nombre del Negocio",
+      "email": "Correo Electrónico",
+      "phone_number": "Número de Teléfono",
+      "address": "Dirección",
+      "country": "País",
+      "select_country": "Selecciona un país",
+      "vat": "IVA (%)",
+      "check_in_out_title": "Check-in / Check-out",
+      "check_in_time": "Hora de Check-in",
+      "check_out_time": "Hora de Check-out",
+      "check_in_info": "Información de Check-in",
+      "guest_communication_title": "Comunicación con el Huésped",
+      "check_in_message": "Mensaje de Check-in",
+      "welcome_message": "Mensaje de Bienvenida",
+      "checkout_message": "Mensaje de Checkout",
+      "policies_title": "Políticas e Instrucciones",
+      "deposit_percentage": "Porcentaje de Depósito (%)",
+      "payment_instructions": "Instrucciones de Pago",
+      "house_rules": "Reglas de la Casa",
+      "terms": "Términos",
+      "conditions": "Condiciones",
+      "faq": "Preguntas Frecuentes",
+      "ical_feed_title": "Feed iCal",
+      "copied": "¡Copiado!",
+      "copy": "Copiar",
+      "social_media_title": "Presencia en Redes Sociales",
+      "x_url": "URL de X",
+      "facebook_url": "URL de Facebook",
+      "instagram_url": "URL de Instagram",
+      "preview_landing_page": "Vista Previa de la Página de Destino",
+      "saving": "Guardando...",
+      "saved": "¡Guardado!",
+      "save_changes": "Guardar Cambios"
+    },
+    "image_upload": {
+      "uploading": "Subiendo...",
+      "upload_failed": "Falló la subida. Por favor, inténtalo de nuevo.",
+      "upload_complete": "¡Subida completa!",
+      "view_image": "Ver Imagen",
+      "drop_prompt": "Suelta la imagen aquí...",
+      "drag_prompt": "Arrastra y suelta una imagen aquí, o haz clic para seleccionar una",
+      "file_types": "PNG, JPG, GIF hasta 10MB"
+    },
+    "message_menu": {
+      "direct_message": "Mensaje Directo",
+      "welcome": "Bienvenida",
+      "check_in": "Check-In",
+      "check_out": "Check-Out"
+    },
+    "message_modal": {
+      "title": "Mensaje para {{guestName}}",
+      "placeholder": "Escribe tu mensaje aquí...",
+      "send_message_aria_label": "Enviar Mensaje"
+    },
+    "timeline_calendar": {
+      "unit_header": "Unidad"
+    }
+  },
+  "apartment": {
+    "apartment_card": {
+      "night": "/ noche",
+      "title": "Detalles del Apartamento",
+      "photo": "Foto del Apartamento"
+    },
+    "apartment_header": {
+      "return": "Volver",
+      "show_all_photos": "Mostrar todas las fotos",
+      "view_photo": "Ver foto {{number}}"
+    },
+    "apartment_info": {
+      "about_this_place": "Sobre este lugar",
+      "what_this_place_offers": "Lo que ofrece este lugar",
+      "house_rules": "Reglas de la casa"
+    },
+    "check_in_info": {
+      "more_about_this_place": "Más sobre este lugar",
+      "cancellation_policy": "Política de cancelación"
+    },
+    "apartment_detail_page": {
+      "apartment_not_available": "Apartamento no disponible",
+      "apartment_not_active": "Este apartamento no está activo actualmente y no se puede reservar.",
+      "return_to_listings": "Volver a los listados",
+      "things_to_know": "Cosas que saber",
+      "check_in": "Llegada",
+      "checkout": "Salida",
+      "check_in_out": "Llegada / Salida",
+      "cancellation_policy": "Política de cancelación",
+      "house_rules": "Reglas de la casa",
+      "no_house_rules": "No se especificaron reglas de la casa.",
+      "faq": "Preguntas frecuentes",
+      "no_faq": "No se especificaron preguntas frecuentes."
+    }
+  },
+  "date_picker": {
+    "placeholder": "AAAA-MM-DD"
+  },
+  "calendar": {
+    "loading": "Cargando...",
+    "error": "Error: {{error}}",
+    "booking_calendar": "Calendario de Reservas",
+    "availability_legend": {
+      "sanctum_booked": "Reservado Sanctum",
+      "manual_block": "Bloqueo Manual",
+      "airbnb_sync": "Sincronización Airbnb"
+    },
+    "weekdays": {
+      "mo": "Lu",
+      "tu": "Ma",
+      "we": "Mi",
+      "th": "Ju",
+      "fr": "Vi",
+      "sa": "Sá",
+      "su": "Do"
+    }
+  },
+  "booking_section": {
+    "title": "Reserva"
+  },
+  "booking_card": {
+    "guests_one": "{{count}} Huésped",
+    "guests_other": "{{count}} Huéspedes",
+    "total": "Total",
+    "mark_as_paid": "Marcar como Pagado",
+    "cancel": "Cancelar"
+  },
+  "booking_status": {
+    "paid": "Pagado",
+    "confirmed": "Confirmado",
+    "pending_payment": "Pago Pendiente",
+    "canceled": "Cancelado"
+  },
+  "booking_confirmation": {
+    "title": "¡Reserva confirmada!",
+    "subtitle": "Tu reserva se ha realizado con éxito y se te ha enviado por correo electrónico.",
+    "booking_id": "ID de la reserva",
+    "apartment": "Apartamento",
+    "host": "Anfitrión",
+    "check_in_date": "Fecha de llegada",
+    "check_out_date": "Fecha de salida",
+    "num_guests": "Número de huéspedes",
+    "total_price": "Precio total",
+    "deposit_amount": "Importe del depósito",
+    "booking_status": "Estado de la reserva",
+    "next_steps_title": "Próximos pasos y pago",
+    "close_button": "Cerrar",
+    "booking_summary": "Resumen de la Reserva"
+  },
+  "booking_form": {
+    "booking_failed": "Error en la Reserva",
+    "min_stay_requirement": "Requisito de Estancia Mínima",
+    "min_stay_message": "Esta propiedad requiere una estancia mínima de {{count}} noches.",
+    "max_stay_exceeded": "Estancia Máxima Excedida",
+    "max_stay_message": "Esta propiedad permite una estancia máxima de {{count}} noches.",
+    "validation": {
+      "name_required": "Por favor, introduce tu nombre completo.",
+      "name_invalid": "El nombre solo debe contener letras y espacios.",
+      "email_required": "Por favor, introduce una dirección de correo electrónico válida.",
+      "email_invalid": "Por favor, introduce una dirección de correo electrónico válida.",
+      "phone_invalid": "Por favor, introduce un número de teléfono válido.",
+      "dates_required": "Por favor, selecciona tus fechas de check-in y check-out.",
+      "country_required": "Por favor, selecciona tu país de residencia."
+    },
+    "booking_request_sent": "Solicitud de Reserva Enviada",
+    "booking_request_sent_message": "Tu solicitud de reserva ha sido enviada al anfitrión. Se pondrán en contacto contigo en breve para confirmar los detalles.",
+    "total_price": "Precio total",
+    "price_per_night": "Precio por noche",
+    "guest_name_label": "Nombre del huésped",
+    "guest_name_placeholder": "Introduce el nombre completo",
+    "dates_label": "Fechas",
+    "dates_placeholder": "Consultar fechas y tarifas",
+    "num_guests_label": "Número de huéspedes",
+    "contact_email_label": "Email de contacto",
+    "contact_email_placeholder": "contacto@dominio.com",
+    "country_label": "País",
+    "country_placeholder": "Selecciona un país",
+    "contact_phone_label": "Teléfono de contacto (opcional)",
+    "contact_phone_placeholder": "p.ej., +34 600 123 456",
+    "message_label": "Tu mensaje para el anfitrión (opcional)",
+    "message_placeholder": "¿Alguna petición especial o pregunta?",
+    "processing_button": "Procesando...",
+    "book_and_pay_button": "Reservar y Pagar",
+    "book_now_button": "Reservar Ahora",
+    "secure_booking_message": "Reserva segura por Stripe",
+    "instant_confirmation_message": "Reservar con confirmación instantánea"
+  },
+  "booking_list_item": {
+    "guest": "Huésped",
+    "guests": "Huéspedes",
+    "total": "Total",
+    "guest_info": "Información del Huésped"
+  },
+  "booking_price_breakdown": {
+    "nights_at_price_one": "{{count}} noche a $",
+    "nights_at_price_other": "{{count}} noches a $",
+    "service_fee": "Tarifa de servicio",
+    "total": "Total"
+  },
+  "printable_booking": {
+    "fetch_error": "Error al recuperar los datos: ",
+    "error": "Error",
+    "loading": "Cargando...",
+    "invoice": "Factura",
+    "billed_to": "Facturado a",
+    "from": "De",
+    "description": "Descripción",
+    "amount": "Importe",
+    "nightly_stay": "Estancia de una noche el {{date}}",
+    "service_fee": "Tarifa de servicio",
+    "total": "Total",
+    "deposit_paid": "Depósito pagado",
+    "balance_due": "Saldo adeudado",
+    "thank_you": "¡Gracias por alojarse con nosotros!"
+  },
+  "layout": {
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "footer": {
+      "rights": "© 2026 Plataforma Sanctum. Todos los derechos reservados.",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "sitemap": "Mapa del sitio"
+    },
+    "privacy_policy": {
+      "title": "Política de privacidad",
+      "data_collection": {
+        "title": "1. Recopilación de datos",
+        "description": "Recopilamos la información personal necesaria para procesar sus solicitudes, incluidos el nombre, el correo electrónico y las preferencias de pago. Estos datos se tratan con el máximo respeto por la discreción y la seguridad."
+      },
+      "use_of_information": {
+        "title": "2. Uso de la información",
+        "description": "Su información se utiliza exclusivamente para facilitar las reservas, comunicarse con los anfitriones y mejorar su experiencia de viaje personalizada. Nunca compartimos sus datos con anunciantes de terceros."
+      },
+      "digital_security": {
+        "title": "3. Seguridad digital",
+        "description": "Nuestra plataforma utiliza un cifrado de nivel empresarial para proteger su huella digital. Todas las interacciones dentro de la red de Sanctum se registran y supervisan para detectar accesos no autorizados."
+      }
+    },
+    "terms_of_service": {
+      "title": "Términos de servicio",
+      "booking_philosophy": {
+        "title": "1. Filosofía de reserva",
+        "description": "Al usar Sanctum, usted se compromete a respetar los santuarios proporcionados por nuestros anfitriones. Las estancias se conceden en base a la confianza mutua y al cumplimiento de las directrices específicas de la casa que se proporcionan en el momento de la confirmación."
+      },
+      "financial_obligations": {
+        "title": "2. Obligaciones financieras",
+        "description": "Se requiere un depósito para asegurar cualquier santuario. Las cancelaciones están sujetas a la política específica del anfitrión, que normalmente requiere un preaviso de 72 horas para un reembolso parcial. Los pagos finales deben liquidarse directamente con el anfitrión."
+      },
+      "platform_conduct": {
+        "title": "3. Conducta en la plataforma",
+        "description": "El acceso no autorizado al Host Studio o la manipulación de los datos de precios dará lugar a la terminación inmediata del acceso a la red de propiedades de Sanctum."
+      }
+    }
+  },
+  "featured_stays": {
+    "available_units": "Unidades Disponibles",
+    "properties_available_one": "{{count}} propiedad disponible",
+    "properties_available_other": "{{count}} propiedades disponibles"
+  },
+  "guest_popover": {
+    "guests": "Huéspedes",
+    "select_capacity": "Seleccionar capacidad",
+    "apply": "Aplicar"
+  },
+  "guest_landing_page": {
+    "welcome": "Bienvenido a {{businessName}}",
+    "title_line1": "Tu Escape Perfecto",
+    "title_line2": "Te Espera",
+    "subtitle": "Descubre un lugar para relajarte de verdad.",
+    "check_in_out": "Entrada — Salida",
+    "select_dates": "Seleccionar fechas",
+    "guests": "Huéspedes",
+    "num_guests": "{{count}} huésped",
+    "num_guests_plural": "{{count}} huéspedes",
+    "search": "Buscar",
+    "rights_reserved": "Todos los derechos reservados.",
+    "terms": "Términos",
+    "conditions": "Condiciones",
+    "faq": "Preguntas frecuentes"
+  },
+  "booking_success": {
+    "invalid_session": "ID de sesión no válido.",
+    "verifying": "Verificando su pago...",
+    "error": "Error: {{error}}",
+    "no_details": "No se pudieron recuperar los detalles de la reserva.",
+    "title": "¡Reserva Confirmada!",
+    "thank_you": "Gracias por su pago, {{guestName}}.",
+    "confirmation_sent": "Se ha enviado un correo electrónico de confirmación a {{email}}.",
+    "booking_id": "ID de Reserva",
+    "guest_name": "Nombre del Huésped",
+    "apartment": "Apartamento",
+    "check_in": "Fecha de Entrada",
+    "check_out": "Fecha de Salida",
+    "total_price": "Precio Total",
+    "payment_status": "Estado del Pago",
+    "paid": "Pagado",
+    "booking_status": "Estado de la Reserva",
+    "close": "Cerrar"
+  },
+  "booking_cancel_page": {
+    "title": "Reserva Cancelada",
+    "subtitle": "Su reserva no se completó. Puede volver al apartamento e intentarlo de nuevo.",
+    "loading": "Cargando detalles del apartamento...",
+    "return_to_apartment": "Volver al Apartamento",
+    "return_to_homepage": "Volver a la Página Principal"
+  },
+  "email_templates": {
+    "booking_id": "ID de Reserva",
+    "apartment": "Apartamento",
+    "address": "Dirección",
+    "host": "Anfitrión",
+    "check_in_date": "Fecha de Entrada",
+    "check_out_date": "Fecha de Salida",
+    "guests": "Huéspedes",
+    "total_price": "Precio Total",
+    "deposit_amount": "Importe del Depósito",
+    "booking_status": "Estado de la Reserva",
+    "house_rules_title": "Reglas de la Casa",
+    "payment_instructions_title": "Instrucciones de Pago",
+    "reply_to_respond": "Responda a este correo electrónico para contestar.",
+    "the_area": "la zona",
+    "welcome": {
+      "title": "¡Bienvenido a {{apartment_title}}!",
+      "subtitle": "Estamos emocionados de recibirte.",
+      "body": "Esperamos que tengas una estancia maravillosa. Si tienes alguna pregunta, no dudes en contactarnos."
+    },
+    "check_in": {
+      "title": "Tus Detalles de Check-In",
+      "subtitle": "para tu estancia en {{apartment_title}}",
+      "instructions_title": "Instrucciones de Check-In",
+      "footer": "Si tienes alguna pregunta, puedes responder a este correo electrónico."
+    },
+    "checkout": {
+      "title": "Información de Checkout",
+      "subtitle": "Esperamos que hayas disfrutado tu estancia en {{apartment_title}}.",
+      "instructions_title": "Instrucciones de Checkout",
+      "footer": "¡Esperamos verte de nuevo pronto!"
+    },
+    "server_crash": {
+      "title": "Informe de Fallo del Servidor",
+      "subtitle": "Ocurrió un error no controlado.",
+      "error_details_title": "Detalles del Error"
+    },
+    "direct_message": {
+      "title": "Nuevo Mensaje Sobre Tu Reserva",
+      "subtitle": "en {{apartment_title}}",
+      "message_from_host_title": "Mensaje de tu anfitrión"
+    },
+    "booking_confirmation": {
+      "title": "¡Reserva Confirmada!",
+      "subtitle": "Tu santuario te espera.",
+      "footer": "Para cualquier pregunta, por favor contacta a tu anfitrión respondiendo a este correo electrónico."
+    },
+    "booking_cancellation": {
+      "title": "Reserva Cancelada",
+      "subtitle": "Se ha cancelado una reserva para {{apartment_title}}.",
+      "body": "Si se pagó un depósito, será reembolsado de acuerdo con la política de cancelación. Te invitamos a explorar otros santuarios disponibles en {{city}}.",
+      "original_check_in": "Check-In Original",
+      "explore_alternatives": "Explorar Alternativas"
+    }
+  },
+  "premium_landing": {
+    "host_feature": "Característica del Anfitrión",
+    "beyond_the": "Más allá de lo",
+    "ordinary": "Ordinario",
+    "description": "No solo proporcionamos alojamiento; creamos entornos donde los recuerdos echan raíces y florecen. Explore el corazón de nuestra hospitalidad.",
+    "detail_alt": "Detalle",
+    "gallery_alt": "Galería {{number}}"
+  }
+}

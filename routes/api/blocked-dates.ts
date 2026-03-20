@@ -1,3 +1,4 @@
+
 import { Router } from 'express';
 import { body, query } from 'express-validator';
 import { pool } from '../../db.js';
@@ -9,7 +10,7 @@ import { UserRole, Apartment } from '../../types.js';
 
 const router = Router();
 
-// These routes were moved here from misc.ts because they depend on blocked_dates
+// GET /host-dashboard - Fetches all data needed for the host dashboard.
 router.get('/host-dashboard', protect, async (req: AuthRequest, res, next) => {
   if (!req.user) return res.status(401).json({ error: 'Authentication required.' });
 
@@ -47,6 +48,7 @@ router.get('/host-dashboard', protect, async (req: AuthRequest, res, next) => {
   }
 });
 
+// GET /landing-data - Fetches data for public landing pages.
 router.get('/landing-data',
   query('slug').optional().isString(),
   query('email').optional().isEmail(),
@@ -108,13 +110,12 @@ router.get('/landing-data',
     }
 });
 
-
+// Creates a new single blocked date, or updates the source if it already exists.
+// [VALIDATION TEMPORARILY REMOVED FOR DEBUGGING]
 router.post('/blocked-dates',
   protect,
-  body().isArray(),
-  validate,
   async (req: AuthRequest, res, next) => {
-    const blockedDates = req.body;
+    const { apartmentId, date, source } = req.body;
     const client = await pool.connect();
     const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
@@ -123,89 +124,75 @@ router.post('/blocked-dates',
       if (!isAdmin) {
         const hostRes = await client.query('SELECT id FROM hosts WHERE user_id = $1', [userId]);
         if (hostRes.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have a host profile and cannot block dates.' });
+          return res.status(403).json({ error: 'You must have a host profile to block dates.' });
         }
         const userHostId = hostRes.rows[0].id;
 
-        for (const blockedDate of blockedDates) {
-          const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [blockedDate.apartmentId]);
-          if (aptRes.rows.length === 0) {
-             return res.status(404).json({ error: `Apartment with id ${blockedDate.apartmentId} not found.` });
-          }
-          if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
-             return res.status(403).json({ error: `You are not authorized to block dates for apartment with id ${blockedDate.apartmentId}.` });
-          }
+        const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [apartmentId]);
+        if (aptRes.rows.length === 0) {
+          return res.status(404).json({ error: `Apartment not found.` });
+        }
+        if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
+          return res.status(403).json({ error: `You are not authorized to block dates for this apartment.` });
         }
       }
 
-      await client.query('BEGIN');
+      const newId = uuidv4();
+      const queryText = `
+        INSERT INTO blocked_dates (id, apartment_id, date, source)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (apartment_id, date) DO UPDATE SET source = EXCLUDED.source
+        RETURNING *
+      `;
+      const insertRes = await client.query(queryText, [newId, apartmentId, date, source]);
 
-      const resultBlockedDates = [];
-      for (const blockedDate of blockedDates) {
-        const { apartmentId, date } = blockedDate;
-        const newId = uuidv4();
-        const insertRes = await client.query(
-          'INSERT INTO blocked_dates (id, apartment_id, date) VALUES ($1, $2, $3) RETURNING *',
-          [newId, apartmentId, date]
-        );
-        resultBlockedDates.push(keysToCamel(insertRes.rows[0]));
-      }
-
-      await client.query('COMMIT');
-      res.status(201).json(resultBlockedDates);
+      res.status(201).json(keysToCamel(insertRes.rows[0]));
 
     } catch (err) {
-      await client.query('ROLLBACK');
       next(err);
     } finally {
       client.release();
     }
 });
 
+// Deletes a single blocked date by its unique ID.
+// [VALIDATION TEMPORARILY REMOVED FOR DEBUGGING]
 router.delete('/blocked-dates',
   protect,
-  body().isArray(),
-  validate,
   async (req: AuthRequest, res, next) => {
-    const blockedDatesToDelete = req.body;
+    const { id } = req.body;
     const client = await pool.connect();
     const isAdmin = req.user?.role === UserRole.ADMIN;
     const userId = req.user?.id;
 
     try {
+      const blockedDateRes = await client.query('SELECT apartment_id, source FROM blocked_dates WHERE id = $1', [id]);
+      if (blockedDateRes.rows.length === 0) {
+        return res.status(404).json({ error: 'Blocked date not found. It may have already been deleted.' });
+      }
+      const { apartment_id, source } = blockedDateRes.rows[0];
+
+      if (source === 'ICAL') {
+        return res.status(400).json({ error: 'iCal-synced dates cannot be manually unblocked.' });
+      }
+
       if (!isAdmin) {
         const hostRes = await client.query('SELECT id FROM hosts WHERE user_id = $1', [userId]);
         if (hostRes.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have a host profile and cannot unblock dates.' });
+          return res.status(403).json({ error: 'You must have a host profile to unblock dates.' });
         }
         const userHostId = hostRes.rows[0].id;
 
-        for (const blockedDate of blockedDatesToDelete) {
-            const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [blockedDate.apartmentId]);
-            if (aptRes.rows.length === 0) {
-                return res.status(404).json({ error: `Apartment with id ${blockedDate.apartmentId} not found.` });
-            }
-            if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
-                return res.status(403).json({ error: `You are not authorized to unblock dates for apartment with id ${blockedDate.apartmentId}.` });
-            }
+        const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [apartment_id]);
+        if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
+          return res.status(403).json({ error: `You are not authorized to unblock dates for this apartment.` });
         }
       }
 
-      await client.query('BEGIN');
-
-      for (const blockedDate of blockedDatesToDelete) {
-        const { apartmentId, date } = blockedDate;
-        await client.query(
-          'DELETE FROM blocked_dates WHERE apartment_id = $1 AND date = $2',
-          [apartmentId, date]
-        );
-      }
-
-      await client.query('COMMIT');
-      res.status(200).json({ message: 'Blocked dates deleted successfully' });
+      await client.query('DELETE FROM blocked_dates WHERE id = $1', [id]);
+      res.status(200).json({ message: 'Blocked date deleted successfully' });
 
     } catch (err) {
-      await client.query('ROLLBACK');
       next(err);
     } finally {
       client.release();

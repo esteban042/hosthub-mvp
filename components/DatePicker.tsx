@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface DatePickerProps {
@@ -8,6 +9,7 @@ interface DatePickerProps {
 }
 
 const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
+  const { t, i18n } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   // Initialize with selectedDate's month or today's
   const initialDate = selectedDate ? new Date(selectedDate) : new Date();
@@ -45,7 +47,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
     const days = [];
     const numDays = daysInMonth(monthDate);
     const offset = startOffset(monthDate);
-    const monthName = monthDate.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const monthName = monthDate.toLocaleString(i18n.language, { month: 'long', year: 'numeric' });
 
     for (let i = 0; i < offset; i++) days.push(<div key={`e-${i}`} />);
 
@@ -97,7 +99,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
         </div>
         <div className="grid grid-cols-7 gap-1 mb-2 text-xs font-bold uppercase tracking-widest text-stone-400 text-center">
           {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((d) => (
-            <div key={d} className="py-2">{d}</div>
+            <div key={d} className="py-2">{t(`calendar.weekdays.${d.toLowerCase()}`)}</div>
           ))}
         </div>
         <div className="grid grid-cols-7 gap-1 place-items-center">{days}</div>
@@ -117,7 +119,7 @@ const DatePicker: React.FC<DatePickerProps> = ({ onSelect, selectedDate }) => {
             readOnly
             value={selectedDate}
             onClick={() => setIsOpen(!isOpen)}
-            placeholder="YYYY-MM-DD"
+            placeholder={t('date_picker.placeholder')}
             className="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs text-charcoal outline-none cursor-pointer focus:ring-1 focus:ring-sky-accent transition-all"
         />
         {selectedDate && (

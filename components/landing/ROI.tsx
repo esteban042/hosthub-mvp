@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const ROI: React.FC = () => {
+  const { t } = useTranslation();
   const [sliderValue, setSliderValue] = useState(50000);
   const airbnbFee = 0.15; // 15%
   const sanctumFee = 0.04; // 4%
@@ -14,11 +16,11 @@ const ROI: React.FC = () => {
         <div className="bg-[#333333] text-white rounded-3xl p-6 md:p-16">
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div className="text-center md:text-left">
-                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">Stop Burning Money</h2>
-                    <p className="mt-4 text-lg text-white/80 max-w-lg">Major platforms like Airbnb can take 15% or more in commissions. With Sanctum, your cost is a transparent 4% fee plus a standard 2.9% Stripe processing fee. See how much you could save.</p>
+                    <h2 className="text-4xl sm:text-5xl font-bold tracking-tight">{t('landing_page.roi.title')}</h2>
+                    <p className="mt-4 text-lg text-white/80 max-w-lg">{t('landing_page.roi.subtitle')}</p>
                 </div>
                 <div className="bg-white/10 p-6 md:p-8 rounded-2xl">
-                    <p className="text-white/90 text-lg">Your Annual Booking Revenue</p>
+                    <p className="text-white/90 text-lg">{t('landing_page.roi.gross_revenue')}</p>
                     <p className="text-4xl sm:text-5xl font-bold text-white my-4">${sliderValue.toLocaleString()}</p>
                     <input 
                         type="range" 
@@ -33,9 +35,9 @@ const ROI: React.FC = () => {
                         }}
                     />
                     <div className="mt-8 text-center">
-                        <p className="text-lg text-white/90">Your estimated annual savings:</p>
+                        <p className="text-lg text-white/90">{t('landing_page.roi.yearly_savings')}:</p>
                         <p className="text-5xl md:text-6xl font-extrabold text-brand-green">~${yearlySavings.toLocaleString()}</p>
-                        <p className="mt-2 text-white/70">Enough for a nice vacation.</p>
+                        <p className="mt-2 text-white/70">{t('landing_page.roi.based_on')}</p>
                     </div>
                 </div>
             </div>

@@ -1,7 +1,6 @@
 
 import { Apartment, Booking, Host, BlockedDate, keysToCamel } from '../types.js';
 import { createClient } from '@supabase/supabase-js';
-import { MOCK_HOSTS, MOCK_APARTMENTS, MOCK_BOOKINGS } from '../mockData.js';
 import { config } from '../config.js';
 
 const SUPABASE_URL = (import.meta as any).env?.VITE_SUPABASE_URL || '';
@@ -152,14 +151,6 @@ export const sanctumApi = {
   async deleteBlockedDate(id: string): Promise<void> {
     const { error } = await supabase.from('blocked_dates').delete().eq('id', id);
     if (error) throw error;
-  },
-
-  async seedDatabase(): Promise<void> {
-    console.log("Seeding database with mock data...");
-    await supabase.from('hosts').upsert(MOCK_HOSTS);
-    await supabase.from('apartments').upsert(MOCK_APARTMENTS);
-    await supabase.from('bookings').upsert(MOCK_BOOKINGS);
-    console.log("Database seeding complete.");
   },
 
   trackApartmentView: (apartmentId: string) => {

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment, Host, Booking, BlockedDate } from '../types.js';
 import { BookingConfirmationCard } from '../components/booking/BookingConfirmationCard.js';
 import ApartmentHeader from '../components/apartment/ApartmentHeader.js';
@@ -28,6 +29,7 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
   onBack,
   onNewBooking
 }) => {
+  const { t } = useTranslation();
   const [confirmedBooking, setConfirmedBooking] = useState<Booking | null>(null);
   const [host, setHost] = useState<Host>(initialHost);
 
@@ -64,10 +66,10 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
     return (
       <div className="pt-48 pb-24 w-full max-w-lg mx-auto px-6 text-center animate-in fade-in duration-700">
           <XCircle className="w-24 h-24 text-red-400 mx-auto mb-6" />
-          <h2 className="text-3xl font-bold text-charcoal mb-4">Apartment Not Available</h2>
-          <p className="text-charcoal/70">This apartment is not currently active and cannot be booked.</p>
+          <h2 className="text-3xl font-bold text-charcoal mb-4">{t('apartment.apartment_detail_page.apartment_not_available')}</h2>
+          <p className="text-charcoal/70">{t('apartment.apartment_detail_page.apartment_not_active')}</p>
           <button onClick={onBack} className="mt-8 px-6 py-3 rounded-xl bg-sky-700 text-white font-bold hover:bg-sky-800 transition-colors">
-            Return to Listings
+            {t('apartment.apartment_detail_page.return_to_listings')}
           </button>
       </div>
     );
@@ -110,20 +112,20 @@ const ApartmentDetailPage: React.FC<ApartmentDetailPageProps> = ({
       </div>
 
       <div className="mt-24 pt-12 border-t border-stone-200">
-        <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight mb-6">Things to know</h3>
+        <h3 className="text-2xl font-serif font-bold text-charcoal tracking-tight mb-6">{t('apartment.apartment_detail_page.things_to_know')}</h3>
         <div className="p-8 rounded-2xl border border-stone-200 shadow-lg">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-charcoal/80">
-                <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Check-in:</b> {host.checkInTime}</span></div>
-                <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Checkout:</b> {host.checkOutTime}</span></div>
+                <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>{t('apartment.apartment_detail_page.check_in')}:</b> {host.checkInTime}</span></div>
+                <div className="flex items-start"><Clock className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>{t('apartment.apartment_detail_page.checkout')}:</b> {host.checkOutTime}</span></div>
             </div>
             <div className="mt-8 pt-8 border-t border-stone-200">
-                <div className="flex items-start"><Info className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>Cancellation policy:</b> {host.conditions}</span></div>
+                <div className="flex items-start"><Info className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>{t('apartment.apartment_detail_page.cancellation_policy')}:</b> {host.conditions}</span></div>
             </div>
             <div className="mt-8 pt-8 border-t border-stone-200">
-                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>House rules:</b> {host.houseRules || 'No house rules specified.'}</span></div>
+                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>{t('apartment.apartment_detail_page.house_rules')}:</b> {host.houseRules || t('apartment.apartment_detail_page.no_house_rules')}</span></div>
             </div>
             <div className="mt-8 pt-8 border-t border-stone-200">
-                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>FAQ:</b> {host.faq || 'No raq specified.'}</span></div>
+                <div className="flex items-start"><Home className="w-5 h-5 mr-3 mt-1 text-sky-700 flex-shrink-0" /><span><b>{t('apartment.apartment_detail_page.faq')}:</b> {host.faq || t('apartment.apartment_detail_page.no_faq')}</span></div>
             </div>
         </div>
       </div>

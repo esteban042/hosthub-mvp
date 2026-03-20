@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment } from '../../types';
 import { CORE_ICONS } from '../../constants';
-import { X, Grid, Image as ImageIcon } from 'lucide-react';
+import { X, Grid } from 'lucide-react';
 
 interface ApartmentHeaderProps {
   apartment: Apartment;
@@ -9,6 +10,7 @@ interface ApartmentHeaderProps {
 }
 
 const ApartmentHeader: React.FC<ApartmentHeaderProps> = ({ apartment, onBack }) => {
+  const { t } = useTranslation();
   const [showAllPhotos, setShowAllPhotos] = useState(false);
 
   if (showAllPhotos) {
@@ -20,7 +22,7 @@ const ApartmentHeader: React.FC<ApartmentHeaderProps> = ({ apartment, onBack }) 
         <div className="p-4 sm:p-8 pt-20 h-full overflow-y-auto">
           <div className="max-w-4xl mx-auto columns-1 sm:columns-2 md:columns-3 gap-4">
             {apartment.photos.map((photo, idx) => (
-              <img key={idx} src={photo} className="mb-4 rounded-lg w-full h-auto object-cover break-inside-avoid" alt={`View ${idx + 1}`} />
+              <img key={idx} src={photo} className="mb-4 rounded-lg w-full h-auto object-cover break-inside-avoid" alt={t('apartment.apartment_header.view_photo', { number: idx + 1 })} />
             ))}
           </div>
         </div>
@@ -34,7 +36,7 @@ const ApartmentHeader: React.FC<ApartmentHeaderProps> = ({ apartment, onBack }) 
         <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
           <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
         </svg>
-        <span className="text-[10px] font-bold uppercase tracking-widest text-charcoal">Return</span>
+        <span className="text-[10px] font-bold uppercase tracking-widest text-charcoal">{t('apartment.apartment_header.return')}</span>
       </button>
       
       <div className="mb-8">
@@ -63,7 +65,7 @@ const ApartmentHeader: React.FC<ApartmentHeaderProps> = ({ apartment, onBack }) 
             onClick={() => setShowAllPhotos(true)} 
             className="absolute bottom-4 right-4 bg-white/90 backdrop-blur-sm text-charcoal font-bold text-xs px-4 py-2 rounded-lg flex items-center gap-2 border border-stone-200 shadow-md hover:bg-white transition-all">
             <Grid className="w-4 h-4" />
-            Show all photos
+            {t('apartment.apartment_header.show_all_photos')}
         </button>
       </div>
     </>

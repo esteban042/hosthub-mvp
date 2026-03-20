@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Host } from '../../types.ts';
 
 interface CheckInInfoProps {
@@ -6,7 +7,8 @@ interface CheckInInfoProps {
 }
 
 const CheckInInfo: React.FC<CheckInInfoProps> = ({ host }) => {
-  // A helper to render a section if the data exists
+  const { t } = useTranslation();
+
   const renderSection = (title: string, data: string | null | undefined) => {
     if (!data) return null;
     return (
@@ -19,10 +21,10 @@ const CheckInInfo: React.FC<CheckInInfoProps> = ({ host }) => {
 
   return (
     <div className="p-6 rounded-lg shadow-inner">
-      <h3 className="text-xl font-bold mb-4 text-charcoal">More about this Place</h3>
+      <h3 className="text-xl font-bold mb-4 text-charcoal">{t('apartment.check_in_info.more_about_this_place')}</h3>
       <div className="space-y-2">
 
-        {renderSection('Cancellation Policy', host.conditions)}
+        {renderSection(t('apartment.check_in_info.cancellation_policy'), host.conditions)}
 
       </div>
     </div>

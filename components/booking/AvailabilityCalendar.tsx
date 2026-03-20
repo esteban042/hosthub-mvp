@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Booking, BlockedDate, BookingStatus, Currency } from '../../types.js';
 import { CARD_BORDER } from '../../constants.tsx';
@@ -14,6 +15,7 @@ const AvailabilityCalendar: React.FC<{
   loadingIcal: boolean, 
   onToggle: (date: string) => void 
 }> = ({ aptId, pricePerNight, currency, bookings, blockedDates, airbnbCalendarDates, loadingIcal, onToggle }) => {
+  const { t } = useTranslation();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const daysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   const startOffset = (date: Date) => (new Date(date.getFullYear(), date.getMonth(), 1).getDay() + 6) % 7;
@@ -83,7 +85,7 @@ const AvailabilityCalendar: React.FC<{
            <button onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))} className="text-stone-500 hover:text-white transition-colors"><ChevronRight className="w-5 h-5" /></button>
         </div>
         <div className="grid grid-cols-7 gap-1.5 mb-2 text-[9px] font-black uppercase tracking-widest text-stone-400 text-center">
-          {['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map(d => <div key={d} className="capitalize">{d}</div>)}
+          {[t('calendar.weekdays.mo'), t('calendar.weekdays.tu'), t('calendar.weekdays.we'), t('calendar.weekdays.th'), t('calendar.weekdays.fr'), t('calendar.weekdays.sa'), t('calendar.weekdays.su')].map(d => <div key={d} className="capitalize">{d}</div>)}
         </div>
         <div className="grid grid-cols-7 gap-1.5">
             {loadingIcal && (
@@ -96,15 +98,15 @@ const AvailabilityCalendar: React.FC<{
         <div className="mt-8 pt-6 border-t border-stone-800/60 flex flex-wrap gap-4 justify-center text-[10px] uppercase tracking-widest font-bold">
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-sky-accent/20 border border-sky-accent/40"></span>
-                <span className="text-sky-accent/70">sanctum Booked</span>
+                <span className="text-sky-accent/70">{t('calendar.availability_legend.sanctum_booked')}</span>
             </div>
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-rose-500/20 border border-rose-500/40"></span>
-                <span className="text-rose-500/70">Manual Block</span>
+                <span className="text-rose-500/70">{t('calendar.availability_legend.manual_block')}</span>
             </div>
             <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/20 border border-yellow-500/40"></span>
-                <span className="text-yellow-500/70">Airbnb Sync</span>
+                <span className="text-yellow-500/70">{t('calendar.availability_legend.airbnb_sync')}</span>
             </div>
         </div>
       </div>

@@ -1,0 +1,683 @@
+{
+  "common": {
+    "not_available": "N/A"
+  },
+  "landing_page": {
+    "demo": {
+      "title": "See It in Action",
+      "description": "Words are cheap. See how Sanctum looks and feels from a guest's perspective. Select a demo host to explore their live booking site.",
+      "explore_showcase": "— Explore a Showcase —"
+    },
+    "footer": {
+      "all_rights_reserved": "All Rights Reserved"
+    },
+    "header": {
+      "how_it_works": "How it Works",
+      "pricing": "Pricing",
+      "roi_calculator": "ROI Calculator",
+      "live_demo": "Live Demo",
+      "host_login": "Host Login"
+    },
+    "search": {
+        "title1": "Own your bookings",
+        "title2": "Own your guests"
+    },
+    "pricing": {
+      "title": "Pricing That Makes Sense",
+      "subtitle": "Start small, grow big. Our success is tied to yours. All plans include our powerful direct booking engine and a 4% booking fee.",
+      "promotion_rate": "Promotion Rate",
+      "per_month": "/mo",
+      "plans": {
+        "basic": {
+          "name": "Basic",
+          "commission": "No Commission",
+          "features": [
+            "Up to 3 Properties",
+            "Direct Booking Website",
+            "Google Maps Setup",
+            "Standard Email Support",
+            "Automated Guest Messaging",
+            "Calendar Sync"
+          ]
+        },
+        "pro": {
+          "name": "Pro",
+          "commission": "4% commission",
+          "features": [
+            "Up to 8 Properties",
+            "Stripe Payment Integration",
+            "Commission added on top of nightly rate",
+            "Calendar Sync",
+            "Priority Support"
+          ]
+        },
+        "premium": {
+          "name": "Premium",
+          "commission": "4% commission",
+          "features": [
+            "Unlimited Properties",
+            "Custom Branding & Landing Page",
+            "Private Domain",
+            "Phone & Video Support",
+            "Dedicated Account Manager"
+          ]
+        }
+      }
+    },
+    "process": {
+      "ultimate_toolkit": "THE ULTIMATE TOOLKIT",
+      "title": "All-in-One Property Management",
+      "subtitle": "Escape the 15% commission trap. Sanctum puts you on the map—literally. Get a stunning, independent booking website that syncs with everything, automates your guest communication and takes payments directly. We help you appear on Google Maps independently from Airbnb and capture direct bookings at lower commission.",
+      "features": {
+        "direct_booking_site": {
+          "title": "Your Direct Booking Site",
+          "description": "Appear on Google Maps and search. Get a beautiful, mobile-friendly website that showcases your properties and lets guests book direct."
+        },
+        "seamless_payments": {
+          "title": "Seamless Payments",
+          "description": "Integrated Stripe processing means you get paid instantly and securely. No more chasing payments, no more platform fees."
+        },
+        "unified_calendar": {
+          "title": "Unified Calendar",
+          "description": "Automatically sync your bookings and availability from Airbnb, Vrbo, and more. Say goodbye to double bookings forever."
+        },
+        "automated_messaging": {
+          "title": "Automated Messaging",
+          "description": "Five-star service, on autopilot. Send automated booking confirmations, check-in instructions, and review reminders."
+        },
+        "dynamic_pricing": {
+          "title": "Dynamic Pricing",
+          "description": "Take control of your revenue. Set custom price ranges for different dates, seasons, or events to maximize your occupancy and profit."
+        },
+        "ready_to_go": {
+          "title": "Ready2go",
+          "description": "No technical overhead, no high effort needed - we set everything up for you and your plattform is ready to go from day 1. Only functions you need, in a clean design."
+        }
+      }
+    },
+    "roi": {
+      "title": "Stop Losing Money to Commissions",
+      "subtitle": "Use the calculator to estimate your yearly savings with a direct booking website.",
+      "gross_revenue": "Your Yearly Gross Revenue",
+      "yearly_savings": "Your Estimated Yearly Savings",
+      "based_on": "Enough for a vacation."
+    }
+  },
+  "host_dashboard": {
+    "statistics": {
+      "bookings": "Bookings",
+      "revenue": "Revenue"
+    },
+    "header": {
+      "title": "Host Studio",
+      "subtitle": "Asset Operations",
+      "share_modal": {
+        "title": "Share Your Booking Link",
+        "description": "Share this link with your guests to allow them to book directly."
+      }
+    },
+    "stats": {
+      "active_units": "Active Units",
+      "upcoming_stays": "Upcoming Stays",
+      "completed_stays": "Completed Stays",
+      "annual_revenue": "Annual Revenue",
+      "total_page_views": "Total Page Views"
+    },
+    "apartments_list": {
+      "base": "Base",
+      "configure": "Configure"
+    },
+    "add_unit_menu": {
+      "add_unit": "Add Unit"
+    },
+    "amenity_selector": {
+      "search_amenities": "Search amenities...",
+      "amenities": {
+        "wifi": "Wifi",
+        "tv": "TV",
+        "kitchen": "Kitchen",
+        "air_conditioning": "Air Conditioning",
+        "heating": "Heating",
+        "free_parking": "Free Parking",
+        "washer": "Washer",
+        "pool": "Pool",
+        "coffee_maker": "Coffee Maker",
+        "bbq_grill": "BBQ Grill",
+        "fireplace": "Fireplace",
+        "beach_access": "Beach Access",
+        "outdoor_shower": "Outdoor Shower",
+        "free_wifi": "Free Wi-Fi",
+        "flat_screen_tv": "Flat-screen TV",
+        "cable_satellite_channels": "Cable/satellite channels",
+        "mini_bar": "Mini bar",
+        "coffee_tea_maker": "Coffee/tea maker",
+        "in_room_safe": "In-room safe",
+        "desk_workspace": "Desk/workspace",
+        "balcony_or_terrace": "Balcony or terrace",
+        "private_bathroom": "Private bathroom",
+        "shower": "Shower",
+        "bathtub": "Bathtub",
+        "toiletries": "Toiletries",
+        "hairdryer": "Hairdryer",
+        "bathrobes": "Bathrobes",
+        "slippers": "Slippers",
+        "extra_pillows": "Extra pillows",
+        "extra_blankets": "Extra blankets",
+        "room_service": "Room service",
+        "daily_housekeeping": "Daily housekeeping",
+        "laundry_service": "Laundry service",
+        "iron_ironing_board": "Iron/ironing board",
+        "blackout_curtains": "Blackout curtains",
+        "telephone": "Telephone",
+        "alarm_clock": "Alarm clock",
+        "complimentary_bottled_water": "Complimentary bottled water",
+        "welcome_snacks": "Welcome snacks",
+        "soundproofing": "Soundproofing",
+        "refrigerator": "Refrigerator",
+        "microwave": "Microwave",
+        "sofa_lounge_area": "Sofa/lounge area",
+        "dining_area": "Dining area",
+        "closet_wardrobe": "Closet/wardrobe",
+        "hangers": "Hangers",
+        "luggage_rack": "Luggage rack",
+        "safe_deposit_box": "Safe deposit box",
+        "turndown_service": "Turndown service",
+        "complimentary_toiletries": "Complimentary toiletries",
+        "electric_kettle": "Electric kettle",
+        "usb_charging_ports": "USB charging ports",
+        "multiple_power_outlets": "Multiple power outlets",
+        "tea_selection": "Tea selection",
+        "coffee_selection": "Coffee selection",
+        "wine_glasses": "Wine glasses",
+        "outdoor_seating": "Outdoor seating",
+        "garden_access": "Garden access",
+        "private_pool": "Private pool",
+        "shared_pool_access": "Shared pool access",
+        "hot_tub_jacuzzi": "Hot tub/Jacuzzi",
+        "fitness_center_access": "Fitness center access",
+        "spa_access": "Spa access",
+        "fire_pit": "Fire pit",
+        "water_sports_equipment": "Water sports equipment",
+        "bicycle_rental": "Bicycle rental",
+        "parking": "Parking",
+        "ev_charging_station": "EV charging station",
+        "concierge_service": "Concierge service",
+        "tour_desk": "Tour desk",
+        "shuttle_service": "Shuttle service",
+        "airport_transfer": "Airport transfer",
+        "pet_friendly_amenities": "Pet-friendly amenities",
+        "baby_crib": "Baby crib",
+        "high_chair": "High chair",
+        "childrens_play_area": "Children’s play area",
+        "board_games": "Board games",
+        "books_magazines": "Books/magazines",
+        "room_blackout_shades": "Room blackout shades",
+        "smart_home_controls": "Smart home controls",
+        "bluetooth_speaker": "Bluetooth speaker",
+        "streaming_services": "Streaming services",
+        "dvd_player": "DVD player",
+        "yoga_mats": "Yoga mats",
+        "mini_library": "Mini library",
+        "fire_extinguisher": "Fire extinguisher",
+        "first_aid_kit": "First aid kit",
+        "smoke_detector": "Smoke detector",
+        "carbon_monoxide_detector": "Carbon monoxide detector",
+        "umbrella": "Umbrella",
+        "beach_towels": "Beach towels",
+        "pool_towels": "Pool towels"
+      }
+    },
+    "apartment_editor": {
+      "unit_configuration": "Unit Configuration",
+      "save_unit": "Save Unit",
+      "discard": "Discard",
+      "apartment_import": {
+        "import_from_airbnb": "Import from Airbnb",
+        "paste_airbnb_url": "Paste Airbnb URL...",
+        "importing": "Importing...",
+        "import": "Import",
+        "enter_airbnb_url_error": "Please enter an Airbnb URL.",
+        "import_error": "An error occurred during import."
+      },
+      "apartment_basic_info": {
+        "unit_title": "Unit Title",
+        "city": "City",
+        "beds": "Beds",
+        "bathrooms": "Bathrooms",
+        "guests": "Guests"
+      },
+      "apartment_pricing": {
+        "base_price": "Base Price ({{symbol}})",
+        "base_price_placeholder": "e.g. 150",
+        "min_stay": "Min Stay (Nights)",
+        "max_stay": "Max Stay (Nights)",
+        "seasonal_pricing": "Seasonal Pricing",
+        "add_rate_rule": "Add Rate Rule",
+        "from_date": "From Date",
+        "until_date": "Until Date",
+        "nightly_price": "Nightly Price ({{symbol}})",
+        "no_rules_configured": "No seasonal pricing rules configured."
+      },
+      "apartment_media": {
+        "map_embed_url": "Map Embed URL",
+        "unit_photos": "Unit Photos",
+        "apartment_alt": "Apartment",
+        "no_photos_added": "No photos have been added for this unit."
+      },
+      "apartment_details": {
+        "description": "Description",
+        "amenities": "Amenities"
+      },
+      "apartment_status": {
+        "unit_status": "Unit Status",
+        "status_description": "Inactive units are hidden from guests and cannot be booked.",
+        "use_setting": "Use setting"
+      },
+      "ical_sync": {
+        "title": "iCal Sync",
+        "description": "Keep your availability up-to-date by syncing your calendars from other platforms like Airbnb, Booking.com, etc.",
+        "paste_ical_url": "Paste iCal URL here...",
+        "add": "Add"
+      }
+    },
+    "bookings": {
+      "all_active": "All Active",
+      "upcoming_30d": "Upcoming (30d)",
+      "confirmed": "Confirmed",
+      "paid": "Paid",
+      "past_stays": "Past Stays",
+      "canceled": "Canceled",
+      "no_bookings": "No bookings match this selection."
+    },
+    "current_bookings": {
+      "current_stays": "Current Stays",
+      "check_ins_today": "Check-ins Today",
+      "check_outs_today": "Check-outs Today",
+      "currently_in_unit": "Currently in Unit",
+      "no_guests": "No guests currently in units.",
+      "unknown_unit": "Unknown Unit",
+      "no_check_ins": "No check-ins scheduled for today.",
+      "no_check_outs": "No check-outs scheduled for today."
+    },
+    "nav": {
+      "current": "Current",
+      "all_bookings": "All Bookings",
+      "calendar": "Calendar",
+      "units": "Units",
+      "statistics": "Statistics",
+      "settings": "Settings"
+    },
+    "host_info": {
+      "host_name": "Host Name",
+      "avatar_image": "Avatar Image",
+      "landing_page_picture": "Landing Page Picture",
+      "host_bio": "Host Bio (Public)",
+      "business_name": "Business Name",
+      "email": "Email",
+      "phone_number": "Phone Number",
+      "address": "Address",
+      "country": "Country",
+      "select_country": "Select a country",
+      "vat": "VAT (%)",
+      "check_in_out_title": "Check-in / Check-out",
+      "check_in_time": "Check-in time",
+      "check_out_time": "Check-out time",
+      "check_in_info": "Check-in information",
+      "guest_communication_title": "Guest Communication",
+      "check_in_message": "Check-in Message",
+      "welcome_message": "Welcome Message",
+      "checkout_message": "Checkout Message",
+      "policies_title": "Policies & Instructions",
+      "deposit_percentage": "Deposit Percentage (%)",
+      "payment_instructions": "Payment Instructions",
+      "house_rules": "House Rules",
+      "terms": "Terms",
+      "conditions": "Conditions",
+      "faq": "FAQ",
+      "ical_feed_title": "iCal Feed",
+      "copied": "Copied!",
+      "copy": "Copy",
+      "social_media_title": "Social Media Presence",
+      "x_url": "X URL",
+      "facebook_url": "Facebook URL",
+      "instagram_url": "Instagram URL",
+      "preview_landing_page": "Preview Landing Page",
+      "saving": "Saving...",
+      "saved": "Saved!",
+      "save_changes": "Save Changes"
+    },
+    "image_upload": {
+      "uploading": "Uploading...",
+      "upload_failed": "Upload failed. Please try again.",
+      "upload_complete": "Upload complete!",
+      "view_image": "View Image",
+      "drop_prompt": "Drop the image here...",
+      "drag_prompt": "Drag 'n' drop an image here, or click to select one",
+      "file_types": "PNG, JPG, GIF up to 10MB"
+    },
+    "message_menu": {
+      "direct_message": "Direct Message",
+      "welcome": "Welcome",
+      "check_in": "Check-In",
+      "check_out": "Check-Out"
+    },
+    "message_modal": {
+      "title": "Message to {{guestName}}",
+      "placeholder": "Write your message here...",
+      "send_message_aria_label": "Send Message"
+    },
+    "timeline_calendar": {
+      "unit_header": "Unit"
+    }
+  },
+  "apartment": {
+    "apartment_card": {
+      "night": "/ night",
+      "title": "Apartment Details",
+      "photo": "Apartment Photo"
+    },
+    "apartment_header": {
+      "return": "Return",
+      "show_all_photos": "Show all photos",
+      "view_photo": "View {{number}}"
+    },
+    "apartment_info": {
+      "about_this_place": "About this place",
+      "what_this_place_offers": "What this place offers",
+      "house_rules": "House Rules"
+    },
+    "check_in_info": {
+      "more_about_this_place": "More about this Place",
+      "cancellation_policy": "Cancellation Policy"
+    },
+    "apartment_detail_page": {
+      "apartment_not_available": "Apartment Not Available",
+      "apartment_not_active": "This apartment is not currently active and cannot be booked.",
+      "return_to_listings": "Return to Listings",
+      "things_to_know": "Things to know",
+      "check_in": "Check-in",
+      "checkout": "Checkout",
+      "check_in_out": "Check-in / Check-out",
+      "cancellation_policy": "Cancellation policy",
+      "house_rules": "House rules",
+      "no_house_rules": "No house rules specified.",
+      "faq": "FAQ",
+      "no_faq": "No faq specified."
+    }
+  },
+  "date_picker": {
+    "placeholder": "YYYY-MM-DD"
+  },
+  "calendar": {
+    "loading": "Loading...",
+    "error": "Error: {{error}}",
+    "booking_calendar": "Booking Calendar",
+    "availability_legend": {
+      "sanctum_booked": "Sanctum Booked",
+      "manual_block": "Manual Block",
+      "airbnb_sync": "Airbnb Sync"
+    },
+    "weekdays": {
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    }
+  },
+  "booking_section": {
+    "title": "Booking"
+  },
+   "booking_card": {
+    "guests_one": "{{count}} Guest",
+    "guests_other": "{{count}} Guests",
+    "total": "Total",
+    "mark_as_paid": "Mark as Paid",
+    "cancel": "Cancel"
+  },
+  "booking_status": {
+    "paid": "Paid",
+    "confirmed": "Confirmed",
+    "pending_payment": "Pending Payment",
+    "canceled": "Canceled"
+  },
+  "booking_confirmation": {
+    "title": "Booking confirmed!",
+    "subtitle": "Your booking was successful and sent to you per email.",
+    "booking_id": "Booking ID",
+    "apartment": "Apartment",
+    "host": "Host",
+    "check_in_date": "Check-in Date",
+    "check_out_date": "Check-out Date",
+    "num_guests": "Number of Guests",
+    "total_price": "Total Price",
+    "deposit_amount": "Deposit Amount",
+    "booking_status": "Booking Status",
+    "next_steps_title": "Next Steps & Payment",
+    "close_button": "Close",
+    "booking_summary": "Booking Summary"
+  },
+  "booking_form": {
+    "booking_failed": "Booking Failed",
+    "min_stay_requirement": "Minimum Stay Requirement",
+    "min_stay_message": "This property requires a minimum stay of {{count}} nights.",
+    "max_stay_exceeded": "Maximum Stay Exceeded",
+    "max_stay_message": "This property allows a maximum stay of {{count}} nights.",
+    "validation": {
+      "name_required": "Please enter your full name.",
+      "name_invalid": "Name should only contain letters and spaces.",
+      "email_required": "Please enter a valid email address.",
+      "email_invalid": "Please enter a valid email address.",
+      "phone_invalid": "Please enter a valid phone number.",
+      "dates_required": "Please select your check-in and check-out dates.",
+      "country_required": "Please select your country of residence."
+    },
+    "booking_request_sent": "Booking Request Sent",
+    "booking_request_sent_message": "Your booking request has been sent to the host. They will contact you shortly to confirm the details.",
+    "total_price": "Total price",
+    "price_per_night": "Price per night",
+    "guest_name_label": "Guest name",
+    "guest_name_placeholder": "Enter full name",
+    "dates_label": "Dates",
+    "dates_placeholder": "Check dates & rates",
+    "num_guests_label": "Number of guests",
+    "contact_email_label": "Contact email",
+    "contact_email_placeholder": "contact@domain.com",
+    "country_label": "Country",
+    "country_placeholder": "Select a country",
+    "contact_phone_label": "Contact phone (optional)",
+    "contact_phone_placeholder": "e.g., +1 555 123 4567",
+    "message_label": "Your message to the host (optional)",
+    "message_placeholder": "Any special requests or questions?",
+    "processing_button": "Processing...",
+    "book_and_pay_button": "Book & Pay",
+    "book_now_button": "Book Now",
+    "secure_booking_message": "Secure booking by Stripe",
+    "instant_confirmation_message": "Book with instant confirmation"
+  },
+  "booking_list_item": {
+    "guest": "Guest",
+    "guests": "Guests",
+    "total": "Total",
+    "guest_info": "Guest Information"
+  },
+  "booking_price_breakdown": {
+    "nights_at_price_one": "{{count}} night at $",
+    "nights_at_price_other": "{{count}} nights at $",
+    "service_fee": "Service fee",
+    "total": "Total"
+  },
+  "printable_booking": {
+    "fetch_error": "Failed to fetch data: ",
+    "error": "Error",
+    "loading": "Loading...",
+    "invoice": "Invoice",
+    "billed_to": "Billed To",
+    "from": "From",
+    "description": "Description",
+    "amount": "Amount",
+    "nightly_stay": "Nightly stay on {{date}}",
+    "service_fee": "Service Fee",
+    "total": "Total",
+    "deposit_paid": "Deposit Paid",
+    "balance_due": "Balance Due",
+    "thank_you": "Thank you for your for staying with us!"
+  },
+  "layout": {
+    "logout": "Logout",
+    "login": "Log In",
+    "footer": {
+      "rights": "© 2026 Sanctum Platform. All rights reserved.",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "sitemap": "Sitemap"
+    },
+    "privacy_policy": {
+      "title": "Privacy Policy",
+      "data_collection": {
+        "title": "1. Data Collection",
+        "description": "We collect personal information necessary for processing your requests, including name, email, and payment preferences. This data is curated with the highest regard for discretion and security."
+      },
+      "use_of_information": {
+        "title": "2. Use of Information",
+        "description": "Your information is used exclusively to facilitate bookings, communicate with hosts, and enhance your personalized travel experience. We never share your details with third-party advertisers."
+      },
+      "digital_security": {
+        "title": "3. Digital Security",
+        "description": "Our platform utilizes enterprise-grade encryption to protect your digital footprint. All interactions within the sanctum Network are logged and monitored for unauthorized access."
+      }
+    },
+    "terms_of_service": {
+      "title": "Terms of Service",
+      "booking_philosophy": {
+        "title": "1. Booking Philosophy",
+        "description": "By using Sanctum, you agree to respect the sanctuaries provided by our hosts. Stays are granted based on mutual trust and adherence to house-specific guidelines provided at the time of confirmation."
+      },
+      "financial_obligations": {
+        "title": "2. Financial Obligations",
+        "description": "A deposit is required to secure any sanctuary. Cancellations are subject to the host's specific policy, typically requiring 72-hour notice for a partial refund. Final payments must be settled directly with the host."
+      },
+      "platform_conduct": {
+        "title": "3. Platform Conduct",
+        "description": "Unauthorized access to the Host Studio or manipulation of pricing data will result in immediate termination of access to the Sanctum Property Network."
+      }
+    }
+  },
+  "featured_stays": {
+    "available_units": "Available Units",
+    "properties_available_one": "{{count}} property available",
+    "properties_available_other": "{{count}} properties available"
+  },
+  "guest_popover": {
+    "guests": "Guests",
+    "select_capacity": "Select capacity",
+    "apply": "Apply"
+  },
+  "guest_landing_page": {
+    "welcome": "Welcome to {{businessName}}",
+    "title_line1": "Your Perfect Escape",
+    "title_line2": "Awaits",
+    "subtitle": "Discover a place to truly unwind.",
+    "check_in_out": "Check in — Check out",
+    "select_dates": "Select dates",
+    "guests": "Guests",
+    "num_guests": "{{count}} guest",
+    "num_guests_plural": "{{count}} guests",
+    "search": "Search",
+    "rights_reserved": "All rights reserved.",
+    "terms": "Terms",
+    "conditions": "Conditions",
+    "faq": "FAQ"
+  },
+  "booking_success": {
+    "invalid_session": "Invalid session ID.",
+    "verifying": "Verifying your payment...",
+    "error": "Error: {{error}}",
+    "no_details": "Could not retrieve booking details.",
+    "title": "Booking Confirmed!",
+    "thank_you": "Thank you for your payment, {{guestName}}.",
+    "confirmation_sent": "A confirmation email has been sent to {{email}}.",
+    "booking_id": "Booking ID",
+    "guest_name": "Guest Name",
+    "apartment": "Apartment",
+    "check_in": "Check-in Date",
+    "check_out": "Check-out Date",
+    "total_price": "Total Price",
+    "payment_status": "Payment Status",
+    "paid": "Paid",
+    "booking_status": "Booking Status",
+    "close": "Close"
+  },
+  "booking_cancel_page": {
+    "title": "Booking Canceled",
+    "subtitle": "Your booking was not completed. You can return to the apartment and try again.",
+    "loading": "Loading apartment details...",
+    "return_to_apartment": "Return to Apartment",
+    "return_to_homepage": "Return to Homepage"
+  },
+  "email_templates": {
+    "booking_id": "Booking ID",
+    "apartment": "Apartment",
+    "address": "Address",
+    "host": "Host",
+    "check_in_date": "Check-in Date",
+    "check_out_date": "Check-out Date",
+    "guests": "Guests",
+    "total_price": "Total Price",
+    "deposit_amount": "Deposit Amount",
+    "booking_status": "Booking Status",
+    "house_rules_title": "House Rules",
+    "payment_instructions_title": "Payment Instructions",
+    "reply_to_respond": "Reply to this email to respond.",
+    "the_area": "the area",
+    "welcome": {
+      "title": "Welcome to {{apartment_title}}!",
+      "subtitle": "We are excited to host you.",
+      "body": "We hope you have a wonderful stay. If you have any questions, please don't hesitate to reach out."
+    },
+    "check_in": {
+      "title": "Your Check-In Details",
+      "subtitle": "for your stay at {{apartment_title}}",
+      "instructions_title": "Check-In Instructions",
+      "footer": "If you have any questions, you can reply to this email."
+    },
+    "checkout": {
+      "title": "Checkout Information",
+      "subtitle": "We hope you enjoyed your stay at {{apartment_title}}.",
+      "instructions_title": "Checkout Instructions",
+      "footer": "We hope to see you again soon!"
+    },
+    "server_crash": {
+      "title": "Server Crash Report",
+      "subtitle": "An unhandled error occurred.",
+      "error_details_title": "Error Details"
+    },
+    "direct_message": {
+      "title": "New Message Regarding Your Booking",
+      "subtitle": "at {{apartment_title}}",
+      "message_from_host_title": "Message from your host"
+    },
+    "booking_confirmation": {
+      "title": "Booking Confirmed!",
+      "subtitle": "Your sanctuary awaits.",
+      "footer": "For any questions, please contact your host by replying to this email."
+    },
+    "booking_cancellation": {
+      "title": "Booking Cancelled",
+      "subtitle": "A booking for {{apartment_title}} has been cancelled.",
+      "body": "If a deposit was paid, it will be refunded according to the cancellation policy. We invite you to explore other available sanctuaries in {{city}}.",
+      "original_check_in": "Original Check-In",
+      "explore_alternatives": "Explore Alternatives"
+    }
+  },
+  "premium_landing": {
+    "host_feature": "Host Feature",
+    "beyond_the": "Beyond the",
+    "ordinary": "Ordinary",
+    "description": "We don't just provide accommodation; we curate environments where memories take root and flourish. Explore the heart of our hospitality.",
+    "detail_alt": "Detail",
+    "gallery_alt": "Gallery {{number}}"
+  }
+}

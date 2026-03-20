@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { ALL_AMENITIES } from '../../utils/amenities.js';
+import { useTranslation } from 'react-i18next';
+import { ALL_AMENITIES } from '../../utils/amenities';
 
 interface AmenitySelectorProps {
   selectedAmenities: string[];
@@ -7,6 +8,7 @@ interface AmenitySelectorProps {
 }
 
 const AmenitySelector: React.FC<AmenitySelectorProps> = ({ selectedAmenities, onChange }) => {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState('');
 
   const handleToggleAmenity = (amenity: string) => {
@@ -18,14 +20,14 @@ const AmenitySelector: React.FC<AmenitySelectorProps> = ({ selectedAmenities, on
   };
 
   const filteredAmenities = ALL_AMENITIES.filter(amenity =>
-    amenity.label.toLowerCase().includes(searchTerm.toLowerCase())
+    t(`host_dashboard.amenity_selector.amenities.${amenity.key}`).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div>
       <input
         type="text"
-        placeholder="Search amenities..."
+        placeholder={t('host_dashboard.amenity_selector.search_amenities')}
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
         className="w-full px-4 py-2 border rounded-md mb-4"
@@ -33,13 +35,13 @@ const AmenitySelector: React.FC<AmenitySelectorProps> = ({ selectedAmenities, on
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-h-64 overflow-y-auto">
         {filteredAmenities.map(amenity => (
           <div
-            key={amenity.label}
-            onClick={() => handleToggleAmenity(amenity.label)}
+            key={amenity.key}
+            onClick={() => handleToggleAmenity(amenity.key)}
             className={`flex items-center space-x-2 p-2 rounded-md cursor-pointer ${
-              selectedAmenities.includes(amenity.label) ? 'bg-sky-100 border border-gray-500' : 'bg-gray-100'
+              selectedAmenities.includes(amenity.key) ? 'bg-sky-100 border border-gray-500' : 'bg-gray-100'
             }`}>
             {React.cloneElement(amenity.icon, { className: "w-5 h-5 text-sky-accent" })}
-            <span>{amenity.label}</span>
+            <span>{t(`host_dashboard.amenity_selector.amenities.${amenity.key}`)}</span>
           </div>
         ))}
       </div>

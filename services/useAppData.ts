@@ -148,7 +148,14 @@ export const useAppData = () => {
         format(new Date(blockedDate.date), 'yyyy-MM-dd') === dateToToggle
     );
 
+    // Do not allow unblocking of ICAL dates
+    if (existingBlock?.source === 'ICAL') {
+      setError("iCal-synced dates cannot be manually unblocked. Please remove the event from the original calendar.");
+      return;
+    }
+
     const method = existingBlock ? 'DELETE' : 'POST';
+    const body = existingBlock ? { id: existingBlock.id } : { apartmentId, date: dateToToggle, source: 'MANUAL' };
     
     try {
         const response = await fetch('/api/v1/blocked-dates', {
@@ -156,7 +163,7 @@ export const useAppData = () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify([{ apartmentId, date: dateToToggle }])
+            body: JSON.stringify(body)
         });
 
         if (!response.ok) {
@@ -226,7 +233,6 @@ export const useAppData = () => {
     loadingAirbnbIcal,
     currentHostAirbnbBlockedDates: [],
     onToggleBlock,
-    handleSeed: createApiHandler(sanctumApi.seedDatabase),
     handleAuth,
     handleLogout,
     handleHostChange,

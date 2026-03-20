@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment, Host } from '../../types';
 import { CARD_BORDER } from '../../constants';
 import { Eye } from 'lucide-react';
@@ -14,6 +15,7 @@ interface ApartmentsListProps {
 }
 
 const ApartmentsList: React.FC<ApartmentsListProps> = ({ apartments, onConfigure, onImport, loading, host }) => {
+  const { t } = useTranslation();
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const currency = getCurrency(host?.currency?.code);
   const handleImport = (url: string) => {
@@ -37,8 +39,8 @@ const ApartmentsList: React.FC<ApartmentsListProps> = ({ apartments, onConfigure
                 </div>
               </div>
               <div className="flex justify-between items-center pt-6 border-t border-charcoal/10 mt-auto">
-                <p className="text-xl font-bold text-coral-500">({currency.symbol}) {apt.pricePerNight}<span className="text-[10px] text-charcoal/60 ml-2 font-bold">Base</span></p>
-                <button onClick={() => onConfigure(apt)} className="px-6 py-2 rounded-xl bg-transparent border border-gray-600 text-charcoal-darker hover:text-white hover:bg-gray-600 text-[10px] font-bold uppercase tracking-widest transition-all">Configure</button>
+                <p className="text-xl font-bold text-coral-500">({currency.symbol}) {apt.pricePerNight}<span className="text-[10px] text-charcoal/60 ml-2 font-bold">{t('host_dashboard.apartments_list.base')}</span></p>
+                <button onClick={() => onConfigure(apt)} className="px-6 py-2 rounded-xl bg-transparent border border-gray-600 text-charcoal-darker hover:text-white hover:bg-gray-600 text-[10px] font-bold uppercase tracking-widest transition-all">{t('host_dashboard.apartments_list.configure')}</button>
               </div>
             </div>
           </div>

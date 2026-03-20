@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Booking, BookingStatus, Host, Apartment } from '../../types';
 import BookingCard from '../booking/BookingCard';
 import { CalendarDays, History, X } from 'lucide-react';
@@ -13,6 +14,7 @@ interface BookingsProps {
 }
 
 const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdateBooking }) => {
+  const { t } = useTranslation();
   const [statusFilter, setStatusFilter] = React.useState<'all' | 'past' | 'upcoming-30d' | BookingStatus>('all');
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [selectedBooking, setSelectedBooking] = React.useState<Booking | null>(null);
@@ -110,12 +112,12 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
   }, [bookings, apartments, statusFilter, todayStr]);
 
   const filters = [
-    { label: 'All Active', value: 'all', icon: null },
-    { label: 'Upcoming (30d)', value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
-    { label: 'Confirmed', value: BookingStatus.CONFIRMED, icon: null },
-    { label: 'Paid', value: BookingStatus.PAID, icon: null },
-    { label: 'Past Stays', value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
-    { label: 'Canceled', value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
+    { label: t('host_dashboard.bookings.all_active'), value: 'all', icon: null },
+    { label: t('host_dashboard.bookings.upcoming_30d'), value: 'upcoming-30d', icon: <CalendarDays className="w-3.5 h-3.5 mr-1.5" /> },
+    { label: t('host_dashboard.bookings.confirmed'), value: BookingStatus.CONFIRMED, icon: null },
+    { label: t('host_dashboard.bookings.paid'), value: BookingStatus.PAID, icon: null },
+    { label: t('host_dashboard.bookings.past_stays'), value: 'past', icon: <History className="w-3.5 h-3.5 mr-1.5" /> },
+    { label: t('host_dashboard.bookings.canceled'), value: BookingStatus.CANCELED, icon: <X className="w-3.5 h-3.5 mr-1.5" /> },
   ];
 
   return (
@@ -161,7 +163,7 @@ const Bookings: React.FC<BookingsProps> = ({ bookings, apartments, host, onUpdat
         ))
       ) : (
         <div className="py-20 text-center border border-dashed border-stone-800 rounded-[3rem]">
-          <p className="text-stone-600 font-medium italic">No bookings match this selection.</p>
+          <p className="text-stone-600 font-medium italic">{t('host_dashboard.bookings.no_bookings')}</p>
         </div>
       )}
 

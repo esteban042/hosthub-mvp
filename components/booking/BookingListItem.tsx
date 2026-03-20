@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Booking, BookingStatus } from '../../types';
 import { CalendarDays, Users, Mail, Phone, Printer } from 'lucide-react';
 import { formatBookingRange } from '../../utils/formatBookingRange.tsx';
@@ -13,11 +14,13 @@ const BookingListItem: React.FC<{
   statusFilter: string;
   onUpdateStatus: (booking: Booking, newStatus: BookingStatus) => void;
 }> = ({ booking: b, apartmentTitle, statusFilter, onUpdateStatus: handleUpdateStatus }) => {
+  const { t } = useTranslation();
+
   return (
     <div key={b.id} className="w-full rounded-2xl p-8 border flex flex-col md:flex-row md:items-center justify-between gap-8 transition-all hover:border-stone-700/50" style={{ borderColor: CARD_BORDER }}>
       <div className="space-y-4 flex-1 text-left">
         <div className="flex items-center space-x-4">
-          <h4 className="text-2xl font-serif text-charcoal-darker">{b.guestName || 'Guest'}</h4>
+          <h4 className="text-2xl font-serif text-charcoal-darker">{b.guestName || t('booking_list_item.guest')}</h4>
           <span className={`px-4 py-1.5 text-[9px] uppercase tracking-widest font-black border ${
             b.status === BookingStatus.PAID ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
             b.status === BookingStatus.CONFIRMED ? 'text-blue-400 border-blue-500/40' :
@@ -26,7 +29,7 @@ const BookingListItem: React.FC<{
             <CalendarDays className="w-4 h-4" />
             <span className="text-l">{formatBookingRange(b.startDate, b.endDate)}</span>
             <Users className="w-4 h-4" />
-            <span className="text-m">{b.numGuests || 1} Guests</span>
+            <span className="text-m">{b.numGuests || 1} {t('booking_list_item.guests', { count: b.numGuests || 1 })}</span>
         </div>
         
         <div className="flex flex-wrap items-center gap-x-8 gap-y-2 font-medium" style={{ color: LABEL_COLOR }}>
@@ -37,7 +40,7 @@ const BookingListItem: React.FC<{
             <span className="text-s font-mono opacity-60">#{b.customBookingId}</span>
             </div>
           <div className="flex items-center space-x-2">
-             <span className="text-ml font-black ">${b.totalPrice.toLocaleString()} Total</span>
+             <span className="text-ml font-black ">${b.totalPrice.toLocaleString()} {t('booking_list_item.total')}</span>
           </div>
         </div>
 

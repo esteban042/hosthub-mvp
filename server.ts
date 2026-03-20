@@ -1,3 +1,4 @@
+
 import 'dotenv/config';
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
@@ -12,7 +13,6 @@ import { nonceGenerator, securityHeaders, httpsRedirect, apiLimiter } from './mi
 import authRoutes from './routes/auth.js';
 import apiRoutes from './routes/api.js';
 import stripeWebhookRouter from './routes/api/stripe-webhooks.js';
-import icalRouter from './routes/api/ical.js';
 import { sendEmail } from './services/email.js';
 
 const rootPath = process.cwd();
@@ -52,7 +52,6 @@ app.use('/auth', authRoutes);
 
 // All other API routes are under /api/v1 and have a rate limiter
 app.use('/api/v1', apiLimiter, apiRoutes);
-app.use('/api/v1/ical', icalRouter);
 
 app.use(express.static(clientPath, { index: false }));
 

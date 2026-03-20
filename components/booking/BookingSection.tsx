@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment, Host, Booking, BlockedDate } from '../../types.js';
 import { sanctumApi } from '../../services/api.js';
 import BookingForm from './BookingForm.js';
@@ -11,6 +12,7 @@ interface BookingSectionProps {
 }
 
 const BookingSection: React.FC<BookingSectionProps> = ({ apartment, host, airbnbCalendarDates, onNewBooking }) => {
+  const { t } = useTranslation();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [blockedDates, setBlockedDates] = useState<BlockedDate[]>([]);
 

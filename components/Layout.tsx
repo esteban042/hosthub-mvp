@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { UserRole, Host, User } from '../types.js';
+import LanguageSwitcher from './LanguageSwitcher';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -42,6 +44,7 @@ export const Layout: React.FC<LayoutProps> = ({
   onLogout,
   onSignIn
 }) => {
+  const { t, i18n } = useTranslation();
   const [activeLegal, setActiveLegal] = useState<'privacy' | 'terms' | null>(null);
 
   return (
@@ -53,12 +56,12 @@ export const Layout: React.FC<LayoutProps> = ({
           </div>
           
           <div className="flex items-center space-x-4">
-            
+            <LanguageSwitcher />
             
             {user ? (
                <div className="flex items-center space-x-3">
                  <button onClick={onLogout} 
-                className="bg-transparent border border-cyan-700 text-cyan-700 hover:bg-cyan-700 hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20">Logout</button>
+                className="bg-transparent border border-cyan-700 text-cyan-700 hover:bg-cyan-700 hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20">{t('layout.logout')}</button>
                </div>
             ) : (
               <button 
@@ -66,7 +69,7 @@ export const Layout: React.FC<LayoutProps> = ({
                 className="bg-transparent border border-700 text-cyan-700 hover:bg-cyan-700/30 hover:text-white px-6 py-2.5 rounded-xl text-sm font-semibold flex items-center space-x-2 transition-all shadow-lg shadow-sky-accent/20"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                <span>Log In</span>
+                <span>{t('layout.login')}</span>
               </button>
             )}
           </div>
@@ -80,43 +83,43 @@ export const Layout: React.FC<LayoutProps> = ({
       <footer className="bg-alabaster border-t border-charcoal/10 py-12">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
           <img src="/images/logo.svg" alt="Sanctum Logo" className="h-8" />
-          <p className="text-charcoal/60 text-sm">© 2026 Sanctum Platform. All rights reserved.</p>
+          <p className="text-charcoal/60 text-sm">{t('layout.footer.rights')}</p>
           <div className="flex space-x-6 text-sm text-charcoal font-medium">
-             <button onClick={() => setActiveLegal('privacy')} className="hover:text-terracotta cursor-pointer transition-colors">Privacy</button>
-             <button onClick={() => setActiveLegal('terms')} className="hover:text-terracotta cursor-pointer transition-colors">Terms</button>
-             <span className="hover:text-terracotta cursor-pointer transition-colors">Sitemap</span>
+             <button onClick={() => setActiveLegal('privacy')} className="hover:text-terracotta cursor-pointer transition-colors">{t('layout.footer.privacy')}</button>
+             <button onClick={() => setActiveLegal('terms')} className="hover:text-terracotta cursor-pointer transition-colors">{t('layout.footer.terms')}</button>
+             <span className="hover:text-terracotta cursor-pointer transition-colors">{t('layout.footer.sitemap')}</span>
           </div>
         </div>
       </footer>
 
       {/* Legal Modals */}
-      <LegalModal title="Privacy Policy" isOpen={activeLegal === 'privacy'} onClose={() => setActiveLegal(null)}>
+      <LegalModal title={t('layout.privacy_policy.title')} isOpen={activeLegal === 'privacy'} onClose={() => setActiveLegal(null)}>
         <section className="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">1. Data Collection</h4>
-          <p>We collect personal information necessary for processing your requests, including name, email, and payment preferences. This data is curated with the highest regard for discretion and security.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.privacy_policy.data_collection.title')}</h4>
+          <p>{t('layout.privacy_policy.data_collection.description')}</p>
         </section>
         <section className_="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">2. Use of Information</h4>
-          <p>Your information is used exclusively to facilitate bookings, communicate with hosts, and enhance your personalized travel experience. We never share your details with third-party advertisers.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.privacy_policy.use_of_information.title')}</h4>
+          <p>{t('layout.privacy_policy.use_of_information.description')}</p>
         </section>
         <section className="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">3. Digital Security</h4>
-          <p>Our platform utilizes enterprise-grade encryption to protect your digital footprint. All interactions within the sanctum Network are logged and monitored for unauthorized access.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.privacy_policy.digital_security.title')}</h4>
+          <p>{t('layout.privacy_policy.digital_security.description')}</p>
         </section>
       </LegalModal>
 
-      <LegalModal title="Terms of Service" isOpen={activeLegal === 'terms'} onClose={() => setActiveLegal(null)}>
+      <LegalModal title={t('layout.terms_of_service.title')} isOpen={activeLegal === 'terms'} onClose={() => setActiveLegal(null)}>
         <section className="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">1. Booking Philosophy</h4>
-          <p>By using Sanctum, you agree to respect the sanctuaries provided by our hosts. Stays are granted based on mutual trust and adherence to house-specific guidelines provided at the time of confirmation.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.terms_of_service.booking_philosophy.title')}</h4>
+          <p>{t('layout.terms_of_service.booking_philosophy.description')}</p>
         </section>
         <section className="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">2. Financial Obligations</h4>
-          <p>A deposit is required to secure any sanctuary. Cancellations are subject to the host's specific policy, typically requiring 72-hour notice for a partial refund. Final payments must be settled directly with the host.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.terms_of_service.financial_obligations.title')}</h4>
+          <p>{t('layout.terms_of_service.financial_obligations.description')}</p>
         </section>
         <section className="space-y-4">
-          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">3. Platform Conduct</h4>
-          <p>Unauthorized access to the Host Studio or manipulation of pricing data will result in immediate termination of access to the Sanctum Property Network.</p>
+          <h4 className="text-charcoal font-bold uppercase tracking-widest text-xs">{t('layout.terms_of_service.platform_conduct.title')}</h4>
+          <p>{t('layout.terms_of_service.platform_conduct.description')}</p>
         </section>
       </LegalModal>
     </div>

@@ -9,6 +9,7 @@ import {
     getApartmentById,
     updateApartmentIcalUrls
 } from '../../services/apartment.service.js';
+import { syncApartmentIcal } from '../../services/sync.service.js';
 import { UserRole } from '../../types.js';
 
 const router = Router();
@@ -142,6 +143,8 @@ router.put('/:id/ical-urls',
 
         try {
             const apartment = await updateApartmentIcalUrls(id as string, icalUrls, req.user!);
+            const urls = icalUrls.map((ical: { url: string }) => ical.url);
+            await syncApartmentIcal(apartment.id, urls);
             res.status(200).json(apartment);
         } catch (err: any) {
             if (err.message.includes('not authorized') || err.message.includes('host profile')) {

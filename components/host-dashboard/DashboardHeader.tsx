@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Share2, Copy, CheckCircle2 } from 'lucide-react';
 import AddUnitMenu from './AddUnitMenu';
 import Modal from '../Modal';
@@ -11,6 +12,7 @@ interface DashboardHeaderProps {
 }
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({ hostSlug, onAddUnit, onImportFromAirbnb }) => {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
@@ -26,8 +28,8 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ hostSlug, onAddUnit, 
     <>
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight">Host Studio</h1>
-          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-charcoal/40">Asset Operations</p>
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 tracking-tight">{t('host_dashboard.header.title')}</h1>
+          <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-charcoal/40">{t('host_dashboard.header.subtitle')}</p>
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -43,9 +45,9 @@ const DashboardHeader: React.FC<DashboardHeaderProps> = ({ hostSlug, onAddUnit, 
         </div>
       </div>
 
-      <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title="Share Your Booking Link">
+      <Modal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} title={t('host_dashboard.header.share_modal.title')}>
         <div className="p-4">
-          <p className="text-sm text-gray-600 mb-4">Share this link with your guests to allow them to book directly.</p>
+          <p className="text-sm text-gray-600 mb-4">{t('host_dashboard.header.share_modal.description')}</p>
           <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-between">
             <span className="text-sm text-gray-800 truncate">{shareableUrl}</span>
             <button 

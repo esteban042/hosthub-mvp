@@ -117,6 +117,8 @@ export interface Apartment {
   currency: Currency;
   icalUrls?: ICalUrl[];
   airbnbCalendarDates?: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Booking {
@@ -149,6 +151,7 @@ export interface BlockedDate {
   id: string;
   apartmentId: string;
   date: string;
+  source?: 'MANUAL' | 'ICAL';
 }
 
 // Utility to convert snake_case to camelCase

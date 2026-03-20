@@ -1,5 +1,5 @@
-
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment } from '../../../types';
 
 interface ApartmentStatusProps {
@@ -8,14 +8,15 @@ interface ApartmentStatusProps {
 }
 
 const ApartmentStatus: React.FC<ApartmentStatusProps> = ({ apt, onAptChange }) => {
+  const { t } = useTranslation();
   const currentStatus = apt.isActive === undefined ? true : apt.isActive;
 
   return (
     <div className="pt-8 border-t border-stone-200">
         <div className="flex items-center justify-between">
             <div>
-                <h4 className="text-lg sm:text-xl font-bold text-charcoal tracking-tight">Unit Status</h4>
-                <p className="text-sm text-stone-500">Inactive units are hidden from guests and cannot be booked.</p>
+                <h4 className="text-lg sm:text-xl font-bold text-charcoal tracking-tight">{t('host_dashboard.apartment_editor.apartment_status.unit_status')}</h4>
+                <p className="text-sm text-stone-500">{t('host_dashboard.apartment_editor.apartment_status.status_description')}</p>
             </div>
             <button
                 type="button"
@@ -24,7 +25,7 @@ const ApartmentStatus: React.FC<ApartmentStatusProps> = ({ apt, onAptChange }) =
                 role="switch"
                 aria-checked={currentStatus}
             >
-                <span className="sr-only">Use setting</span>
+                <span className="sr-only">{t('host_dashboard.apartment_editor.apartment_status.use_setting')}</span>
                 <span
                     aria-hidden="true"
                     className={`inline-block h-6 w-6 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200 ${currentStatus ? 'translate-x-6' : 'translate-x-0'}`}

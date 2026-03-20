@@ -7,7 +7,6 @@ import { keysToCamel } from '../../dputils.js';
 import { validate } from '../../middleware/validation.js';
 import { protect, AuthRequest } from '../../middleware/auth.js';
 import { sendEmail } from '../../services/email.js';
-import { v4 as uuidv4 } from 'uuid';
 import { UserRole, Host, Apartment, Booking, BlockedDate } from '../../types.js';
 
 import apartmentsRouter from './apartments.js';
@@ -22,7 +21,8 @@ import stripeRouter from './stripe.js';
 import importerRouter from './importer.js';
 import miscRouter from './misc.js';
 import filesRouter from '../files.js';
-import icalRouter from './ical.js';
+import syncRouter from './sync.js';
+import blockedDatesRouter from './blockedDates.js'; // Import the new, correct router
 
 const router = Router();
 
@@ -39,7 +39,8 @@ router.use('/stripe', stripeRouter);
 router.use('/importer', importerRouter);
 router.use('/files', filesRouter);
 router.use('/misc', miscRouter);
-router.use('/ical', icalRouter);
+router.use('/sync', protect, syncRouter);
+router.use('/blocked-dates', blockedDatesRouter); // Use the new, correct router
 
 
 // --- Routes originally from misc.ts ---
@@ -213,110 +214,6 @@ router.get('/landing-data',
 
     } catch (err) {
       next(err);
-    }
-});
-
-
-router.post('/blocked-dates',
-  protect,
-  body().isArray(),
-  validate,
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const blockedDates = req.body;
-    const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.ADMIN;
-    const userId = req.user?.id;
-
-    try {
-      if (!isAdmin) {
-        const hostRes = await client.query('SELECT id FROM hosts WHERE user_id = $1', [userId]);
-        if (hostRes.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have a host profile and cannot block dates.' });
-        }
-        const userHostId = hostRes.rows[0].id;
-
-        for (const blockedDate of blockedDates) {
-          const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [blockedDate.apartmentId]);
-          if (aptRes.rows.length === 0) {
-             return res.status(404).json({ error: `Apartment with id ${blockedDate.apartmentId} not found.` });
-          }
-          if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
-             return res.status(403).json({ error: `You are not authorized to block dates for apartment with id ${blockedDate.apartmentId}.` });
-          }
-        }
-      }
-
-      await client.query('BEGIN');
-
-      const resultBlockedDates = [];
-      for (const blockedDate of blockedDates) {
-        const { apartmentId, date } = blockedDate;
-        const newId = uuidv4();
-        const insertRes = await client.query(
-          'INSERT INTO blocked_dates (id, apartment_id, date) VALUES ($1, $2, $3) RETURNING *',
-          [newId, apartmentId, date]
-        );
-        resultBlockedDates.push(keysToCamel(insertRes.rows[0]));
-      }
-
-      await client.query('COMMIT');
-      res.status(201).json(resultBlockedDates);
-
-    } catch (err) {
-      await client.query('ROLLBACK');
-      next(err);
-    } finally {
-      client.release();
-    }
-});
-
-router.delete('/blocked-dates',
-  protect,
-  body().isArray(),
-  validate,
-  async (req: AuthRequest, res: Response, next: NextFunction) => {
-    const blockedDatesToDelete = req.body;
-    const client = await pool.connect();
-    const isAdmin = req.user?.role === UserRole.ADMIN;
-    const userId = req.user?.id;
-
-    try {
-      if (!isAdmin) {
-        const hostRes = await client.query('SELECT id FROM hosts WHERE user_id = $1', [userId]);
-        if (hostRes.rows.length === 0) {
-          return res.status(403).json({ error: 'You do not have a host profile and cannot unblock dates.' });
-        }
-        const userHostId = hostRes.rows[0].id;
-
-        for (const blockedDate of blockedDatesToDelete) {
-            const aptRes = await client.query('SELECT host_id FROM apartments WHERE id = $1', [blockedDate.apartmentId]);
-            if (aptRes.rows.length === 0) {
-                return res.status(404).json({ error: `Apartment with id ${blockedDate.apartmentId} not found.` });
-            }
-            if (String(aptRes.rows[0].host_id) !== String(userHostId)) {
-                return res.status(403).json({ error: `You are not authorized to unblock dates for apartment with id ${blockedDate.apartmentId}.` });
-            }
-        }
-      }
-
-      await client.query('BEGIN');
-
-      for (const blockedDate of blockedDatesToDelete) {
-        const { apartmentId, date } = blockedDate;
-        await client.query(
-          'DELETE FROM blocked_dates WHERE apartment_id = $1 AND date = $2',
-          [apartmentId, date]
-        );
-      }
-
-      await client.query('COMMIT');
-      res.status(200).json({ message: 'Blocked dates deleted successfully' });
-
-    } catch (err) {
-      await client.query('ROLLBACK');
-      next(err);
-    } finally {
-      client.release();
     }
 });
 

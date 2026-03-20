@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, Briefcase, Users, Hash, ArrowRight, DollarSign, Calendar, Home, CreditCard, ClipboardCheck } from 'lucide-react';
 import { Booking, Apartment, Host } from '../types.js';
 import { BACKGROUND_COLOR, TEXT_COLOR, SKY_ACCENT, EMERALD_ACCENT } from '../../constants.tsx';
@@ -36,9 +37,10 @@ const InfoBlock: React.FC<{ icon: React.ElementType, title: string, content: str
 };
 
 export const BookingConfirmationCard: React.FC<BookingConfirmationCardProps> = ({ booking, apartment, host, onClose }) => {
+  const { t, i18n } = useTranslation();
   if (!booking) return null;
 
-  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString(i18n.language, { month: 'long', day: 'numeric', year: 'numeric' });
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-lg flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
@@ -46,27 +48,27 @@ export const BookingConfirmationCard: React.FC<BookingConfirmationCardProps> = (
         <div className="p-8 space-y-8">
           <header className="text-center space-y-3">
             <CheckCircle size={50} className="mx-auto text-emerald-accent bg-emerald-accent/10 p-2 rounded-full" />
-            <h1 className="text-4xl font-bold tracking-tight">Booking confirmed!</h1>
-            <p className="text-charcoal/70 text-lg">Your booking was successful and sent to you per email.</p>
+            <h1 className="text-4xl font-bold tracking-tight">{t('booking_confirmation.title')}</h1>
+            <p className="text-charcoal/70 text-lg">{t('booking_confirmation.subtitle')}</p>
           </header>
 
           <div className="bg-white/50 p-6 rounded-xl border border-stone-200/60">
-            <InfoRow icon={Hash} label="Booking ID" value={booking.customBookingId || 'N/A'} />
-            <InfoRow icon={Home} label="Apartment" value={apartment.title} />
-            <InfoRow icon={Briefcase} label="Host" value={host.name} />
-            <InfoRow icon={Calendar} label="Check-in Date" value={formatDate(booking.startDate)} />
-            <InfoRow icon={Calendar} label="Check-out Date" value={formatDate(booking.endDate)} />
-            <InfoRow icon={Users} label="Number of Guests" value={booking.numGuests} />
-            <InfoRow icon={DollarSign} label="Total Price" value={`$${booking.totalPrice.toFixed(2)}`} />
+            <InfoRow icon={Hash} label={t('booking_confirmation.booking_id')} value={booking.customBookingId || t('common.not_available')} />
+            <InfoRow icon={Home} label={t('booking_confirmation.apartment')} value={apartment.title} />
+            <InfoRow icon={Briefcase} label={t('booking_confirmation.host')} value={host.name} />
+            <InfoRow icon={Calendar} label={t('booking_confirmation.check_in_date')} value={formatDate(booking.startDate)} />
+            <InfoRow icon={Calendar} label={t('booking_confirmation.check_out_date')} value={formatDate(booking.endDate)} />
+            <InfoRow icon={Users} label={t('booking_confirmation.num_guests')} value={booking.numGuests} />
+            <InfoRow icon={DollarSign} label={t('booking_confirmation.total_price')} value={`$${booking.totalPrice.toFixed(2)}`} />
             {booking.depositAmount && booking.depositAmount > 0 && (
-              <InfoRow icon={DollarSign} label="Deposit Amount" value={`$${booking.depositAmount.toFixed(2)}`} />
+              <InfoRow icon={DollarSign} label={t('booking_confirmation.deposit_amount')} value={`$${booking.depositAmount.toFixed(2)}`} />
             )}
-            <InfoRow icon={ClipboardCheck} label="Booking Status" value={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)} valueClass="text-emerald-500" />
+            <InfoRow icon={ClipboardCheck} label={t('booking_confirmation.booking_status')} value={booking.status.charAt(0).toUpperCase() + booking.status.slice(1)} valueClass="text-emerald-500" />
           </div>
 
           <InfoBlock 
             icon={CreditCard} 
-            title="Next Steps & Payment"
+            title={t('booking_confirmation.next_steps_title')}
             content={host.paymentInstructions}
           />
 
@@ -77,7 +79,7 @@ export const BookingConfirmationCard: React.FC<BookingConfirmationCardProps> = (
               style={{ backgroundColor: SKY_ACCENT }}
               className="hover:opacity-90 text-white font-bold py-3 px-8 rounded-lg transition-transform transform hover:scale-105 w-full md:w-auto"
             >
-              Close
+              {t('booking_confirmation.close_button')}
             </button>
           </footer>
         </div>

@@ -1,5 +1,5 @@
-
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Apartment, PriceRule, Host, ICalUrl } from '../../types';
 import { X } from 'lucide-react';
 import ApartmentImport from './editor-sections/ApartmentImport';
@@ -19,6 +19,7 @@ interface ApartmentEditorProps {
 }
 
 const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onSave, onClose, onIcalUrlsChange }) => {
+  const { t } = useTranslation();
   const [apt, setApt] = useState<Partial<Apartment> | null>(editingApt);
 
   if (!apt) return null;
@@ -97,7 +98,7 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
     <div className="fixed inset-0 z-[100] bg-stone-900/50 backdrop-blur-lg flex items-start justify-center p-4 sm:p-6 animate-in fade-in duration-300 overflow-y-auto">
        <div className="bg-[#F7F5F0] border border-stone-200 w-full max-w-4xl rounded-3xl sm:rounded-[3rem] p-6 sm:p-10 shadow-2xl space-y-10 my-8 sm:my-12 relative text-left font-dm">
           <button onClick={onClose} className="absolute top-6 right-6 sm:top-10 sm:right-10 text-stone-400 hover:text-charcoal transition-colors"><X className="w-7 h-7 sm:w-8 sm:h-8" /></button>
-          <h3 className="text-2xl sm:text-3xl font-bold text-charcoal leading-none tracking-tight">Unit Configuration</h3>
+          <h3 className="text-2xl sm:text-3xl font-bold text-charcoal leading-none tracking-tight">{t('host_dashboard.apartment_editor.unit_configuration')}</h3>
 
           <ApartmentImport onImport={handleImport} />
 
@@ -128,8 +129,8 @@ const ApartmentEditor: React.FC<ApartmentEditorProps> = ({ editingApt, host, onS
             <ApartmentStatus apt={apt} onAptChange={handleAptChange} />
 
              <div className="flex flex-col sm:flex-row-reverse gap-3 pt-6 border-t border-stone-200">
-                <button type="submit" className="w-full sm:w-auto bg-sky-700 text-white font-bold py-4 px-8 rounded-full transition-all text-[10px] uppercase tracking-widest hover:bg-sky-800 active:scale-95">Save Unit</button>
-                <button type="button" onClick={onClose} className="w-full sm:w-auto font-bold py-4 px-8 rounded-full border border-stone-300 text-charcoal/70 hover:bg-stone-100 transition-all text-[10px] uppercase tracking-widest">Discard</button>
+                <button type="submit" className="w-full sm:w-auto bg-sky-700 text-white font-bold py-4 px-8 rounded-full transition-all text-[10px] uppercase tracking-widest hover:bg-sky-800 active:scale-95">{t('host_dashboard.apartment_editor.save_unit')}</button>
+                <button type="button" onClick={onClose} className="w-full sm:w-auto font-bold py-4 px-8 rounded-full border border-stone-300 text-charcoal/70 hover:bg-stone-100 transition-all text-[10px] uppercase tracking-widest">{t('host_dashboard.apartment_editor.discard')}</button>
              </div>
           </form>
        </div>

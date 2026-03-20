@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useDropzone } from 'react-dropzone';
 import { UploadCloud, CheckCircle, AlertCircle, Loader } from 'lucide-react';
 
@@ -7,6 +8,7 @@ interface ImageUploadProps {
 }
 
 const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
+  const { t } = useTranslation();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
@@ -32,7 +34,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        throw new Error(errorData.error || t('host_dashboard.image_upload.upload_failed'));
       }
 
       const data = await response.json();
@@ -41,11 +43,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
       setUploadedUrl(url);
       onUploadComplete(url);
     } catch (e: any) {
-      setError(e.message || 'Upload failed. Please try again.');
+      setError(e.message || t('host_dashboard.image_upload.upload_failed'));
     } finally {
       setUploading(false);
     }
-  }, [onUploadComplete]);
+  }, [onUploadComplete, t]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -63,7 +65,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
         {uploading ? (
             <>
                 <Loader className="animate-spin h-8 w-8 text-stone-500" />
-                <p className="mt-2 text-sm text-stone-600">Uploading...</p>
+                <p className="mt-2 text-sm text-stone-600">{t('host_dashboard.image_upload.uploading')}</p>
             </>
         ) : error ? (
             <>
@@ -73,16 +75,16 @@ const ImageUpload: React.FC<ImageUploadProps> = ({ onUploadComplete }) => {
         ) : uploadedUrl ? (
             <>
                 <CheckCircle className="h-8 w-8 text-emerald-500" />
-                <p className="mt-2 text-sm text-emerald-600">Upload complete!</p>
-                <a href={uploadedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-500 hover:underline mt-1 truncate max-w-full">View Image</a>
+                <p className="mt-2 text-sm text-emerald-600">{t('host_dashboard.image_upload.upload_complete')}</p>
+                <a href={uploadedUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-stone-500 hover:underline mt-1 truncate max-w-full">{t('host_dashboard.image_upload.view_image')}</a>
             </>
         ) : (
             <>
                 <UploadCloud className="h-8 w-8 text-stone-400" />
                 <p className="mt-2 text-sm text-stone-600">
-                    {isDragActive ? "Drop the image here..." : "Drag 'n' drop an image here, or click to select one"}
+                    {isDragActive ? t('host_dashboard.image_upload.drop_prompt') : t('host_dashboard.image_upload.drag_prompt')}
                 </p>
-                <p className="text-xs text-stone-500 mt-1">PNG, JPG, GIF up to 10MB</p>
+                <p className="text-xs text-stone-500 mt-1">{t('host_dashboard.image_upload.file_types')}</p>
             </>
         )}
       </div>

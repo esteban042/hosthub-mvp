@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Booking, Apartment, BookingStatus } from '../../types';
 import BookingCard from '../booking/BookingCard';
 import BookingListItem from '../booking/BookingListItem';
@@ -10,6 +11,7 @@ interface CurrentBookingsProps {
 }
 
 const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments, onUpdateStatus }) => {
+  const { t } = useTranslation();
   const [currentTabFilter, setCurrentTabFilter] = useState<'current' | 'check-in' | 'check-out'>('current');
 
   const { guestsCurrentlyIn, checkInsToday, checkOutsToday } = useMemo(() => {
@@ -45,18 +47,18 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
   return (
     <div>
       <div className="flex items-center px-1 space-x-2">
-        <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-border'}`}>Current Stays</button>
-        <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-ins Today</button>
-        <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>Check-outs Today</button>
+        <button onClick={() => setCurrentTabFilter('current')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'current' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-border'}`}>{t('host_dashboard.current_bookings.current_stays')}</button>
+        <button onClick={() => setCurrentTabFilter('check-in')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-in' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>{t('host_dashboard.current_bookings.check_ins_today')}</button>
+        <button onClick={() => setCurrentTabFilter('check-out')} className={`px-6 py-3 mb-8 gap-3 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl ${currentTabFilter === 'check-out' ? 'bg-sky-700/50 text-white border border-zinc-800' : 'bg-transparent border border-zinc-800 text-charcoal-darker'}`}>{t('host_dashboard.current_bookings.check_outs_today')}</button>
       </div>
 
       {currentTabFilter === 'current' && (
         <div>
-          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">Currently in Unit</h3>
+          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">{t('host_dashboard.current_bookings.currently_in_unit')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
             {guestsCurrentlyIn.length > 0 ? (
               guestsCurrentlyIn.map(b => {
-                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || t('host_dashboard.current_bookings.unknown_unit');
                 return (
                   <BookingCard
                     key={b.id}
@@ -70,7 +72,7 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
               })
             ) : (
               <div className="col-span-full py-20 text-center border border-dashed border-charcoal/20 rounded-[3rem]">
-                <p className="text-charcoal/60 font-medium italic">No guests currently in units.</p>
+                <p className="text-charcoal/60 font-medium italic">{t('host_dashboard.current_bookings.no_guests')}</p>
               </div>
             )}
           </div>
@@ -79,16 +81,16 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
 
       {currentTabFilter === 'check-in' && (
         <div>
-          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">Check-ins Today</h3>
+          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">{t('host_dashboard.current_bookings.check_ins_today')}</h3>
           <div className="space-y-6 mt-4">
             {checkInsToday.length > 0 ? (
               checkInsToday.map(b => {
-                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || t('host_dashboard.current_bookings.unknown_unit');
                 return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={onUpdateStatus} />;
               })
             ) : (
               <div className="py-20 text-center border border-dashed border-charcoal/20 rounded-[3rem]">
-                <p className="text-charcoal/60 font-medium italic">No check-ins scheduled for today.</p>
+                <p className="text-charcoal/60 font-medium italic">{t('host_dashboard.current_bookings.no_check_ins')}</p>
               </div>
             )}
           </div>
@@ -97,16 +99,16 @@ const CurrentBookings: React.FC<CurrentBookingsProps> = ({ bookings, apartments,
 
       {currentTabFilter === 'check-out' && (
         <div>
-          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">Check-outs Today</h3>
+          <h3 className="text-2xl font-serif font-bold text-charcoal px-2 tracking-tight">{t('host_dashboard.current_bookings.check_outs_today')}</h3>
           <div className="space-y-6 mt-4">
             {checkOutsToday.length > 0 ? (
               checkOutsToday.map(b => {
-                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || 'Unknown Unit';
+                const aptTitle = apartments.find(a => a.id === b.apartmentId)?.title || t('host_dashboard.current_bookings.unknown_unit');
                 return <BookingListItem key={b.id} booking={b} apartmentTitle={aptTitle} statusFilter={'all'} onUpdateStatus={onUpdateStatus} />;
               })
             ) : (
               <div className="py-20 text-center border border-dashed border-charcoal/20 rounded-[3rem]">
-                <p className="text-charcoal/60 font-medium italic">No check-outs scheduled for today.</p>
+                <p className="text-charcoal/60 font-medium italic">{t('host_dashboard.current_bookings.no_check_outs')}</p>
               </div>
             )}
           </div>

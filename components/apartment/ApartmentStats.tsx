@@ -25,7 +25,7 @@ const ApartmentStats: React.FC<ApartmentStatsProps> = ({ apartment }) => {
             `}>
             {stat.icon}
             <div className="flex flex-col items-start">
-              <p className="text-4xl font-bold text-charcoal -mb-1">{stat.value}</p>
+              <p className="text-2xl font-bold text-charcoal -mb-1">{stat.value}</p>
               <p className="text-sm font-bold uppercase tracking-widest text-charcoal/60">{stat.label}</p>
             </div>
           </div>

@@ -11,6 +11,7 @@ import Modal from '../components/Modal.js';
 import Particles from "@tsparticles/react";
 import { loadFull } from "tsparticles";
 import type { Engine } from "tsparticles-engine";
+import { useTranslation } from 'react-i18next';
 
 interface GuestLandingPageProps {
   host: Host;
@@ -32,6 +33,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
   const [isTermsModalOpen, setIsTermsModalOpen] = useState(false);
   const [isConditionsModalOpen, setIsConditionsModalOpen] = useState(false);
   const [isFaqModalOpen, setIsFaqModalOpen] = useState(false);
+  const { t } = useTranslation();
 
   const particlesInit = useCallback(async (engine: Engine) => {
     await loadFull(engine);
@@ -135,14 +137,14 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
             className="absolute top-0 left-0 w-full h-full z-0"
         />
         <div className="z-10 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-accent mb-6">Welcome to {host.businessName} </p>
+          <p className="text-[12px] font-black uppercase tracking-[0.6em] text-emerald-accent mb-6">{t('guest_landing_page.welcome', { businessName: host.businessName })}</p>
           <h1 className="text-6xl md:text-9xl font-serif font-bold text-stone-800 leading-tight tracking-tight">
-            Your Perfect Escape <br/>
-            <span className="text-sky-700 italic">Awaits</span>
+            {t('guest_landing_page.title_line1')} <br/>
+            <span className="text-sky-700 italic">{t('guest_landing_page.title_line2')}</span>
           </h1>
-          <p className="mt-8 text-xl md:text-2xl text-stone-700 max-w-3xl mx-auto font-medium leading-relaxed">
-          Discover a place to truly unwind. A villa for your next unforgettable holiday, where comfort meets hospitality.
-          </p>
+          {/* <p className="mt-8 text-xl md:text-2xl text-stone-700 max-w-3xl mx-auto font-medium leading-relaxed">
+          {t('guest_landing_page.subtitle')}
+          </p> */}
 
           <div className="mt-16 w-full max-w-5xl mx-auto">
              <div className="bg-white/30 backdrop-blur-2xl border border-charcoal/10 rounded-[2.5rem] p-3 flex flex-col md:flex-row items-center gap-1 shadow-2xl relative z-[60]">
@@ -155,9 +157,9 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                       {CORE_ICONS.Calendar("w-5 h-5")}
                    </div>
                    <div className="flex flex-col">
-                      <span className="text-xs font-medium text-charcoal/60 mb-1">Check in — Check out</span>
+                      <span className="text-xs font-medium text-charcoal/60 mb-1">{t('guest_landing_page.check_in_out')}</span>
                       <span className="text-charcoal font-medium text-lg leading-none">
-                        {dates.start ? `${formatDate(dates.start)} — ${formatDate(dates.end) || '...'}` : 'Select dates'}
+                        {dates.start ? `${formatDate(dates.start)} — ${formatDate(dates.end) || '...'}` : t('guest_landing_page.select_dates')}
                       </span>
                    </div>
                 </div>
@@ -185,8 +187,8 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                       {CORE_ICONS.Guests("w-5 h-5")}
                    </div>
                    <div className="flex flex-col">
-                      <span className="text-xs font-medium text-charcoal/60 mb-1">Guests</span>
-                      <span className="text-charcoal font-medium text-lg leading-none">{numGuests} guest{numGuests > 1 ? 's' : ''}</span>
+                      <span className="text-xs font-medium text-charcoal/60 mb-1">{t('guest_landing_page.guests')}</span>
+                      <span className="text-charcoal font-medium text-lg leading-none">{t('guest_landing_page.num_guests', { count: numGuests })}</span>
                    </div>
                 </div>
 
@@ -203,7 +205,7 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
                 <button 
                   className="bg-transparent border border-sky-700 text-sky-700 font-black hover:bg-sky-700 hover:text-white py-6 px-12 rounded-[1.8rem] transition-all flex items-center space-x-3 shadow-xl shadow-sky-700/20 active:scale-95 w-full md:w-auto mt-4 md:mt-0">
                    {CORE_ICONS.Search("w-6 h-6")}
-                   <span className="uppercase text-[12px] tracking-widest">Search</span>
+                   <span className="uppercase text-[12px] tracking-widest">{t('guest_landing_page.search')}</span>
                 </button>
              </div>
           </div>
@@ -225,24 +227,24 @@ export const GuestLandingPage: React.FC<GuestLandingPageProps> = ({
               {host.socialMediaLinks?.instagram && <a href={host.socialMediaLinks.instagram} target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal">{CORE_ICONS.Instagram("w-6 h-6")}</a>}
               {host.socialMediaLinks?.facebook && <a href={host.socialMediaLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-charcoal/60 hover:text-charcoal">{CORE_ICONS.Facebook("w-6 h-6")}</a>}
           </div>
-          <p className="text-sm text-charcoal/60">&copy; {new Date().getFullYear()}. All rights reserved.</p>
+          <p className="text-sm text-charcoal/60">&copy; {new Date().getFullYear()}. {t('guest_landing_page.rights_reserved')}</p>
           <div className="mt-4">
-              <button onClick={() => setIsTermsModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">Terms</button>
-              <button onClick={() => setIsConditionsModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">Conditions</button>
-              <button onClick={() => setIsFaqModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">FAQ</button>
+              <button onClick={() => setIsTermsModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">{t('guest_landing_page.terms')}</button>
+              <button onClick={() => setIsConditionsModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">{t('guest_landing_page.conditions')}</button>
+              <button onClick={() => setIsFaqModalOpen(true)} className="text-sm text-charcoal/60 hover:text-charcoal mx-2">{t('guest_landing_page.faq')}</button>
           </div>
         </div>
       </footer>
 
-      <Modal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} title="Terms">
+      <Modal isOpen={isTermsModalOpen} onClose={() => setIsTermsModalOpen(false)} title={t('guest_landing_page.terms')}>
         <p>{host.terms}</p>
       </Modal>
 
-      <Modal isOpen={isConditionsModalOpen} onClose={() => setIsConditionsModalOpen(false)} title="Conditions">
+      <Modal isOpen={isConditionsModalOpen} onClose={() => setIsConditionsModalOpen(false)} title={t('guest_landing_page.conditions')}>
         <p>{host.conditions}</p>
       </Modal>
 
-      <Modal isOpen={isFaqModalOpen} onClose={() => setIsFaqModalOpen(false)} title="FAQ">
+      <Modal isOpen={isFaqModalOpen} onClose={() => setIsFaqModalOpen(false)} title={t('guest_landing_page.faq')}>
         <p>{host.faq}</p>
       </Modal>
     </div>

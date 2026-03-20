@@ -1,16 +1,19 @@
 import React from 'react';
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const PricingCard: React.FC<{ plan: string, price: string, priceDescription?: string, features: string[], isPopular?: boolean, commission: string }> = ({ plan, price, priceDescription, features, isPopular, commission }) => {
+  const { t } = useTranslation();
+
   return (
     <div className={`border rounded-2xl p-8 flex flex-col ${isPopular ? 'bg-cyan-700 text-white shadow-2xl' : 'bg-[#333333]/90 text-white'}`}>
         {isPopular && (
             <div className="text-center mb-4">
-                <span className="bg-cyan-700 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">Promotion Rate</span>
+                <span className="bg-cyan-700 text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full">{t('landing_page.pricing.promotion_rate')}</span>
             </div>
         )}
         <h3 className="text-2xl font-bold text-charcoal text-center">{plan}</h3>
-        <p className="text-5xl font-extrabold text-charcoal text-center my-4">{price}<span className="text-lg font-medium">{priceDescription || '/mo'}</span></p>
+        <p className="text-5xl font-extrabold text-charcoal text-center my-4">{price}<span className="text-lg font-medium">{priceDescription || t('landing_page.pricing.per_month')}</span></p>
         <p className="text-center text-charcoal/70 font-bold mb-6">{commission}</p>
         <ul className="space-y-4 mb-8 flex-grow">
             {features.map(feature => (
@@ -26,25 +29,27 @@ const PricingCard: React.FC<{ plan: string, price: string, priceDescription?: st
 };
 
 const Pricing: React.FC = () => {
+  const { t } = useTranslation();
+
   const plans = [
     { 
-      plan: 'Basic', 
+      plan: t('landing_page.pricing.plans.basic.name'), 
       price: '$19', 
-      commission: 'No Commission',
-      features: ['Up to 3 Properties', 'Direct Booking Website', 'Google Maps Setup', 'Standard Email Support', 'Automated Guest Messaging', 'Calendar Sync']
+      commission: t('landing_page.pricing.plans.basic.commission'),
+      features: t('landing_page.pricing.plans.basic.features', { returnObjects: true }) as string[]
     },
     { 
-      plan: 'Pro', 
+      plan: t('landing_page.pricing.plans.pro.name'), 
       price: '$9', 
-      commission: '4% commission',
-      features: ['Up to 8 Properties', 'Stripe Payment Integration', 'Commission added on top of nightly rate', 'Calendar Sync', 'Priority Support'],
+      commission: t('landing_page.pricing.plans.pro.commission'),
+      features: t('landing_page.pricing.plans.pro.features', { returnObjects: true }) as string[],
       isPopular: true
     },
     { 
-      plan: 'Premium', 
+      plan: t('landing_page.pricing.plans.premium.name'), 
       price: '$19', 
-      commission: '4% commission',
-      features: ['Unlimited Properties', 'Custom Branding & Landing Page', 'Private Domain', 'Phone & Video Support', 'Dedicated Account Manager']
+      commission: t('landing_page.pricing.plans.premium.commission'),
+      features: t('landing_page.pricing.plans.premium.features', { returnObjects: true }) as string[]
     }
   ];
   
@@ -52,8 +57,8 @@ const Pricing: React.FC = () => {
     <div id="pricing" className="bg-white py-24 sm:py-32">
       <div className="container mx-auto px-6">
          <div className="text-center mb-16">
-          <h2 className="text-4xl sm:text-5xl font-extrabold text-charcoal tracking-tight">Pricing That Makes Sense</h2>
-          <p className="mt-6 text-xl text-charcoal/80 max-w-2xl mx-auto">Start small, grow big. Our success is tied to yours. All plans include our powerful direct booking engine and a 4% booking fee.</p>
+          <h2 className="text-4xl sm:text-5xl font-extrabold text-charcoal tracking-tight">{t('landing_page.pricing.title')}</h2>
+          <p className="mt-6 text-xl text-charcoal/80 max-w-2xl mx-auto">{t('landing_page.pricing.subtitle')}</p>
         </div>
         <div className="grid lg:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
           {plans.map(p => <PricingCard key={p.plan} {...p} />)}

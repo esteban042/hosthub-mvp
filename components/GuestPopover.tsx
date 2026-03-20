@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { SKY_ACCENT } from '../constants.tsx';
 
 const GuestPopover: React.FC<{
@@ -6,12 +7,14 @@ const GuestPopover: React.FC<{
   onSelect: (val: number) => void;
   onClose: () => void;
 }> = ({ guests, onSelect, onClose }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="p-8 bg-white border border-stone-200 rounded-3xl shadow-2xl w-[300px] animate-in zoom-in-95 duration-200">
       <div className="flex items-center justify-between mb-6">
         <div className="flex flex-col">
-          <span className="text-charcoal font-serif font-bold text-lg">Guests</span>
-          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">Select capacity</span>
+          <span className="text-charcoal font-serif font-bold text-lg">{t('guest_popover.guests')}</span>
+          <span className="text-[10px] font-bold text-stone-500 uppercase tracking-widest">{t('guest_popover.select_capacity')}</span>
         </div>
       </div>
       <div className="flex items-center justify-between p-4 bg-white/50 border border-stone-300 rounded-2xl">
@@ -29,7 +32,7 @@ const GuestPopover: React.FC<{
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M12 4v16m8-8H4" /></svg>
         </button>
       </div>
-      <button onClick={onClose} style={{ backgroundColor: SKY_ACCENT }} className="w-full mt-6 text-sky-700 border border-sky-700 bg-transparent font-black py-4 rounded-xl text-[10px] uppercase tracking-widest shadow-lg shadow-sky-accent/20 active:scale-95">Apply</button>
+      <button onClick={onClose} style={{ backgroundColor: SKY_ACCENT }} className="w-full mt-6 text-sky-700 border border-sky-700 bg-transparent font-black py-4 rounded-xl text-[10px] uppercase tracking-widest shadow-lg shadow-sky-accent/20 active:scale-95">{t('guest_popover.apply')}</button>
     </div>
   );
 };
